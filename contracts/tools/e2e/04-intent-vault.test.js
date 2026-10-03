@@ -332,7 +332,7 @@ test('a challenger with a valid proof slashes the agent and gets paid', async ()
   const stakeBefore = await p.stake.stakeOf(deviant);
   const bountyBefore = await p.usdc.balanceOf(p.challenger.address);
   const bond = await p.stake.challengerBond();
-  await (await p.usdc.connect(p.challenger).approve(await p.stake.getAddress(), bond)).wait();
+  await (await p.usdc.connect(p.challenger).approve(await p.stake.getAddress(), ethers.MaxUint256)).wait();
 
   const proof = { action: 'transfer', spendUsd: 500n, leafIndex: 1n, merkleProof: merkle.proofFor(layers, 1) };
   const tx = await (await p.stake.connect(p.challenger).challengeDeviation(deviant, intentHash, proof)).wait();
@@ -360,7 +360,7 @@ test('a bogus challenge burns the challenger bond instead of the agent stake', a
   await (await p.intentVault.connect(p.agentA).attestOutcome(agentA, intentHash, hash('o-bogus'), root)).wait();
 
   const bond = await p.stake.challengerBond();
-  await (await p.usdc.connect(p.challenger).approve(await p.stake.getAddress(), bond)).wait();
+  await (await p.usdc.connect(p.challenger).approve(await p.stake.getAddress(), ethers.MaxUint256)).wait();
   const stakeBefore = await p.stake.stakeOf(agentA);
   const challengerBefore = await p.usdc.balanceOf(p.challenger.address);
   const treasuryBefore = await p.usdc.balanceOf(p.treasury.address);

@@ -181,6 +181,12 @@ contract AvairaStakeRegistry is IAvairaStakeRegistry, Ownable, ReentrancyGuard {
     /// @dev Full exit: request everything, wait out the cooldown, then burn the identity
     ///      and reclaim the registration bond. Blocked for BANNED agents (their bond is
     ///      protocol revenue, see {slash}).
+    ///
+    ///      Deliberately idempotent rather than reverting when the cooldown has not been
+    ///      served: a revert would roll back the exit request itself, so the request would
+    ///      never survive to maturity and the agent could never leave. Call it once to
+    ///      file the request (UnstakeRequested) and again after the cooldown to complete
+    ///      the exit (VoluntarilyExited).
     function voluntaryExit(uint256 agentId) external nonReentrant {
         _requireAgentOwner(agentId);
         Position storage p = _positions[agentId];
@@ -192,7 +198,7 @@ contract AvairaStakeRegistry is IAvairaStakeRegistry, Ownable, ReentrancyGuard {
             p.unstakeReadyAt = uint64(block.timestamp) + unstakeCooldown;
             emit UnstakeRequested(agentId, available, p.unstakeReadyAt);
         }
-        if (block.timestamp < p.unstakeReadyAt) revert NothingToWithdraw(agentId, p.unstakeReadyAt);
+        if (block.timestamp < p.unstakeReadyAt) return; // request filed; come back after the cooldown
 
         uint256 amount = p.pendingUnstake;
         p.pendingUnstake = 0;

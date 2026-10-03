@@ -319,6 +319,12 @@ async function deployProtocol(chain, artifacts, opts = {}) {
     }
   });
 
+  // The credit market lends from a real liquidity pool: fund it as a lender would (after
+  // the wallet bootstrap has set up the USDC approvals).
+  await run('fund credit pool', async () => {
+    await (await credit.connect(lender).depositLiquidity(usdc(50_000))).wait();
+  });
+
   return {
     usdc: usdcToken,
     identity,
@@ -542,6 +548,69 @@ async function expectRevert(promise, matcher, context) {
   throw new Error('expected a reverting transaction, got no transaction response');
 }
 
+
+/**
+ * Re-simulate a reverted send read-only and return a human-readable reason.
+ *
+ * This EVM returns no revert data for a mined status-0 receipt, so the only way to learn
+ * *why* a write failed is to replay the exact call against the current state with
+ * `eth_call`. Uses the transaction hash when the error object has lost the calldata.
+ */
+async function decodeRevert(err, iface) {
+  if (!RAW_PROVIDER) return null;
+  let tx = err?.avairaTx || err?.transaction || null;
+  try {
+    if ((!tx || !tx.data) && err?.receipt?.hash) {
+      const sent = await RAW_PROVIDER.request({ method: 'eth_getTransactionByHash', params: [err.receipt.hash] });
+      if (sent?.to && sent?.input) tx = { to: sent.to, from: sent.from, data: sent.input };
+    }
+    if (!tx?.to || !tx?.data) return null;
+    await RAW_PROVIDER.request({
+      method: 'eth_call',
+      params: [{ to: tx.to, from: tx.from, data: tx.data }, 'latest'],
+    });
+    return null; // re-simulation did not revert
+  } catch (callErr) {
+    const raw = callErr?.data || callErr?.info?.data?.result || null;
+    if (raw && iface?.parseError) {
+      const parsed = iface.parseError(raw);
+      if (parsed) {
+        const args = Array.from(parsed.args ?? []).map((a) => String(a)).join(', ');
+        return { name: parsed.name, args, raw, text: `${parsed.name}(${args})` };
+      }
+    }
+    return {
+      name: null,
+      args: null,
+      raw,
+      text: `${String(callErr.message || callErr).slice(0, 120)} [selector ${String(tx.data).slice(0, 10)} to ${tx.to}]`,
+    };
+  }
+}
+
+/** Await a send and throw a decoded reason when it reverts. */
+async function send(txPromise, iface) {
+  let tx;
+  try {
+    tx = await txPromise;
+  } catch (err) {
+    const decoded = await decodeRevert(err, iface);
+    throw new Error(decoded ? `send reverted: ${decoded.text}` : `send failed: ${err.shortMessage || err.message}`);
+  }
+  try {
+    const receipt = await tx.wait();
+    if (receipt && receipt.status === 0) {
+      const decoded = await decodeRevert({ receipt }, iface);
+      throw new Error(decoded ? `send reverted: ${decoded.text}` : 'send reverted (no reason returned)');
+    }
+    return receipt;
+  } catch (err) {
+    if (String(err.message).startsWith('send reverted')) throw err;
+    const decoded = await decodeRevert(err, iface);
+    throw new Error(decoded ? `send reverted: ${decoded.text}` : `send failed: ${err.shortMessage || err.message}`);
+  }
+}
+
 async function gasOf(txPromise) {
   const receipt = await (await txPromise).wait();
   return { gasUsed: receipt.gasUsed, receipt };
@@ -558,6 +627,8 @@ module.exports = {
   merkle: { leafHash, hashPair, buildTree, proofFor, buildAuditTree },
   expectRevert,
   gasOf,
+  send,
+  decodeRevert,
   usdc,
   USDC,
   MON,

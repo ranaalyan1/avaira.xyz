@@ -59,6 +59,26 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
     address public treasury;
 
     // -------------------------------------------------------------------------
+    // Liquidity pool
+    //
+    // Principal must come from somewhere. Without a pool the market would pay out the
+    // borrower's own collateral, and liquidation would find an empty contract — the exact
+    // failure mode this design avoids: collateral stays locked, principal is lent by
+    // liquidity providers, and interest accrues to them (net of the protocol reserve).
+    // -------------------------------------------------------------------------
+
+    /// @notice Pool assets under management (idle liquidity + outstanding principal).
+    uint256 public totalLiquidity;
+
+    /// @notice Cumulative shortfall the pool had to absorb on liquidations.
+    uint256 public totalBadDebt;
+
+    /// @notice Liquidation bonus paid to the keeper, in bps of principal.
+    uint16 public constant LIQUIDATION_BONUS_BPS = 500; // 5%
+
+    mapping(address provider => uint256 amount) public liquidityOf;
+
+    // -------------------------------------------------------------------------
     // Storage
     // -------------------------------------------------------------------------
 
@@ -90,6 +110,9 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
     event Repaid(uint256 indexed agentId, uint256 principal, uint256 interest);
     event CollateralWithdrawn(uint256 indexed agentId, uint256 amount);
     event Liquidated(uint256 indexed agentId, address indexed liquidator, uint256 debt, uint256 collateralSeized);
+    event LiquidityDeposited(address indexed provider, uint256 amount, uint256 totalLiquidity);
+    event LiquidityWithdrawn(address indexed provider, uint256 amount, uint256 totalLiquidity);
+    event BadDebtRecorded(uint256 indexed agentId, uint256 shortfall);
 
     error NotAgentOwner(uint256 agentId, address caller);
     error AgentNotEligibleForCredit(uint256 agentId, AgentStatus status);
@@ -100,6 +123,7 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
     error Healthy(uint256 agentId, uint256 healthBps);
     error ZeroAmount();
     error ZeroAddress();
+    error InsufficientLiquidity(uint256 available, uint256 requested);
 
     // -------------------------------------------------------------------------
     // Construction
@@ -167,6 +191,36 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
     }
 
     // -------------------------------------------------------------------------
+    // Liquidity
+    // -------------------------------------------------------------------------
+
+    /// @notice Idle liquidity that can be borrowed right now.
+    function availableLiquidity() public view returns (uint256) {
+        return totalLiquidity - totalPrincipalOutstanding;
+    }
+
+    /// @notice Provide USDC to the pool. Interest earned later accrues to the pool.
+    function depositLiquidity(uint256 amount) external nonReentrant {
+        if (amount == 0) revert ZeroAmount();
+        usdc.safeTransferFrom(msg.sender, address(this), amount);
+        liquidityOf[msg.sender] += amount;
+        totalLiquidity += amount;
+        emit LiquidityDeposited(msg.sender, amount, totalLiquidity);
+    }
+
+    /// @notice Withdraw idle liquidity. Funds lent out must be repaid first.
+    function withdrawLiquidity(uint256 amount) external nonReentrant {
+        if (amount == 0) revert ZeroAmount();
+        if (amount > liquidityOf[msg.sender]) revert InsufficientLiquidity(liquidityOf[msg.sender], amount);
+        uint256 idle = availableLiquidity();
+        if (amount > idle) revert InsufficientLiquidity(idle, amount);
+        liquidityOf[msg.sender] -= amount;
+        totalLiquidity -= amount;
+        usdc.safeTransfer(msg.sender, amount);
+        emit LiquidityWithdrawn(msg.sender, amount, totalLiquidity);
+    }
+
+    // -------------------------------------------------------------------------
     // Borrow / repay
     // -------------------------------------------------------------------------
 
@@ -180,6 +234,9 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
             revert AgentNotEligibleForCredit(agentId, status);
         }
         if (_loans[agentId].principal != 0) revert LoanAlreadyOpen(agentId);
+
+        uint256 idle = availableLiquidity();
+        if (amount > idle) revert InsufficientLiquidity(idle, amount);
 
         uint16 ratio = collateralRatioBps(agentId);
         uint256 collateralRequired = (amount * ratio) / BPS;
@@ -213,6 +270,8 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
         if (reserve != 0) usdc.safeTransfer(treasury, reserve);
 
         totalPrincipalOutstanding -= loan.principal;
+        // The pool earns the interest net of the protocol reserve.
+        totalLiquidity += interest - reserve;
         totalInterestEarned += interest;
         loan.interestPaid += interest;
         loan.principal = 0;
@@ -250,13 +309,34 @@ contract AvairaCreditMarket is Ownable, ReentrancyGuard {
         seized = loan.collateral;
         uint256 payout = seized > debt ? debt : seized;
 
-        usdc.safeTransfer(msg.sender, payout);
+        // Waterfall: the pool is repaid its principal first, then the keeper is paid the
+        // accrued interest plus a bonus, and any excess collateral goes back to the owner.
+        uint256 toPool = payout < loan.principal ? payout : loan.principal;
+        uint256 toKeeper = payout - toPool;
         uint256 remainder = seized - payout;
-        if (remainder != 0) usdc.safeTransfer(treasury, remainder);
+
+        if (remainder != 0) {
+            uint256 bonus = (loan.principal * LIQUIDATION_BONUS_BPS) / BPS;
+            if (bonus > remainder) bonus = remainder;
+            toKeeper += bonus;
+            remainder -= bonus;
+        }
 
         totalPrincipalOutstanding -= loan.principal;
+        if (toPool < loan.principal) {
+            // The pool absorbs the shortfall: its claim on the borrower was not covered.
+            uint256 shortfall = loan.principal - toPool;
+            totalLiquidity -= shortfall;
+            totalBadDebt += shortfall;
+            emit BadDebtRecorded(agentId, shortfall);
+        }
+
+        address owner_ = identity.ownerOf(agentId);
         loan.principal = 0;
         loan.collateral = 0;
+
+        if (toKeeper != 0) usdc.safeTransfer(msg.sender, toKeeper);
+        if (remainder != 0 && owner_ != address(0)) usdc.safeTransfer(owner_, remainder);
 
         emit Liquidated(agentId, msg.sender, debt, seized);
     }

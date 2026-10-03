@@ -1,0 +1,19 @@
+{
+  "name": "avaira-contracts-tools",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Toolchain that compiles the Avaira Foundry sources without Foundry (solc-js) and executes the end-to-end behavioural suite on an in-process EVM, plus the Monad testnet deploy/verify path.",
+  "scripts": {
+    "compile": "node lib/compile.js",
+    "test": "npm run compile && node --test e2e/",
+    "deploy:monad": "node scripts/deploy-monad.js",
+    "verify:monad": "node scripts/verify-monad.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "solc": "0.8.24"
+  },
+  "devDependencies": {
+    "ganache": "^7.9.2"
+  }
+}

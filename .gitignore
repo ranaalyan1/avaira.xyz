@@ -90,3 +90,10 @@ frontend/node_modules/.cache/default-development/1.pack
 frontend/node_modules/.cache/default-development/3.pack
 frontend/node_modules/.cache/default-development/6.pack
 frontend/node_modules/.cache/default-development/0.pack
+
+# Foundry / in-sandbox Solidity build artifacts
+contracts/out/
+contracts/out-js/
+contracts/cache/
+contracts/cache-js/
+contracts/tools/node_modules/

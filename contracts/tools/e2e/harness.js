@@ -207,6 +207,16 @@ async function startChain({ chainId = 31337, port } = {}) {
       await provider.request({ method: 'evm_increaseTime', params: [seconds] });
       await provider.request({ method: 'evm_mine', params: [] });
     },
+    /**
+     * Wall-clock time the chain believes it is.
+     *
+     * Every deadline in a test must be built from this, never from Date.now(): tests that
+     * advance time would otherwise commit intents that are already expired.
+     */
+    async now() {
+      const block = await provider.request({ method: 'eth_getBlockByNumber', params: ['latest', false] });
+      return Number(BigInt(block.timestamp));
+    },
     async snapshot() {
       return provider.request({ method: 'evm_snapshot', params: [] });
     },
@@ -288,6 +298,9 @@ async function deployProtocol(chain, artifacts, opts = {}) {
     ['wire reputation.setStakeRegistry', () => reputation.setStakeRegistry(addresses.stake)],
     ['wire reputation.setScorer', () => reputation.setScorer(deployer.address)],
     ['wire intentVault.setContracts', () => intentVault.setContracts(addresses.identity, addresses.stake)],
+    // The vault must be authorised to apply WARNING slashes for non-attestation, exactly
+    // as the deployment script authorises it in production.
+    ['wire stake.setSlasher(intentVault)', () => stake.setSlasher(addresses.intentVault, true)],
   ];
   for (const [name, fn] of wiring) {
     await run(name, async () => {
@@ -471,6 +484,13 @@ async function expectRevert(promise, matcher, context) {
             raw;
         }
       }
+    }
+
+    if (process.env.AVAIRA_REVERT_DEBUG) {
+      let probeName = null;
+      try { probeName = iface?.parseError ? (iface.parseError(raw)?.name ?? 'NO_MATCH') : 'NO_IFACE'; } catch (e) { probeName = 'PARSE_ERR:' + e.message.slice(0, 60); }
+      console.log('[revert-debug] matcher =', String(matcher), '| parsed =', probeName,
+        '| raw =', JSON.stringify(String(raw ?? null)).slice(0, 70));
     }
 
     let decodedName = null;

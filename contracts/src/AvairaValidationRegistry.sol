@@ -271,6 +271,8 @@ contract AvairaValidationRegistry is IAvairaValidationRegistry, Ownable {
     }
 
     function _requireAgentOperator(uint256 agentId) private view {
+        // An unknown agent is "not an operator" — do not leak the ERC-721 token error.
+        if (!identity.isRegistered(agentId)) revert NotAgentOperator(agentId, msg.sender);
         address owner_ = identity.ownerOf(agentId);
         bool ok = msg.sender == owner_ || msg.sender == identity.getAgentWallet(agentId)
             || identity.isApprovedForAll(owner_, msg.sender) || msg.sender == identity.getApproved(agentId);

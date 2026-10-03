@@ -341,6 +341,9 @@ contract AvairaIntentVault is IAvairaIntentVault, Ownable, ReentrancyGuard {
     }
 
     function _requireAgentOperator(uint256 agentId) private view {
+        // Reverting with the identity registry's ERC-721 error would leak a token-level
+        // detail through a protocol-level API; an unknown agent is simply "not an operator".
+        if (!identity.isRegistered(agentId)) revert NotAgentOperator(agentId, msg.sender);
         address owner_ = identity.ownerOf(agentId);
         if (owner_ == address(0)) revert NotAgentOperator(agentId, msg.sender);
         bool ok = msg.sender == owner_ || msg.sender == identity.getAgentWallet(agentId)

@@ -231,17 +231,21 @@ contract AvairaValidationRegistry is IAvairaValidationRegistry, Ownable {
     }
 
     /// @notice The latest Kimi adversarial audit score for an agent (0 when never audited).
+    /// @dev "Latest" is by response timestamp, not by request age: an auditor can re-post a
+    ///      sharper verdict on an older request without it being shadowed by a stale one.
     function latestKimiScore(uint256 agentId) external view returns (uint8 score, uint64 timestamp) {
         bytes32[] storage hashes = _agentValidations[agentId];
-        for (uint256 i = hashes.length; i > 0; --i) {
-            ResponseRecord[] storage list = _responses[hashes[i - 1]];
-            for (uint256 j = list.length; j > 0; --j) {
-                if (keccak256(bytes(list[j - 1].tag)) == keccak256(bytes(KIMI_TAG))) {
-                    return (list[j - 1].response, list[j - 1].timestamp);
+        for (uint256 i = 0; i < hashes.length; ++i) {
+            ResponseRecord[] storage list = _responses[hashes[i]];
+            for (uint256 j = 0; j < list.length; ++j) {
+                if (keccak256(bytes(list[j].tag)) != keccak256(bytes(KIMI_TAG))) continue;
+                if (list[j].timestamp >= timestamp) {
+                    score = list[j].response;
+                    timestamp = list[j].timestamp;
                 }
             }
         }
-        return (0, 0);
+        return (score, timestamp);
     }
 
     // -------------------------------------------------------------------------

@@ -611,6 +611,18 @@ async function send(txPromise, iface) {
   }
 }
 
+/**
+ * Local key for a deterministic node account, optionally connected to a provider.
+ *
+ * Node accounts are unlocked, so a send can go through `eth_sendTransaction`; but EIP-712
+ * signing (`signTypedData`) needs the private key locally. Tests that must both sign typed
+ * data and send as the same address use this.
+ */
+function localWallet(index, provider = null) {
+  const wallet = ethers.HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${index}`);
+  return provider ? wallet.connect(provider) : wallet;
+}
+
 async function gasOf(txPromise) {
   const receipt = await (await txPromise).wait();
   return { gasUsed: receipt.gasUsed, receipt };
@@ -618,6 +630,7 @@ async function gasOf(txPromise) {
 
 module.exports = {
   CHAIN_ID,
+  DEPLOY_GAS,
   compile,
   startChain,
   deploy,
@@ -627,6 +640,7 @@ module.exports = {
   merkle: { leafHash, hashPair, buildTree, proofFor, buildAuditTree },
   expectRevert,
   gasOf,
+  localWallet,
   send,
   decodeRevert,
   usdc,

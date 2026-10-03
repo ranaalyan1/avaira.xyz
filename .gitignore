@@ -97,3 +97,9 @@ contracts/out-js/
 contracts/cache/
 contracts/cache-js/
 contracts/tools/node_modules/
+
+# Verification payload dumps (regenerate with tools/scripts/verify-monad.js --dry-run)
+deployments/*-verify/
+# Local dry-run deployment manifests
+deployments/local.json
+deployments/local-verification.json

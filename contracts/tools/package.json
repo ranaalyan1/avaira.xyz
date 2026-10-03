@@ -5,9 +5,12 @@
   "description": "Toolchain that compiles the Avaira Foundry sources without Foundry (solc-js) and executes the end-to-end behavioural suite on an in-process EVM, plus the Monad testnet deploy/verify path.",
   "scripts": {
     "compile": "node lib/compile.js",
-    "test": "npm run compile && node --test e2e/",
-    "deploy:monad": "node scripts/deploy-monad.js",
-    "verify:monad": "node scripts/verify-monad.js"
+    "test": "npm run compile && node --test --test-concurrency=1 e2e/*.test.js",
+    "test:suite": "node --test --test-concurrency=1 e2e/*.test.js",
+    "metrics": "node metrics.js",
+    "deploy:monad": "node scripts/deploy-monad.js --network monad-testnet",
+    "deploy:local": "node scripts/deploy-monad.js",
+    "verify:monad": "node scripts/verify-monad.js --network monad-testnet"
   },
   "dependencies": {
     "ethers": "^6.13.4",

@@ -1,0 +1,118 @@
+{
+  "network": "in-process-evm",
+  "chainId": "31337",
+  "measurements": {
+    "registerAgent": {
+      "gas": "154164"
+    },
+    "commitIntent": {
+      "label": "commitIntent",
+      "runs": 5,
+      "gas": [
+        366787,
+        332599,
+        332599,
+        332587,
+        332599
+      ],
+      "min": 332587,
+      "max": 366787,
+      "avg": 339434
+    },
+    "attestOutcome": {
+      "label": "attestOutcome",
+      "runs": 5,
+      "gas": [
+        113282,
+        113294,
+        113294,
+        113282,
+        113294
+      ],
+      "min": 113282,
+      "max": 113294,
+      "avg": 113289
+    },
+    "giveFeedbackStaked": {
+      "label": "giveFeedback (staked reviewer)",
+      "runs": 5,
+      "gas": [
+        264311,
+        227351,
+        227351,
+        227351,
+        227351
+      ],
+      "min": 227351,
+      "max": 264311,
+      "avg": 234743
+    },
+    "giveFeedbackX402": {
+      "label": "giveFeedbackWithX402Settlement",
+      "runs": 3,
+      "gas": [
+        396161,
+        362001,
+        359201
+      ],
+      "min": 359201,
+      "max": 396161,
+      "avg": 372454
+    },
+    "recordGateCheck": {
+      "label": "recordGateCheck (onchain event)",
+      "runs": 5,
+      "gas": [
+        55426,
+        55426,
+        55426,
+        55426,
+        55426
+      ],
+      "min": 55426,
+      "max": 55426,
+      "avg": 55426
+    },
+    "challengeDeviation": {
+      "label": "challengeDeviation (Merkle proof)",
+      "runs": 1,
+      "gas": [
+        232736
+      ],
+      "min": 232736,
+      "max": 232736,
+      "avg": 232736
+    }
+  },
+  "gasPriceGwei": 2,
+  "monUsd": 3,
+  "latency": {
+    "gateCheckMs": {
+      "p50": 16.373445,
+      "p95": 19.688515,
+      "max": 20.66408,
+      "samples": 20
+    },
+    "commitTxMs": {
+      "p50": 53.890258,
+      "p95": 69.547792,
+      "max": 71.836933
+    },
+    "roundTripMs": {
+      "p50": 92.343388,
+      "p95": 112.947894,
+      "max": 117.165015,
+      "samples": 20
+    },
+    "gateChecksPerMinute": 3864,
+    "measuredOverSeconds": 5.00061474,
+    "gateChecksPerMinuteConcurrent": 5980,
+    "gateCheckPerCallMsUnderLoad": {
+      "p50": 9.91131496,
+      "p95": 11.37506712
+    },
+    "concurrentBatch": 250,
+    "concurrentRounds": 5
+  },
+  "report": "\n## Avaira measured metrics — in-process EVM harness\n\nGas price used: 2 gwei · MON reference price: $3 (override with --mon-usd)\n\n| Write path | gas (avg) | gas (max) | MON | USD |\n| --- | ---: | ---: | ---: | ---: |\n| registerAgent | 154,164 | 154,164 | 0.000308328 MON | $0.000925 |\n| commitIntent | 339,434 | 366,787 | 0.000678868 MON | $0.002037 |\n| attestOutcome | 113,289 | 113,294 | 0.000226578 MON | $0.000680 |\n| giveFeedback (staked reviewer) | 234,743 | 264,311 | 0.000469486 MON | $0.001408 |\n| giveFeedbackWithX402Settlement | 372,454 | 396,161 | 0.000744908 MON | $0.002235 |\n| recordGateCheck (onchain event) | 55,426 | 55,426 | 0.000110852 MON | $0.000333 |\n| challengeDeviation (Merkle proof) | 232,736 | 232,736 | 0.000465472 MON | $0.001396 |\n\n| Gate latency (SDK hot path) | ms |\n| --- | ---: |\n| checkGate (view, p50) | 16.37 |\n| checkGate (view, p95) | 19.69 |\n| commitIntent tx (p50, includes block) | 53.89 |\n| commit → gate → attest round trip (p50) | 92.34 |\n| commit → gate → attest round trip (p95) | 112.95 |\n| gate checks per minute (sequential, one client) | 3,864 |\n| gate checks per minute (concurrent, 5×250 in flight) | 5,980 |\n| checkGate per call under concurrency (p50/p95) | 9.91 / 11.38 |\n\nSource: in-process EVM. Contract-side costs are chain-independent; the latency column is the\nlower bound and excludes network round trips — re-run with --rpc on Monad for the published figure."
+}

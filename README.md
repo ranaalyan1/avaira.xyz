@@ -110,6 +110,4 @@ became a Merkle commitment that `challengeDeviation` can act on. The v1 contract
 Avalanche Fuji are preserved under [`contracts/legacy-hardhat/`](contracts/legacy-hardhat/) for
 reference.
 
-## License
 
-MIT — see [`LICENSE`](LICENSE).

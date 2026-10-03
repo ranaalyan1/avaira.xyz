@@ -1,0 +1,51 @@
+# Avaira — Monad-native accountability layer for the agent economy.
+# Foundry project root (ERC-8004 registries, Proof-of-Intent gate, staking/slashing, score-gated credit).
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib", "node_modules"]
+test = "test"
+script = "script"
+broadcast = "broadcast"
+solc_version = "0.8.37"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+bytecode_hash = "none"
+cbor_metadata = true
+fs_permissions = [{ access = "read-write", path = "./deployments" }, { access = "read-write", path = "./metrics" }]
+fuzz = { runs = 1024, max_test_rejects = 262144 }
+invariant = { runs = 128, depth = 64, fail_on_revert = false, call_override = false }
+gas_reports = [
+  "AvairaIdentityRegistry",
+  "AvairaReputationRegistry",
+  "AvairaValidationRegistry",
+  "AvairaIntentVault",
+  "AvairaStakeRegistry",
+  "AvairaCreditMarket",
+]
+
+# Sandbox profile: used when `svm` cannot reach binaries.soliditylang.org
+# (offline/allow-listed CI runners). Point `solc` at any solc >= 0.8.24 binary.
+#   forge test --profile sandbox
+[profile.sandbox]
+solc = "/usr/local/bin/solc"
+
+[profile.ci]
+fuzz = { runs = 4096 }
+invariant = { runs = 512, depth = 128 }
+verbosity = 2
+
+# Monad endpoints. Both RPCs are public and need no key; override them in contracts/.env
+# for a private provider (Alchemy/QuickNode/Ankr all serve Monad).
+[rpc_endpoints]
+monad_testnet = "${MONAD_TESTNET_RPC}"
+monad_mainnet = "${MONAD_MAINNET_RPC}"
+localhost = "http://127.0.0.1:8545"
+
+# Verification. Sourcify (BlockVision) needs no API key and is the default path in
+# scripts/verify-monad.sh; Monadscan is used when MONADSCAN_API_KEY is present.
+[etherscan]
+monad_testnet = { key = "${MONADSCAN_API_KEY}", chain = 10143 }
+monad_mainnet = { key = "${MONADSCAN_API_KEY}", chain = 143 }

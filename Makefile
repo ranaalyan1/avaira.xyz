@@ -1,37 +1,124 @@
-.PHONY: dev dev-local test setup clean lint
+# Avaira — Monad-native accountability layer for the agent economy.
+#
+#   make install       install every dependency (contracts, SDK, services, python)
+#   make test          run everything: Foundry suite + SDK tests + scorer tests
+#   make deploy-monad  deploy the whole stack to Monad testnet and verify it
+#   make gateway       start the API + dashboard on http://localhost:8402
+#   make demo-heist    run "The Agent Heist" scenario end to end
+#   make metrics       refresh metrics/ from real runs (gas, latency, coverage)
+#
+# Everything reads contracts/.env (see contracts/.env.example).
 
-dev:
-	docker-compose up
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
 
-dev-local:
-	docker-compose --profile local up
+PORT ?= 8402
+CHAIN_ID ?= 10143
 
-test:
-	@echo "→ Backend tests..."
-	cd backend && pytest tests/ -q --tb=short 2>/dev/null || pytest ../tests/ -q --tb=short
-	@echo "→ Frontend tests..."
-	cd frontend && yarn test --passWithNoTests --watchAll=false
+.PHONY: help install test test-contracts test-sdk test-scorer test-python \
+        deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
+        gateway dashboard score leaderboard demo-heist demo-sybil anvil \
+        smoke-kimi smoke-privy fmt clean legacy-dev
 
-setup:
-	@echo "Setting up AVAIRA development environment..."
-	@command -v node  >/dev/null || (echo "ERROR: Node.js 18+ required" && exit 1)
-	@command -v python3 >/dev/null || (echo "ERROR: Python 3.11+ required" && exit 1)
-	@command -v docker >/dev/null || (echo "ERROR: Docker required" && exit 1)
-	@cp -n backend/.env.example backend/.env 2>/dev/null && echo "Created backend/.env" || echo "backend/.env exists"
-	@cp -n frontend/.env.example frontend/.env 2>/dev/null && echo "Created frontend/.env" || true
-	cd backend && pip install -r requirements.txt -q
-	cd frontend && yarn install --silent
-	@echo ""
-	@echo "✓ Setup complete. Edit .env files, then run: make dev"
+help:
+	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
 
-lint:
-	cd backend && black --check . && python -m flake8 . --max-line-length=120 --exclude=__pycache__
-	cd frontend && yarn lint --max-warnings 0
+install:
+	@echo "→ contracts"
+	cd contracts && (test -d node_modules || npm install --no-audit --no-fund)
+	@echo "→ SDK (typescript)"
+	cd sdk/typescript && npm install --no-audit --no-fund
+	@echo "→ services"
+	cd services/scorer && npm install --no-audit --no-fund
+	cd services/gateway && npm install --no-audit --no-fund
+	@echo "→ SDK (python)"
+	python3 -m pip install -q -e sdk/python || pip install -q -e sdk/python
+	@echo "✓ installed"
+
+# ── tests ───────────────────────────────────────────────────────────────────────
+
+test: test-contracts test-sdk test-scorer
+	@echo "✓ all suites green"
+
+test-contracts:
+	cd contracts && forge test
+
+test-sdk:
+	cd sdk/typescript && npm run typecheck && npm test
+
+test-scorer:
+	cd services/scorer && npm run typecheck && npm test
+
+test-python:
+	cd sdk/python && python3 -m pytest -q
+
+# ── Monad ───────────────────────────────────────────────────────────────────────
+
+deploy-monad:
+	cd contracts && make deploy-monad
+
+verify-monad:
+	cd contracts && make verify-monad CHAIN_ID=$(CHAIN_ID)
+
+# Real gas for every primitive (execution gas, identical on Monad).
+benchmark:
+	cd contracts && make benchmark
+
+# Live gate latency against Monad: commit → checkGate → execute round trip.
+measure-monad:
+	cd sdk/typescript && npm run benchmark -- --rpc $${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz} --chain $(CHAIN_ID) --runs $${RUNS:-50}
+
+# The same benchmark against a throwaway local chain — no faucet, no funds.
+gate-bench:
+	cd demo && ./bench-local.sh
+
+# Refresh metrics/ from real runs.
+metrics:
+	cd contracts && make benchmark
+	cd sdk/typescript && npm run benchmark -- --chain $(CHAIN_ID) --runs $${RUNS:-50} --out ../../metrics/gate-latency.json || true
+	python3 scripts/collect-metrics.py || true
+
+# ── services ────────────────────────────────────────────────────────────────────
+
+gateway:
+	cd services/gateway && PORT=$(PORT) npm start
+
+# Alias: the dashboard is served by the gateway at /.
+dashboard: gateway
+
+score:
+	cd services/scorer && npm run score -- --agent $${AGENT:-1} --anchor
+
+leaderboard:
+	cd services/scorer && npm run leaderboard
+
+demo-heist:
+	cd demo && ./heist.sh
+
+demo-sybil:
+	cd demo && ./sybil.sh
+
+anvil:
+	anvil --chain-id $(CHAIN_ID) --block-time 0.4
+
+# ── sponsor smoke tests (require real credentials) ──────────────────────────────
+
+smoke-kimi:
+	cd services/scorer && npm run smoke:kimi
+
+smoke-privy:
+	cd services/gateway && npm run smoke:privy
+
+# ── housekeeping ────────────────────────────────────────────────────────────────
+
+fmt:
+	cd contracts && forge fmt
+	cd sdk/typescript && npx prettier --write 'src/**/*.ts' 'test/**/*.ts' 2>/dev/null || true
 
 clean:
-	docker-compose down -v
-	cd backend && find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; true
-	cd frontend && rm -rf build
+	cd contracts && forge clean
+	rm -rf sdk/typescript/dist services/*/dist
 
-logs:
-	docker-compose logs -f backend
+# The pre-Monad offchain product is still runnable; it is not part of the v2 path.
+legacy-dev:
+	docker-compose up

@@ -1,0 +1,25 @@
+{
+  "name": "@avaira/scorer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Avaira Score — computes, adversarially audits and anchors a 0–100 accountability score from Monad state.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts serve",
+    "score": "tsx src/index.ts score",
+    "leaderboard": "tsx src/index.ts leaderboard",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:../../sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

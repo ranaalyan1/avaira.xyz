@@ -2,3 +2,10 @@
 artifacts/
 cache/
 node_modules/
+
+# Foundry (v2 — Monad-native)
+out/
+cache/
+broadcast/
+lcov.info
+coverage/

@@ -1,0 +1,30 @@
+[project]
+name = "avaira"
+version = "2.0.0"
+description = "Avaira v2 — onchain accountability for AI agents on Monad: proof-of-intent, pre-execution gate, stake-backed reputation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "web3>=7.0.0",
+    "eth-account>=0.13.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+integrations = ["langchain-core>=0.3.0", "crewai>=0.60.0"]
+dev = ["pytest>=8.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/ranaalyan1/avaira.xyz"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["avaira*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

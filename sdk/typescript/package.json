@@ -1,0 +1,42 @@
+{
+  "name": "@avaira/sdk",
+  "version": "2.0.0",
+  "description": "Avaira v2 \u2014 onchain accountability for AI agents on Monad. Proof-of-Intent, pre-execution gate, stake-backed reputation.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "vectors": "tsx scripts/gen-parity-vectors.ts",
+    "benchmark": "tsx scripts/benchmark-gate.ts"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "keywords": [
+    "ai-agents",
+    "erc-8004",
+    "x402",
+    "monad",
+    "reputation",
+    "accountability"
+  ]
+}

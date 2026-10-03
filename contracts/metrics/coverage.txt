@@ -1,0 +1,306 @@
+Warning: `--ir-minimum` enables `viaIR` with minimum optimization, which can result in inaccurate source mappings.
+Only use this flag as a workaround if you are experiencing "stack too deep" errors.
+Note that `viaIR` is production ready since Solidity 0.8.13 and above.
+See more: https://book.getfoundry.sh/guides/best-practices/stack-too-deep
+Compiling 81 files with Solc 0.8.37
+Solc 0.8.37 finished in 110.13s
+Compiler run successful with warnings:
+Warning (6335): "error" will be promoted to keyword in the future and will not be allowed as an identifier anymore.
+  --> node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol:92:29:
+   |
+92 |         (address recovered, RecoverError error, bytes32 errorArg) = tryRecover(hash, signature);
+   |                             ^^^^^^^^^^^^^^^^^^
+
+Warning (6335): "error" will be promoted to keyword in the future and will not be allowed as an identifier anymore.
+   --> node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol:119:29:
+    |
+119 |         (address recovered, RecoverError error, bytes32 errorArg) = tryRecover(hash, r, vs);
+    |                             ^^^^^^^^^^^^^^^^^^
+
+Warning (6335): "error" will be promoted to keyword in the future and will not be allowed as an identifier anymore.
+   --> node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol:161:29:
+    |
+161 |         (address recovered, RecoverError error, bytes32 errorArg) = tryRecover(hash, v, r, s);
+    |                             ^^^^^^^^^^^^^^^^^^
+
+Warning (6335): "error" will be promoted to keyword in the future and will not be allowed as an identifier anymore.
+   --> node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol:169:26:
+    |
+169 |     function _throwError(RecoverError error, bytes32 errorArg) private pure {
+    |                          ^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+  --> test/fixtures/SdkVectors.sol:39:9:
+   |
+39 |         uint256 i;
+   |         ^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/AvairaIntentVault.t.sol:84:5:
+   |
+84 |     function test_CheckGate_AllowsHealthyAgent() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/AvairaReputationRegistry.t.sol:303:5:
+    |
+303 |     function test_GradeBoundaries() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MerkleParity.t.sol:28:5:
+   |
+28 |     function test_LeafEncoding_MatchesSolidity() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MerkleParity.t.sol:56:5:
+   |
+56 |     function test_MerkleRoot_MatchesSolidity() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MerkleParity.t.sol:68:5:
+   |
+68 |     function test_Proofs_VerifyOnchain() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MerkleParity.t.sol:81:5:
+   |
+81 |     function test_Proofs_DoNotVerifyForWrongLeaf() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/MerkleParity.t.sol:97:5:
+   |
+97 |     function test_EnvelopeHash_MatchesSolidity() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/MerkleParity.t.sol:108:5:
+    |
+108 |     function test_EnvelopeHash_SensitiveToEveryField() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/MerkleParity.t.sol:131:5:
+    |
+131 |     function testFuzz_TreeRoundTrip(uint8 count, bytes32 leafSeed) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Analysing contracts...
+Running tests...
+
+Ran 10 tests for test/AvairaCreditMarket.t.sol:AvairaCreditMarketTest
+[PASS] testFuzz_Borrow_NeverExceedsTierRequirement(uint96,uint96,uint8) (runs: 1024, μ: 271614, ~: 273664)
+[PASS] test_BannedAgent_IsCutOff() (gas: 360351)
+[PASS] test_Borrow_EnforcesTierCollateral() (gas: 302479)
+[PASS] test_Borrow_RequiresOperatorAndLiquidity() (gas: 137458)
+[PASS] test_Borrow_RevertsWhenPoolIsDrained() (gas: 691207)
+[PASS] test_Borrow_UngradedAgentPaysForItAt150Percent() (gas: 195080)
+[PASS] test_CollateralRatio_TracksScoreTiers() (gas: 193770)
+[PASS] test_Liquidate_RevertsWhenHealthy() (gas: 263144)
+[PASS] test_Repay_ReducesDebtAndFreesCapacity() (gas: 293490)
+[PASS] test_ScoreDowngrade_MakesPositionLiquidatable() (gas: 291933)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 1.16s (1.14s CPU time)
+
+Ran 17 tests for test/AvairaStakeRegistry.t.sol:AvairaStakeRegistryTest
+[PASS] testFuzz_Slash_ConservesValue(uint96,uint8) (runs: 1024, μ: 346859, ~: 355932)
+[PASS] testFuzz_StakeUnstake_NeverCreatesValue(uint96,uint96) (runs: 1024, μ: 202029, ~: 202033)
+[PASS] test_IsEligible_RequiresStakeScoreAndStatus() (gas: 368271)
+[PASS] test_IsStakedReviewer_TracksAccountStake() (gas: 224616)
+[PASS] test_ScoreReader_IsConfigurableByAdmin() (gas: 57976)
+[PASS] test_Slash_BanForfeitsEverythingAndBansIdentity() (gas: 437788)
+[PASS] test_Slash_OnlySlasherRole() (gas: 347190)
+[PASS] test_Slash_SuspensionHalvesStakeAndStartsCooldown() (gas: 380912)
+[PASS] test_Slash_WarningBelowMinStakeDowngradesToPending() (gas: 335627)
+[PASS] test_Slash_WarningTakesTenPercentAndSplitsBounty() (gas: 340745)
+[PASS] test_Stake_LifecyclePendingToActive() (gas: 243901)
+[PASS] test_Stake_RevertsForNonOperatorAndZeroAmount() (gas: 57842)
+[PASS] test_Stake_SecondStakerIsRejected() (gas: 217063)
+[PASS] test_Stake_UnknownAgentReverts() (gas: 30931)
+[PASS] test_Unstake_MovesStatusDownAndReturnsFunds() (gas: 212654)
+[PASS] test_Unstake_RevertsForNonStakerAndOverdraft() (gas: 215083)
+[PASS] test_VoluntaryExit_RefundsEverything() (gas: 184373)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 1.53s (1.53s CPU time)
+
+Ran 10 tests for test/AvairaValidationRegistry.t.sol:AvairaValidationRegistryTest
+[PASS] testFuzz_ValidationResponse_AnyScoreInRange(uint8,uint64) (runs: 1024, μ: 308760, ~: 308351)
+[PASS] test_GetSummary_AveragesPerValidatorWithTagFilter() (gas: 639892)
+[PASS] test_GetSummary_RejectsEmptyValidatorSet() (gas: 14580)
+[PASS] test_GetValidationStatus_RevertsForUnknownRequest() (gas: 17712)
+[PASS] test_MultipleResponses_SoftThenHardFinality() (gas: 577657)
+[PASS] test_RegisterValidator_AdminOnlyAndNoDuplicates() (gas: 55081)
+[PASS] test_RemoveValidator_StopsNewRequests() (gas: 44437)
+[PASS] test_ValidationRequest_OnlyAgentOperatorAndUnregisteredValidatorRejected() (gas: 229931)
+[PASS] test_ValidationResponse_OnlyAssignedValidator() (gas: 351197)
+[PASS] test_ValidationResponse_RejectsOutOfRangeAndUnknownRequest() (gas: 187267)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 445.52ms (439.79ms CPU time)
+
+Ran 1 test for test/benchmark/GasBenchmark.t.sol:GasBenchmark
+[PASS] test_GasBenchmark_WriteMetrics() (gas: 1739998)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 11.10ms (5.79ms CPU time)
+
+Ran 37 tests for test/AvairaIdentityRegistry.t.sol:AvairaIdentityRegistryTest
+[PASS] testFuzz_ExitAgent_AlwaysRefundsExactlyBond(uint8) (runs: 1024, μ: 447406, ~: 338923)
+[PASS] testFuzz_Metadata_RoundTrip(string,bytes) (runs: 1024, μ: 358174, ~: 350970)
+[PASS] testFuzz_Register_AnyBond(uint96,uint96) (runs: 1024, μ: 262565, ~: 263794)
+[PASS] test_Admin_OnlyOwner() (gas: 32451)
+[PASS] test_AgentRegistry_FormatIsEip155() (gas: 65501)
+[PASS] test_BanAgent_ForfeitsBondToTreasuryAndIsTerminal() (gas: 298040)
+[PASS] test_BanAgent_OnlyOwnerOrEnforcer() (gas: 218822)
+[PASS] test_BanOperator_BlocksNewIdentities() (gas: 61746)
+[PASS] test_ExitAgent_RefundsBondAndBurns() (gas: 209428)
+[PASS] test_ExitAgent_RevertsForNonOwner() (gas: 221137)
+[PASS] test_GetMetadata_AgentWalletIsDerivedFromBinding() (gas: 305969)
+[PASS] test_Refund_EscrowsWhenOwnerRejectsNative() (gas: 395308)
+[PASS] test_Register_IdsAreMonotonic() (gas: 380959)
+[PASS] test_Register_RefundsExcessBond() (gas: 223534)
+[PASS] test_Register_RequiresAndStoresBond() (gas: 244984)
+[PASS] test_Register_RevertsOnEmptyMetadataKey() (gas: 214199)
+[PASS] test_Register_RevertsOnEmptyOrOversizedURI() (gas: 58526)
+[PASS] test_Register_RevertsOnReservedAgentWalletMetadataKey() (gas: 215375)
+[PASS] test_Register_RevertsWhenBondNotPaid() (gas: 52872)
+[PASS] test_Register_WithMetadataWritesEveryEntry() (gas: 401953)
+[PASS] test_Register_ZeroBondWhenOwnerDisablesIt() (gas: 193589)
+[PASS] test_SetAgentURI_ByOwnerAndApprovedOperator() (gas: 294303)
+[PASS] test_SetAgentURI_RevertsForStranger() (gas: 222264)
+[PASS] test_SetAgentURI_RevertsForUnknownAgent() (gas: 18613)
+[PASS] test_SetAgentWallet_EOA() (gas: 298315)
+[PASS] test_SetAgentWallet_ERC1271SmartAccount() (gas: 737034)
+[PASS] test_SetAgentWallet_RejectsReplay() (gas: 305826)
+[PASS] test_SetAgentWallet_RevertsForWrongSignerAndWrongCaller() (gas: 282210)
+[PASS] test_SetAgentWallet_RevertsOnExpiredDeadline() (gas: 225081)
+[PASS] test_SetAgentWallet_RevertsOnZeroWallet() (gas: 220018)
+[PASS] test_SetMetadata_RevertsForNonOwnerAndReservedKey() (gas: 233534)
+[PASS] test_SetMetadata_RoundTripAndKeys() (gas: 337137)
+[PASS] test_SetRegistrationBond_AffectsNewRegistrationsOnly() (gas: 223500)
+[PASS] test_SupportsInterface() (gas: 23049)
+[PASS] test_Transfer_ClearsAgentWallet() (gas: 306323)
+[PASS] test_UnsetAgentWallet() (gas: 289608)
+[PASS] test_Withdraw_PaysEscrowedRefund() (gas: 445461)
+Suite result: ok. 37 passed; 0 failed; 0 skipped; finished in 1.80s (1.80s CPU time)
+
+Ran 19 tests for test/AvairaIntentVault.t.sol:AvairaIntentVaultTest
+[PASS] test_Admin_Configuration() (gas: 48525)
+[PASS] test_AttestOutcome_AnchorsRootAndOpensChallengeWindow() (gas: 300088)
+[PASS] test_AttestOutcome_RequiresCommitmentAndOperator() (gas: 257245)
+[PASS] test_Challenge_RejectedOnForgedProof() (gas: 420805)
+[PASS] test_Challenge_RejectedWhenOutcomeStayedInsideEnvelope() (gas: 434598)
+[PASS] test_Challenge_RevertsBeforeAttestationAndWhenAlreadyChallenged() (gas: 768388)
+[PASS] test_Challenge_RevertsOutsideWindowAndOnMismatchedLeaf() (gas: 366711)
+[PASS] test_Challenge_UpheldOnActionOutsideEnvelope() (gas: 584750)
+[PASS] test_Challenge_UpheldOnOverspend() (gas: 583121)
+[PASS] test_Challenge_ZeroBondConfigurationStillWorks() (gas: 541832)
+[PASS] test_CheckGate_AllowsHealthyAgent() (gas: 45451)
+[PASS] test_CheckGate_BoundToIntent() (gas: 293205)
+[PASS] test_CheckGate_DetectsEnvelopeMismatch() (gas: 281305)
+[PASS] test_CheckGate_IntentAlreadyExecuted() (gas: 287540)
+[PASS] test_CheckGate_ReasonCodes() (gas: 452719)
+[PASS] test_CommitIntent_RejectsDuplicatesExpiredEnvelopesAndStrangers() (gas: 282514)
+[PASS] test_CommitIntent_RejectsUnboundedActionLists() (gas: 83342)
+[PASS] test_CommitIntent_StoresEnvelopeAndEmits() (gas: 273478)
+[PASS] test_RecordGateDecision_OnlyAgentOperator() (gas: 56990)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 40.48ms (34.18ms CPU time)
+
+Ran 19 tests for test/AvairaReputationRegistry.t.sol:AvairaReputationRegistryTest
+[PASS] testFuzz_GiveFeedback_ValueRoundTrip(int128,uint8,uint8) (runs: 1024, μ: 484534, ~: 485180)
+[PASS] test_AllStandardTagsAreAccepted() (gas: 1387691)
+[PASS] test_AppendResponse_AgentOperatorOnly() (gas: 638379)
+[PASS] test_GetSummary_RequiresReviewerSet() (gas: 15014)
+[PASS] test_GetSummary_ScalesDecimalsAndSkipsRevoked() (gas: 640781)
+[PASS] test_GiveFeedbackWithPayment_RejectsForgedSignature() (gas: 118202)
+[PASS] test_GiveFeedbackWithPayment_RejectsReplayedAuthorization() (gas: 347113)
+[PASS] test_GiveFeedbackWithPayment_RejectsSmallAndMismatchedPayments() (gas: 172329)
+[PASS] test_GiveFeedbackWithPayment_SettlesAndRecords() (gas: 399915)
+[PASS] test_GiveFeedback_RejectsAbsurdDecimals() (gas: 322788)
+[PASS] test_GiveFeedback_RejectsAgentOperatorReviewingItself() (gas: 396989)
+[PASS] test_GiveFeedback_RejectsNonStandardTag() (gas: 323241)
+[PASS] test_GiveFeedback_RejectsUnstakedSybilReviewer() (gas: 72638)
+[PASS] test_GiveFeedback_StakedReviewerAccepted() (gas: 554538)
+[PASS] test_GradeBoundaries() (gas: 83058)
+[PASS] test_PostAvairaScore_OnlyScorerRole() (gas: 64752)
+[PASS] test_PostAvairaScore_RejectsOutOfRangeAndUnknownAgent() (gas: 35386)
+[PASS] test_PostAvairaScore_WithEvidenceAnchor() (gas: 96426)
+[PASS] test_RevokeFeedback_OnlyReviewerAndOnce() (gas: 500345)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 1.08s (1.08s CPU time)
+
+Ran 8 tests for test/MerkleParity.t.sol:MerkleParityTest
+[PASS] testFuzz_HashPair_IsOrderIndependent(bytes32,bytes32) (runs: 1024, μ: 2781, ~: 2781)
+[PASS] testFuzz_TreeRoundTrip(uint8,bytes32) (runs: 1024, μ: 140040, ~: 115803)
+[PASS] test_EnvelopeHash_MatchesSolidity() (gas: 10407)
+[PASS] test_EnvelopeHash_SensitiveToEveryField() (gas: 27621)
+[PASS] test_LeafEncoding_MatchesSolidity() (gas: 223588)
+[PASS] test_MerkleRoot_MatchesSolidity() (gas: 193288)
+[PASS] test_Proofs_DoNotVerifyForWrongLeaf() (gas: 132721)
+[PASS] test_Proofs_VerifyOnchain() (gas: 266620)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.30s (1.30s CPU time)
+
+Ran 2 tests for test/invariant/IdentityBondInvariant.t.sol:IdentityBondInvariantTest
+[PASS] invariant_BondsFullyBacked() (runs: 128, calls: 8192, reverts: 3866)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| IdentityBondHandler | ban      | 2007  | 1878    | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | exit     | 2098  | 1005    | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | register | 2032  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | transfer | 2055  | 983     | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+[PASS] invariant_TotalBondsExcludesEscrow() (runs: 128, calls: 8192, reverts: 3869)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| IdentityBondHandler | ban      | 2007  | 1878    | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | exit     | 2098  | 1004    | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | register | 2032  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| IdentityBondHandler | transfer | 2055  | 987     | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 5.14s (5.34s CPU time)
+
+Ran 9 test suites in 7.15s (12.52s CPU time): 123 tests passed, 0 failed, 0 skipped (123 total tests)
+Wrote LCOV report.
+
+╭--------------------------------------------+--------------------+--------------------+------------------+------------------╮
+| File                                       | % Lines            | % Statements       | % Branches       | % Funcs          |
++============================================================================================================================+
+| script/Deploy.s.sol                        | 0.00% (0/67)       | 0.00% (0/80)       | 0.00% (0/2)      | 0.00% (0/3)      |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaCreditMarket.sol            | 91.21% (83/91)     | 87.79% (115/131)   | 54.17% (13/24)   | 92.31% (12/13)   |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaIdentityRegistry.sol        | 98.56% (137/139)   | 94.83% (165/174)   | 77.42% (24/31)   | 96.97% (32/33)   |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaIntentVault.sol             | 93.38% (127/136)   | 91.44% (171/187)   | 70.73% (29/41)   | 95.00% (19/20)   |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaReputationRegistry.sol      | 95.65% (154/161)   | 92.16% (188/204)   | 66.67% (28/42)   | 93.10% (27/29)   |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaStakeRegistry.sol           | 90.24% (148/164)   | 87.14% (183/210)   | 68.00% (34/50)   | 90.91% (20/22)   |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/core/AvairaValidationRegistry.sol      | 97.47% (77/79)     | 93.20% (96/103)    | 70.00% (14/20)   | 100.00% (13/13)  |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/lib/AvairaTypes.sol                    | 44.44% (4/9)       | 30.77% (4/13)      | 0.00% (0/1)      | 66.67% (2/3)     |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/lib/MerkleLib.sol                      | 100.00% (29/29)    | 97.62% (41/42)     | 0.00% (0/1)      | 100.00% (5/5)    |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| src/tokens/MockUSDC.sol                    | 80.00% (20/25)     | 80.00% (24/30)     | 50.00% (3/6)     | 66.67% (4/6)     |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| test/fixtures/SdkVectors.sol               | 98.55% (136/138)   | 99.26% (134/135)   | 100.00% (0/0)    | 66.67% (2/3)     |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| test/invariant/IdentityBondInvariant.t.sol | 89.47% (34/38)     | 86.05% (37/43)     | 63.64% (7/11)    | 83.33% (5/6)     |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| test/mocks/Mocks.sol                       | 75.00% (9/12)      | 81.82% (9/11)      | 100.00% (1/1)    | 80.00% (4/5)     |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| test/utils/AvairaFixture.sol               | 100.00% (57/57)    | 100.00% (57/57)    | 100.00% (0/0)    | 100.00% (7/7)    |
+|--------------------------------------------+--------------------+--------------------+------------------+------------------|
+| Total                                      | 88.65% (1015/1145) | 86.20% (1224/1420) | 66.52% (153/230) | 90.48% (152/168) |
+╰--------------------------------------------+--------------------+--------------------+------------------+------------------╯

@@ -16,6 +16,7 @@ import Underwriters from "@/pages/Underwriters";
 import Compliance from "@/pages/Compliance";
 import SDKDocs from "@/pages/SDKDocs";
 import HardeningReport from "@/pages/HardeningReport";
+import DynamicProviderWrapper from "@/components/DynamicProviderWrapper";
 import { Toaster } from "sonner";
 import { API } from "@/lib/api";
 
@@ -86,9 +87,11 @@ function App() {
     <AuthContext.Provider value={{ user, authReady, setUser, logout }}>
       <div className="min-h-screen bg-avaira-bg">
         <div className="noise-overlay" />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <DynamicProviderWrapper>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </DynamicProviderWrapper>
         <Toaster
           position="top-right"
           toastOptions={{

@@ -4,6 +4,7 @@ import { Users, Wallet, TrendingUp, Shield, Plus, Zap, RefreshCw, CheckCircle, X
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/App";
+import UnderwriterTools from "@/components/UnderwriterTools";
 
 import { API } from "@/lib/api";
 
@@ -177,6 +178,8 @@ export default function Underwriters() {
           </Dialog>
         </div>
       </div>
+
+      <UnderwriterTools />
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

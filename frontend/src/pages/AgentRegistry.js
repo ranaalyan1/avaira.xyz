@@ -4,6 +4,7 @@ import { UserPlus, Shield, Zap, AlertTriangle, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/App";
+import OperatorTools from "@/components/OperatorTools";
 
 import { API } from "@/lib/api";
 
@@ -218,6 +219,8 @@ export default function AgentRegistry() {
           </Dialog>
         </div>
       </div>
+
+      <OperatorTools />
 
       <Dialog open={!!newKey} onOpenChange={() => setNewKey(null)}>
         <DialogContent className="bg-avaira-card border-avaira-primary border-2 rounded-none max-w-md">

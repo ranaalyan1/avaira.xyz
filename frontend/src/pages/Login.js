@@ -1,8 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
 import { API } from "@/lib/api";
+import { isDynamicConfigured, useDynamicSession } from "@/components/DynamicProviderWrapper";
 
 export default function Login() {
   const navigate = useNavigate();
+  const dynamicOn = isDynamicConfigured();
+  const dynamicSession = useDynamicSession();
 
   const handleGoogleLogin = () => {
     const redirectUrl = window.location.origin + '/dashboard';
@@ -59,6 +63,31 @@ export default function Login() {
             </svg>
             Continue with X
           </button>
+
+          {/* Dynamic — embedded wallet auth (operators + underwriters) */}
+          {dynamicOn && (
+            <div className="mt-4 pt-4 border-t border-avaira-border" data-testid="dynamic-login-section">
+              <p className="font-heading font-semibold text-[11px] text-foreground uppercase tracking-wider text-center mb-1">
+                Operator / Underwriter
+              </p>
+              <p className="font-mono text-[9px] text-avaira-muted text-center mb-3">
+                Dynamic sign-in provisions an embedded wallet that signs the EIP-712
+                agent-wallet binding and collateral actions — no MetaMask required.
+              </p>
+              <div className="flex justify-center [&>div]:w-full" data-testid="dynamic-widget-container">
+                <DynamicWidget />
+              </div>
+              {dynamicSession?.primaryWallet && (
+                <button
+                  data-testid="dynamic-continue-btn"
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full mt-3 p-3 bg-avaira-primary/10 border border-avaira-primary text-avaira-primary font-heading font-semibold text-sm uppercase tracking-wider hover:bg-avaira-primary/20 transition-colors"
+                >
+                  Continue as {dynamicSession.primaryWallet.address.slice(0, 8)}…
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-avaira-border text-center">
             <p className="font-mono text-[9px] text-avaira-dim">

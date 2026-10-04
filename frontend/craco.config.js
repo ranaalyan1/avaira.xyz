@@ -38,6 +38,14 @@ let webpackConfig = {
     },
     configure: (webpackConfig) => {
 
+      // The Dynamic SDK (Workstream 2) loads some optional modules through
+      // expression requires; webpack flags them but they resolve safely at
+      // runtime. Keep CI builds green without hiding real issues.
+      webpackConfig.ignoreWarnings = [
+        ...(webpackConfig.ignoreWarnings || []),
+        /Critical dependency: the request of a dependency is an expression/,
+      ];
+
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {
           ...webpackConfig.watchOptions,

@@ -163,7 +163,9 @@ async function verifyCviOnchain(
   wallet: Hex,
   ttlSeconds: number,
 ): Promise<Hex> {
-  const now = Math.floor(Date.now() / 1000);
+  // Base the credential on the chain's clock, not ours: repeated demo runs warp a
+  // local node's time forward, and verifyCVI compares against block.timestamp.
+  const now = Number((await publicClient.getBlock()).timestamp);
   const credentialHash = buildCredentialHash(wallet, now);
   const expiry = BigInt(now + ttlSeconds);
   const signature = await issuerAccount.signMessage({ message: { raw: cviPayload(wallet, credentialHash, expiry) } });

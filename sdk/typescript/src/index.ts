@@ -52,11 +52,33 @@ export type {
   RunResult,
 } from "./types.js";
 export { monadMainnet, monadTestnet } from "./abi.js";
+export {
+  CVIStatus,
+  CVI_STATUS_TEXT,
+  CVI_EIP712_DOMAIN_NAME,
+  CVI_EIP712_DOMAIN_VERSION,
+  CVI_CLAIM_TYPE,
+  ComplianceClient,
+  buildCVIClaimTypedData,
+  buildCVIClaimWithExpiryTypedData,
+  decodeCVIRejection,
+  hashIdentityPayload,
+  signCVIClaim,
+  signCVIClaimWithExpiry,
+} from "./compliance.js";
+export type {
+  CVIClaimInput,
+  CVIClaimWithExpiryInput,
+  ComplianceClientConfig,
+} from "./compliance.js";
 export { loadDeployment, defaultRpcUrl } from "./deployment.js";
 export type { DeploymentManifest } from "./deployment.js";
 export {
+  COMPLIANCE_GATE_ABI,
   CREDIT_MARKET_ABI,
+  CVA_TOKEN_ABI,
   ERC20_ABI,
+  GATE_CVI_ABI,
   GATE_AGENT_ABI,
   GATE_INTENT_ABI,
   IDENTITY_REGISTRY_ABI,
@@ -78,4 +100,5 @@ export const GATE_REASON_LABELS = [
   "intent expired",
   "intent already executed",
   "envelope mismatch",
+  "CVI unverified",
 ] as const;

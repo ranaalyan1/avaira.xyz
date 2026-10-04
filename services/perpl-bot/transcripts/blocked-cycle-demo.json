@@ -1,0 +1,358 @@
+{
+  "first": {
+    "cycle": 1,
+    "allowed": true,
+    "reason": "OK",
+    "reasonText": "allowed (simulated gate)",
+    "score": 78,
+    "intentHash": "0x6379636c652d312d310000000000000000000000000000000000000000000000",
+    "planned": 10,
+    "placed": [
+      {
+        "orderId": "sim-1",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.388675,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000002"
+      },
+      {
+        "orderId": "sim-2",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.414186,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000003"
+      },
+      {
+        "orderId": "sim-3",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.380172,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000004"
+      },
+      {
+        "orderId": "sim-4",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.422689,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000005"
+      },
+      {
+        "orderId": "sim-5",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.371668,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000006"
+      },
+      {
+        "orderId": "sim-6",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.431193,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000007"
+      },
+      {
+        "orderId": "sim-7",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.363164,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000008"
+      },
+      {
+        "orderId": "sim-8",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.439697,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000009"
+      },
+      {
+        "orderId": "sim-9",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.354661,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x000000000000000000000000000000000000000000000000000000000000000a"
+      },
+      {
+        "orderId": "sim-10",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.4482,
+        "sizeUsd": 25,
+        "status": "open",
+        "txHash": "0x000000000000000000000000000000000000000000000000000000000000000b"
+      }
+    ],
+    "cancelled": [],
+    "spendUsdThisCycle": "250",
+    "markPrice": 3.401430500674173,
+    "realisedPnlUsd": 0,
+    "unrealisedPnlUsd": 0,
+    "openOrders": 10
+  },
+  "second": {
+    "cycle": 2,
+    "allowed": false,
+    "reason": "SCORE_TOO_LOW",
+    "reasonText": "Avaira score 41 < minimum 60",
+    "score": 41,
+    "haltReason": "SCORE_TOO_LOW: Avaira score 41 < minimum 60",
+    "planned": 10,
+    "placed": [],
+    "cancelled": [],
+    "spendUsdThisCycle": "0",
+    "markPrice": 3.3997298020797047,
+    "realisedPnlUsd": 0,
+    "unrealisedPnlUsd": 0,
+    "openOrders": 10
+  },
+  "state": {
+    "agentId": "1",
+    "pair": "MON/USDC",
+    "cycle": 2,
+    "startedAt": "2026-10-04T14:23:51.375Z",
+    "updatedAt": "2026-10-04T14:23:51.392Z",
+    "halted": true,
+    "killSwitchTripped": false,
+    "openOrders": {
+      "sim-1": {
+        "orderId": "sim-1",
+        "side": "buy",
+        "price": 3.388675,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-2": {
+        "orderId": "sim-2",
+        "side": "sell",
+        "price": 3.414186,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-3": {
+        "orderId": "sim-3",
+        "side": "buy",
+        "price": 3.380172,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-4": {
+        "orderId": "sim-4",
+        "side": "sell",
+        "price": 3.422689,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-5": {
+        "orderId": "sim-5",
+        "side": "buy",
+        "price": 3.371668,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-6": {
+        "orderId": "sim-6",
+        "side": "sell",
+        "price": 3.431193,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-7": {
+        "orderId": "sim-7",
+        "side": "buy",
+        "price": 3.363164,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-8": {
+        "orderId": "sim-8",
+        "side": "sell",
+        "price": 3.439697,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-9": {
+        "orderId": "sim-9",
+        "side": "buy",
+        "price": 3.354661,
+        "sizeUsd": 25,
+        "cycle": 1
+      },
+      "sim-10": {
+        "orderId": "sim-10",
+        "side": "sell",
+        "price": 3.4482,
+        "sizeUsd": 25,
+        "cycle": 1
+      }
+    },
+    "realisedPnlUsd": 0,
+    "lastScore": 41,
+    "cyclesAllowed": 1,
+    "cyclesBlocked": 1,
+    "gateDecisions": [
+      {
+        "at": "2026-10-04T14:23:51.391Z",
+        "cycle": 1,
+        "allowed": true,
+        "reason": "OK",
+        "score": 78,
+        "intentHash": "0x6379636c652d312d310000000000000000000000000000000000000000000000"
+      },
+      {
+        "at": "2026-10-04T14:23:51.392Z",
+        "cycle": 2,
+        "allowed": false,
+        "reason": "SCORE_TOO_LOW",
+        "score": 41,
+        "message": "Avaira score 41 < minimum 60"
+      }
+    ],
+    "trades": [
+      {
+        "at": "2026-10-04T14:23:51.378Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.388675,
+        "sizeUsd": 25,
+        "orderId": "sim-1",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+        "spendUsdThisCycle": 25
+      },
+      {
+        "at": "2026-10-04T14:23:51.388Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.414186,
+        "sizeUsd": 25,
+        "orderId": "sim-2",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+        "spendUsdThisCycle": 50
+      },
+      {
+        "at": "2026-10-04T14:23:51.388Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.380172,
+        "sizeUsd": 25,
+        "orderId": "sim-3",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000004",
+        "spendUsdThisCycle": 75
+      },
+      {
+        "at": "2026-10-04T14:23:51.388Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.422689,
+        "sizeUsd": 25,
+        "orderId": "sim-4",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000005",
+        "spendUsdThisCycle": 100
+      },
+      {
+        "at": "2026-10-04T14:23:51.389Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.371668,
+        "sizeUsd": 25,
+        "orderId": "sim-5",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000006",
+        "spendUsdThisCycle": 125
+      },
+      {
+        "at": "2026-10-04T14:23:51.389Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.431193,
+        "sizeUsd": 25,
+        "orderId": "sim-6",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "spendUsdThisCycle": 150
+      },
+      {
+        "at": "2026-10-04T14:23:51.390Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.363164,
+        "sizeUsd": 25,
+        "orderId": "sim-7",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000008",
+        "spendUsdThisCycle": 175
+      },
+      {
+        "at": "2026-10-04T14:23:51.390Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.439697,
+        "sizeUsd": 25,
+        "orderId": "sim-8",
+        "txHash": "0x0000000000000000000000000000000000000000000000000000000000000009",
+        "spendUsdThisCycle": 200
+      },
+      {
+        "at": "2026-10-04T14:23:51.390Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "buy",
+        "price": 3.354661,
+        "sizeUsd": 25,
+        "orderId": "sim-9",
+        "txHash": "0x000000000000000000000000000000000000000000000000000000000000000a",
+        "spendUsdThisCycle": 225
+      },
+      {
+        "at": "2026-10-04T14:23:51.391Z",
+        "cycle": 1,
+        "kind": "place",
+        "pair": "MON/USDC",
+        "side": "sell",
+        "price": 3.4482,
+        "sizeUsd": 25,
+        "orderId": "sim-10",
+        "txHash": "0x000000000000000000000000000000000000000000000000000000000000000b",
+        "spendUsdThisCycle": 250
+      },
+      {
+        "at": "2026-10-04T14:23:51.392Z",
+        "cycle": 2,
+        "kind": "halt",
+        "pair": "MON/USDC",
+        "spendUsdThisCycle": 0
+      }
+    ],
+    "haltReason": "SCORE_TOO_LOW: Avaira score 41 < minimum 60"
+  }
+}

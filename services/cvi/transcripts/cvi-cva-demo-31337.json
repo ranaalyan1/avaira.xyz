@@ -1,0 +1,69 @@
+{
+  "chainId": 31337,
+  "complianceGate": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+  "cvaToken": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+  "intentVault": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+  "agentA": "11",
+  "agentC": "12",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "VERIFIED → VERIFIED transfer",
+      "expected": "CVA transfer succeeds",
+      "observed": "success, B received 250 CVA",
+      "passed": true,
+      "txHashes": [
+        "0xe14d749cc375a7d3790ca7ed0ad95ef55840571b4bf1ae4842cfc95bfed8562c"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "VERIFIED → NO CVI transfer",
+      "expected": "revert CVI_MISSING(unverified wallet)",
+      "observed": "CVI_MISSING",
+      "passed": true,
+      "txHashes": [
+        "0xc7e6ec0d1458a5820ab093c6f22c811e85dc5ee5c525db9a1141b837675a8079"
+      ],
+      "detail": {
+        "recipientStatus": "NONE"
+      }
+    },
+    {
+      "id": 3,
+      "name": "EXPIRED CVI transfer",
+      "expected": "revert CVI_EXPIRED",
+      "observed": "CVI_EXPIRED",
+      "passed": true,
+      "txHashes": [
+        "0x0c7ebbefd3965f713cecd8b97b12b178b0b5f9a878a340643974d26d92829b87"
+      ],
+      "detail": {
+        "credentialStatus": "EXPIRED"
+      }
+    },
+    {
+      "id": 4,
+      "name": "avaira.run() with cva.transfer, operator unverified",
+      "expected": "blocked with CVI_UNVERIFIED; execute_fn never invoked",
+      "observed": "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet (execute_fn calls: 0)",
+      "passed": true,
+      "txHashes": [
+        "0xf142c00f711e4c20906739f7bdd27effa42aee2f7a621afecbd69ab72a9701b4",
+        "0x21ab1477557800e3c067d784fc20742eb71291443a8ca940c643a65d00ba76cc",
+        "0xa17026af264fe4d1523ef87fe67522d005cd7f8e51de21e7a1a15faa985aa50d"
+      ],
+      "detail": {
+        "intentHash": "0x7165430cd2b5781d0dd2da9ba1efca8317ad1c183c127f8374a361d25583194f",
+        "cviBlocker": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "gateLatencyMs": 932.4379550000012
+      }
+    }
+  ],
+  "recovery": {
+    "status": "completed",
+    "merkleRoot": "0xc4ad71ddb72b0951a14d81a5ecd4f31f2bb570272f61e84478dc0a4c176f6827",
+    "attestTxHash": "0xe5a55152a846c9762c4cb1938c8e38510540db96eb303631d5af025005ed977f"
+  },
+  "generatedAt": "2026-10-04T13:44:40.765Z"
+}

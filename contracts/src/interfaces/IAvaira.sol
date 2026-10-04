@@ -14,7 +14,8 @@ enum GateReason {
     INTENT_NOT_COMMITTED, // 6 — no matching commitment for the given hash
     INTENT_EXPIRED, // 7 — envelope deadline passed
     INTENT_ALREADY_EXECUTED, // 8 — single-use intent already attested
-    ENVELOPE_MISMATCH // 9 — the stored envelope does not match the committed hash
+    ENVELOPE_MISMATCH, // 9 — the stored envelope does not match the committed hash
+    CVI_UNVERIFIED // 10 — a cva.* intent whose operator/agent wallet lacks a valid CVI credential
 }
 
 /// @notice Minimal EIP-3009 surface (native USDC on Monad exposes this).
@@ -129,6 +130,10 @@ interface IAvairaIntentVault {
         uint256 indexed agentId, bytes32 indexed intentHash, address indexed challenger, uint256 bounty, uint256 slashed
     );
     event ChallengeRejected(uint256 indexed agentId, bytes32 indexed intentHash, address indexed challenger, uint256 bondForfeited);
+    /// @notice Emitted when the CVI compliance gate hook is (re)pointed.
+    event ComplianceGateUpdated(address previousGate, address newGate);
+    /// @notice Emitted for every `cva.*` intent evaluation, so CVI denials are explorer-visible.
+    event CVIRequirementChecked(uint256 indexed agentId, bytes32 indexed intentHash, address wallet, bool verified);
 
     /// @notice Commits keccak256 of the agent's full plan + parameters before execution.
     function commitIntent(uint256 agentId, bytes32 intentHash, RiskEnvelope calldata envelope) external;
@@ -148,6 +153,18 @@ interface IAvairaIntentVault {
     /// @notice Optional onchain trace of a gate decision. The view path stays free;
     ///         this exists so denials are explorer-visible evidence in the demo.
     function recordGateDecision(uint256 agentId, bytes32 intentHash, bool allowed, GateReason reason, uint32 latencyMs) external;
+
+    /// @notice Gate check that also returns the wallet blocking a `cva.*` intent (CVI hook).
+    function checkGateWithCVI(uint256 agentId, bytes32 intentHash)
+        external
+        view
+        returns (bool allowed, uint8 score, GateReason reason, address cviBlocker);
+
+    /// @notice True when the committed envelope contains at least one `cva.*` action.
+    function requiresCVI(uint256 agentId, bytes32 intentHash) external view returns (bool);
+
+    /// @notice Traces the per-wallet CVI requirement of a committed intent onchain.
+    function recordCVIRequirement(uint256 agentId, bytes32 intentHash) external;
 
     /// @notice Proves that an executed action left its committed risk envelope; slashes on success.
     function challengeDeviation(uint256 agentId, bytes32 intentHash, DeviationLeaf calldata leaf, bytes32[] calldata merkleProof)

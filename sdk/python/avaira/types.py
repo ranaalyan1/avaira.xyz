@@ -31,6 +31,7 @@ class GateReason(IntEnum):
     INTENT_EXPIRED = 7
     INTENT_ALREADY_EXECUTED = 8
     ENVELOPE_MISMATCH = 9
+    CVI_UNVERIFIED = 10
 
 
 GATE_REASON_TEXT: dict[GateReason, str] = {
@@ -44,6 +45,27 @@ GATE_REASON_TEXT: dict[GateReason, str] = {
     GateReason.INTENT_EXPIRED: "intent expired: the risk envelope deadline has passed",
     GateReason.INTENT_ALREADY_EXECUTED: "intent already executed: one commitment = one execution",
     GateReason.ENVELOPE_MISMATCH: "envelope mismatch: the local risk envelope differs from the committed one",
+    GateReason.CVI_UNVERIFIED: (
+        "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity "
+        "credential for every involved wallet"
+    ),
+}
+
+
+class CVIStatus(IntEnum):
+    """Mirror of the onchain Cleanverse CVI credential status."""
+
+    NONE = 0
+    VALID = 1
+    EXPIRED = 2
+    REVOKED = 3
+
+
+CVI_STATUS_TEXT: dict[CVIStatus, str] = {
+    CVIStatus.NONE: "no credential: this wallet has never passed Cleanverse identity verification",
+    CVIStatus.VALID: "valid: identity verified and wallet-bound",
+    CVIStatus.EXPIRED: "expired: the credential must be refreshed by the issuer",
+    CVIStatus.REVOKED: "revoked: the issuer withdrew this credential",
 }
 
 

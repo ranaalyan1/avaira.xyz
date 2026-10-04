@@ -1,0 +1,69 @@
+{
+  "chainId": 10143,
+  "complianceGate": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+  "cvaToken": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+  "intentVault": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+  "agentA": "7",
+  "agentC": "8",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "VERIFIED → VERIFIED transfer",
+      "expected": "CVA transfer succeeds",
+      "observed": "success, B received 250 CVA",
+      "passed": true,
+      "txHashes": [
+        "0x981b7acc3ce0eb2fd7e893b1ccc75d355ccd70e7c384895c881591747981960f"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "VERIFIED → NO CVI transfer",
+      "expected": "revert CVI_MISSING(unverified wallet)",
+      "observed": "CVI_MISSING",
+      "passed": true,
+      "txHashes": [
+        "0x694f4bcdbf2ba12ec90ff31e3d92e25c99545aa31df3f0b5acce56734344831e"
+      ],
+      "detail": {
+        "recipientStatus": "NONE"
+      }
+    },
+    {
+      "id": 3,
+      "name": "EXPIRED CVI transfer",
+      "expected": "revert CVI_EXPIRED",
+      "observed": "CVI_EXPIRED",
+      "passed": true,
+      "txHashes": [
+        "0xfc86203832826cad67ed8b5714a09776c03695f0ef7072587f7ee9b3889ac88d"
+      ],
+      "detail": {
+        "credentialStatus": "EXPIRED"
+      }
+    },
+    {
+      "id": 4,
+      "name": "avaira.run() with cva.transfer, operator unverified",
+      "expected": "blocked with CVI_UNVERIFIED; execute_fn never invoked",
+      "observed": "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet (execute_fn calls: 0)",
+      "passed": true,
+      "txHashes": [
+        "0x1aa53368545404bcbb5f2e590028484af8a01a8bd45a65b765740d6d8efdfa35",
+        "0x20c9eb7b7cb6089ef93384745106b250204b3feb1038670610639745059bc7bb",
+        "0xb26bc3326390a0e60762b4cb38ae8c38d5967a19e2d59e8f39b31849feacbe1f"
+      ],
+      "detail": {
+        "intentHash": "0x16b99c7287d48eb758ff63a0ba23ae43eef01daf83383a07d25103a7145f82af",
+        "cviBlocker": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "gateLatencyMs": 746.2744200000016
+      }
+    }
+  ],
+  "recovery": {
+    "status": "completed",
+    "merkleRoot": "0xbf12c3cdc310bd872c3ed9b3bafcd367c8f27c09fb6300098b3464258f209886",
+    "attestTxHash": "0x3220dbec5b0b840b2af23320420b407eca6e5ec9a6426441286f99eb4c15c9c6"
+  },
+  "generatedAt": "2026-10-04T14:17:42.422Z"
+}

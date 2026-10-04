@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { Wallet, ShieldCheck } from "lucide-react";
 import { API } from "@/lib/api";
+import { isDynamicConfigured } from "@/lib/dynamicConfig";
+import DynamicOperatorButton from "@/components/DynamicOperatorButton";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -60,9 +63,22 @@ export default function Login() {
             Continue with X
           </button>
 
+          {/* Dynamic embedded wallet — operator / underwriter sign-in (Workstream 2) */}
+          {isDynamicConfigured ? (
+            <div className="mt-3">
+              <DynamicOperatorButton onSignedIn={() => navigate("/dashboard")} />
+            </div>
+          ) : (
+            <div className="mt-3 flex items-center justify-center gap-2 p-3 border border-dashed border-avaira-border font-mono text-[10px] text-avaira-dim">
+              <Wallet size={12} /> Dynamic embedded wallets disabled (REACT_APP_DYNAMIC_ENV_ID unset)
+            </div>
+          )}
+
           <div className="mt-6 pt-4 border-t border-avaira-border text-center">
             <p className="font-mono text-[9px] text-avaira-dim">
-              By signing in, you agree to the AVAIRA Protocol terms.
+              <ShieldCheck size={10} className="inline mr-1" />
+              By signing in, you agree to the AVAIRA Protocol terms. Embedded wallets are
+              non-custodial and sign locally in your browser.
             </p>
           </div>
         </div>

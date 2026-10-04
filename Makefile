@@ -15,7 +15,9 @@ SHELL := /bin/bash
 PORT ?= 8402
 CHAIN_ID ?= 10143
 
-.PHONY: help install test test-contracts test-sdk test-scorer test-python \
+.PHONY: help install test test-contracts test-sdk test-scorer test-python test-services \
+        test-cvi test-perpl-bot test-qwen test-dynamic demo-cvi-cva demo-qwen demo-dynamic \
+        bot-perpl bot-status services-status \
         deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
         gateway dashboard score leaderboard demo-heist demo-sybil anvil \
         smoke-kimi smoke-privy fmt clean legacy-dev
@@ -30,14 +32,17 @@ install:
 	cd sdk/typescript && npm install --no-audit --no-fund
 	@echo "→ services"
 	cd services/scorer && npm install --no-audit --no-fund
-	cd services/gateway && npm install --no-audit --no-fund
+	cd services/cvi && npm install --no-audit --no-fund
+	cd services/perpl-bot && npm install --no-audit --no-fund
+	cd services/qwen-agent && npm install --no-audit --no-fund
+	cd services/dynamic && npm install --no-audit --no-fund
 	@echo "→ SDK (python)"
 	python3 -m pip install -q -e sdk/python || pip install -q -e sdk/python
 	@echo "✓ installed"
 
 # ── tests ───────────────────────────────────────────────────────────────────────
 
-test: test-contracts test-sdk test-scorer
+test: test-contracts test-sdk test-scorer test-services
 	@echo "✓ all suites green"
 
 test-contracts:
@@ -48,6 +53,22 @@ test-sdk:
 
 test-scorer:
 	cd services/scorer && npm run typecheck && npm test
+
+# Workstreams 1–4: Cleanverse CVI service, Perpl bot, Qwen agent, Dynamic binding.
+test-services: test-cvi test-perpl-bot test-qwen test-dynamic
+
+test-cvi:
+	cd services/cvi && npm run typecheck && npm test
+
+test-perpl-bot:
+	cd services/perpl-bot && npm run typecheck && npm test
+
+test-qwen:
+	cd services/qwen-agent && npm run typecheck && npm test
+
+# The on-chain half of the Dynamic flow runs via `make demo-dynamic`; CI only typechecks it.
+test-dynamic:
+	cd services/dynamic && npm run typecheck
 
 test-python:
 	cd sdk/python && python3 -m pytest -q
@@ -91,6 +112,26 @@ score:
 
 leaderboard:
 	cd services/scorer && npm run leaderboard
+
+demo-cvi-cva:
+	npx tsx scripts/demo-cvi-cva.ts --local
+
+demo-qwen:
+	cd services/qwen-agent && npm run demo:qwen
+
+bot-perpl:
+	cd services/perpl-bot && npm start
+
+bot-status:
+	cd services/perpl-bot && npm run status
+
+demo-dynamic:
+	cd services/dynamic && npm run demo -- --chain $(CHAIN_ID)
+
+# Every service's /status endpoint, if running.
+services-status:
+	@curl -s http://127.0.0.1:8403/status | head -40 || true
+	@curl -s http://127.0.0.1:8404/status | head -60 || true
 
 demo-heist:
 	cd demo && ./heist.sh

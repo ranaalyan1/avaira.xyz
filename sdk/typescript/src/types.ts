@@ -27,6 +27,7 @@ export enum GateReason {
   INTENT_EXPIRED = 7,
   INTENT_ALREADY_EXECUTED = 8,
   ENVELOPE_MISMATCH = 9,
+  CVI_UNVERIFIED = 10,
 }
 
 /** Human-readable gate reasons, used in `run()` results and logs. */
@@ -41,6 +42,8 @@ export const GATE_REASON_TEXT: Record<GateReason, string> = {
   [GateReason.INTENT_EXPIRED]: "intent expired: the risk envelope deadline has passed",
   [GateReason.INTENT_ALREADY_EXECUTED]: "intent already executed: one commitment = one execution",
   [GateReason.ENVELOPE_MISMATCH]: "envelope mismatch: the local risk envelope differs from the committed one",
+  [GateReason.CVI_UNVERIFIED]:
+    "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet",
 };
 
 /**
@@ -78,6 +81,10 @@ export interface AvairaConfig {
     validationRegistry?: `0x${string}`;
     creditMarket?: `0x${string}`;
     settlementToken?: `0x${string}`;
+    /** Cleanverse CVI/CVA compliance gate (Workstream 1). */
+    complianceGate?: `0x${string}`;
+    /** CVI-gated Cleanverse Verified Asset token. */
+    cvaToken?: `0x${string}`;
   };
   /** Agent operator account. Privy smart accounts (ERC-1271) work here. */
   account?: unknown;
@@ -114,6 +121,8 @@ export interface BlockedRun {
   intentHash: `0x${string}`;
   score: number;
   reason: GateReason;
+  /** Wallet that failed the Cleanverse CVI requirement (only set for `CVI_UNVERIFIED`). */
+  cviBlocker?: `0x${string}`;
   /** Human-readable form of `reason`. */
   message: string;
   timings: GateTimings;

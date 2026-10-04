@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/App";
 
 import { API } from "@/lib/api";
+import DynamicCollateralCard from "@/components/DynamicCollateralCard";
 
 const GRADE_COLORS = { AAA: '#39FF14', AA: '#00F0FF', A: '#00F0FF', BBB: '#FFD300', BB: '#FFD300', B: '#FF8C00', CCC: '#FF003C', D: '#FF003C' };
 
@@ -103,6 +104,9 @@ export default function Underwriters() {
 
   return (
     <div className="page-shell animate-slide-in" data-testid="underwriters-page">
+      <div className="mb-6">
+        <DynamicCollateralCard />
+      </div>
       <div className="page-header">
         <div>
           <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Underwriter Marketplace</h1>

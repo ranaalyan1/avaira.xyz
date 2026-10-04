@@ -1,0 +1,78 @@
+{
+  "scenario": "deviation",
+  "agentId": "25",
+  "agentAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "counterparty": "0x0D2B70C98AE56792D636B7aC6A9AfA645cB9499C",
+  "challenger": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  "envelope": {
+    "maxSpendUsd": "100000000",
+    "allowedActions": [
+      "cva.transfer"
+    ]
+  },
+  "forgedEntry": {
+    "seq": 0,
+    "action": "cva.transfer",
+    "spendUsd": "10000000000",
+    "nonce": "10000000000"
+  },
+  "leaf": {
+    "agentId": "25",
+    "intentHash": "0x211ba9580a9e884d0f51bb050396aad8a602e1fa06286f4c5a87a12ae36c6600",
+    "action": "cva.transfer",
+    "spendUsd": "10000000000",
+    "nonce": "10000000000"
+  },
+  "proof": [],
+  "intentHash": "0x211ba9580a9e884d0f51bb050396aad8a602e1fa06286f4c5a87a12ae36c6600",
+  "merkleRoot": "0xa819afe6a729dcaf90cd5f15b47341c406851135b9b083c31a8b6a7eae30a30e",
+  "attestTxHash": "0xdfc54599076803b0f8e33df996b8c0b293d6ed7ae6dbf0a69c8b5f2c8163e4ea",
+  "challengeTxHash": "0x917faf59c82b6f5b22d255510063df20ff68bd39e4c76b29ff57f71db945b603",
+  "stakeBefore": "100000000",
+  "stakeAfter": "50000000",
+  "slashed": true,
+  "intent": {
+    "agentId": "25",
+    "envelopeHash": "0x6d1e04f46714aa6374fb333dcf57f362374b932455fae1dd2d83512a1b40725a",
+    "maxSpendUsd": "100000000",
+    "deadline": "1791128364",
+    "committedAt": "1791124915",
+    "challengeEndsAt": "1791211316",
+    "outcomeHash": "0xeb5cf5d588dc2a19df19fa1e341be5f09e07de9f6453d6b7f9d7f85ad6655842",
+    "outcomeRoot": "0xa819afe6a729dcaf90cd5f15b47341c406851135b9b083c31a8b6a7eae30a30e",
+    "executed": true,
+    "challenged": true,
+    "deviationUpheld": true,
+    "committer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  },
+  "deployment": {
+    "admin": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "agentRegistry": "eip155:10143:0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "chainId": 10143,
+    "challengeWindow": 86400,
+    "challengerBond": 5000000,
+    "complianceGate": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+    "creditMarket": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "cvaToken": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "deploymentBlock": 63,
+    "identityRegistry": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "intentVault": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "minGroundedPayment": 100000,
+    "minScore": 60,
+    "minStake": 100000000,
+    "registrationBond": 50000000000000000,
+    "reputationRegistry": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "settlementToken": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "stakeRegistry": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "treasury": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "validationRegistry": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+  },
+  "tools": [
+    "read_balances",
+    "swap_usdc_to_cva",
+    "settle",
+    "report",
+    "forge_overspend"
+  ],
+  "gateReasonText": "envelope mismatch: the local risk envelope differs from the committed one"
+}

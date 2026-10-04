@@ -1,0 +1,22 @@
+{
+  "name": "@avaira/qwen-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Avaira-gated treasury agent driven by Qwen 3.8 Max (Workstream 4)",
+  "scripts": {
+    "demo:qwen": "tsx src/index.ts demo",
+    "live": "tsx src/index.ts live",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:../../sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

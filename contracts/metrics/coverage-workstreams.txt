@@ -1,0 +1,16 @@
+# Workstream 1 — coverage of the new Cleanverse CVI/CVA contracts
+#
+# Reproduce:  forge coverage --report summary --ir-minimum \
+#   --match-contract "AvairaComplianceGateTest|AvairaIntentVaultCVITest"
+#
+# Gate + IntentVault are the contracts a CVI-gated asset movement touches. The vault's
+# own numbers here are low because this window only runs the CVI suites — the full-suite
+# number for AvairaIntentVault is 93.38% line in coverage.txt.
+
+| src/core/AvairaComplianceGate.sol          | 99.06% (105/106)  | 96.45% (136/141)  | 80.00% (24/30)  | 100.00% (21/21) |
+| src/core/AvairaIntentVault.sol             | 62.12% (123/198)  | 58.33% (161/276)  | 25.86% (15/58)  | 66.67% (20/30)  |
+| src/tokens/AvairaCVA.sol                   | 80.95% (17/21)    | 75.00% (15/20)    | 33.33% (2/6)    | 80.00% (4/5)    |
+| Total                                      | 33.38% (458/1372) | 30.47% (524/1720) | 17.42% (50/287) | 41.06% (85/207) |
+
+Ran 29 tests for test/AvairaComplianceGate.t.sol:AvairaComplianceGateTest
+Ran 14 tests for test/AvairaIntentVaultCVI.t.sol:AvairaIntentVaultCVITest

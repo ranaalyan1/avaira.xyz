@@ -34,6 +34,8 @@ export const INTENT_VAULT_ABI = parseAbi([
   "function recordGateDecision(uint256 agentId, bytes32 intentHash, bool allowed, uint8 reason, uint32 latencyMs)",
   "function challengeDeviation(uint256 agentId, bytes32 intentHash, (uint256 agentId, bytes32 intentHash, string action, uint256 spendUsd, uint256 nonce) leaf, bytes32[] merkleProof)",
   "function isChallengeOpen(uint256 agentId, bytes32 intentHash) view returns (bool)",
+  "function getIntent(uint256 agentId, bytes32 intentHash) view returns ((uint256 agentId, bytes32 envelopeHash, uint256 maxSpendUsd, uint64 deadline, uint64 committedAt, uint64 challengeEndsAt, bytes32 outcomeHash, bytes32 outcomeRoot, bool executed, bool challenged, bool deviationUpheld, address committer))",
+  "function allowedActionsOf(uint256 agentId, bytes32 intentHash) view returns (string[])",
   "function challengerBond() view returns (uint256)",
   "function challengeWindow() view returns (uint64)",
   "event IntentCommitted(uint256 indexed agentId, bytes32 indexed intentHash, bytes32 envelopeHash, uint64 deadline, uint256 maxSpendUsd)",
@@ -162,6 +164,78 @@ export const CREDIT_MARKET_ABI = parseAbi([
   "event Repaid(uint256 indexed agentId, address indexed payer, uint256 amount, uint256 remainingDebt)",
   "event Liquidated(uint256 indexed agentId, address indexed liquidator, uint256 debtRepaid, uint256 collateralSeized)",
 ]);
+
+/**
+ * Cleanverse CVI/CVA compliance surface (Workstream 1).
+ *
+ * `gateCVATransfer` is called from inside `AvairaCVA._update` — it is not an optional
+ * wrapper, so integrators read `previewGateCVATransfer` before attempting a movement.
+ */
+export const COMPLIANCE_GATE_ABI = parseAbi([
+  "function verifyCVI(address wallet, bytes issuerSignature, bytes32 credentialHash)",
+  "function verifyCVIWithExpiry(address wallet, bytes issuerSignature, bytes32 credentialHash, uint64 expiry, uint256 nonce)",
+  "function revokeCVI(address wallet)",
+  "function gateCVATransfer(address from, address to, uint256 amount)",
+  "function tryGateCVATransfer(address from, address to, uint256 amount) returns (bool)",
+  "function requireVerified(address wallet) view",
+  "function previewGateCVATransfer(address from, address to, uint256 amount) view returns (bool allowed, uint8 fromStatus, uint8 toStatus, address blockingWallet)",
+  "function recordGatedTransfer(address from, address to, uint256 amount, bool allowed)",
+  "function isCVIValid(address wallet) view returns (bool)",
+  "function credentialOf(address wallet) view returns (address wallet_, bytes32 credentialHash, uint64 expiry, uint8 status, address issuer, uint64 verifiedAt)",
+  "function credentialStatusOf(address wallet) view returns (uint8)",
+  "function credentialNonce(address wallet) view returns (uint256)",
+  "function requiresCVI(string action) pure returns (bool)",
+  "function defaultValidity() view returns (uint64)",
+  "function gatedTransferCount() view returns (uint256)",
+  "function isIssuer(address issuer) view returns (bool)",
+  "function hashCVIClaim(address wallet, bytes32 credentialHash, uint256 nonce) view returns (bytes32)",
+  "function hashCVIClaimWithExpiry(address wallet, bytes32 credentialHash, uint64 expiry, uint256 nonce) view returns (bytes32)",
+  "function setIssuer(address issuer, bool allowed)",
+  "function setDefaultValidity(uint64 newValidity)",
+  "event CVIVerified(address indexed wallet, bytes32 credentialHash, uint256 expiry)",
+  "event CVIRevoked(address indexed wallet, bytes32 credentialHash)",
+  "event CVATransferGated(address indexed from, address indexed to, uint256 amount, bool allowed)",
+  "event IssuerUpdated(address indexed issuer, bool allowed)",
+]);
+
+/** The CVI-gated CVA token. Transfers revert unless both sides hold a valid credential. */
+export const CVA_TOKEN_ABI = parseAbi([
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function totalSupply() view returns (uint256)",
+  "function balanceOf(address account) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+  "function mint(address to, uint256 amount)",
+  "function burn(address from, uint256 amount)",
+  "function complianceGate() view returns (address)",
+  "event Transfer(address indexed from, address indexed to, uint256 value)",
+]);
+
+/**
+ * Gate read that also surfaces the wallet blocking a `cva.*` intent, so a runtime can tell
+ * the operator which wallet needs a Cleanverse credential.
+ */
+export const GATE_CVI_ABI = [
+  {
+    type: "function",
+    name: "checkGateWithCVI",
+    stateMutability: "view",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "intentHash", type: "bytes32" },
+    ],
+    outputs: [
+      { name: "allowed", type: "bool" },
+      { name: "score", type: "uint8" },
+      { name: "reason", type: "uint8" },
+      { name: "blocker", type: "address" },
+    ],
+  },
+] as const;
 
 export const ERC20_ABI = parseAbi([
   "function approve(address spender, uint256 amount) returns (bool)",

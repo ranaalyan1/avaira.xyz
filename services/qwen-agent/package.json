@@ -1,0 +1,23 @@
+{
+  "name": "@avaira/qwen-agent",
+  "version": "1.0.0",
+  "description": "Avaira treasury agent on Qwen 3.8 Max (DashScope OpenAI-compatible API): every tool call runs through avaira.run() behind a task-budget RiskEnvelope, with plan/gate/settlement transcripts and provable deviation challenges.",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "demo:qwen": "tsx src/demo.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

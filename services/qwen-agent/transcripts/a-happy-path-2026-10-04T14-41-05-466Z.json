@@ -1,0 +1,153 @@
+{
+  "scenario": "a-happy-path",
+  "ts": 1791124865466,
+  "model": "qwen3.8-max",
+  "mode": "mock",
+  "chainId": 10143,
+  "agentId": "11",
+  "task": {
+    "id": "treasury-rebalance-001",
+    "description": "Rebalance $250 of MON into USDC"
+  },
+  "events": [
+    {
+      "type": "plan",
+      "text": "Plan: verify the treasury balances, quote the rebalance, then execute a $250 MON→USDC swap. Each step stays inside my task envelope."
+    },
+    {
+      "type": "tool_call",
+      "id": "call-a1",
+      "tool": "treasury_balance",
+      "args": {}
+    },
+    {
+      "type": "gate",
+      "tool": "treasury_balance",
+      "envelope": {
+        "maxSpendUsd": "500000000",
+        "allowedActions": [
+          "treasury.balance"
+        ],
+        "deadline": 1791125465
+      },
+      "outcome": "allowed",
+      "reason": "ALLOWED",
+      "score": 82,
+      "intentHash": "0x6d2b593256c1ee83af0a931f5142fea6acd007dbe43c8ffbe5c1169ddc50078d",
+      "commitTxHash": "0xe538e3879a70ba63dcac46bc8a55488f4041f340914c467a0f9fb71e80106209"
+    },
+    {
+      "type": "execution",
+      "tool": "treasury_balance",
+      "spendUsd": "0",
+      "result": {
+        "MON": 1250,
+        "USDC": 8000
+      }
+    },
+    {
+      "type": "settlement",
+      "tool": "treasury_balance",
+      "outcomeHash": "0x86b879944d83fb4576a18636e497eb59d62f5930415effb7d0cd15974ea1ce8a",
+      "merkleRoot": "0xb9de40e6e9164fe998b8035c22028822e9ef60d3c5957844fe27cd0771ebbbc9",
+      "attestTxHash": "0xf0c18cf76f0b410b36953b18cdbab655a74e964e9551d416492f2d139946736e"
+    },
+    {
+      "type": "tool_call",
+      "id": "call-a2",
+      "tool": "treasury_quote",
+      "args": {
+        "fromAsset": "MON",
+        "toAsset": "USDC",
+        "amountUsd": 250
+      }
+    },
+    {
+      "type": "gate",
+      "tool": "treasury_quote",
+      "envelope": {
+        "maxSpendUsd": "500000000",
+        "allowedActions": [
+          "treasury.quote"
+        ],
+        "deadline": 1791125465
+      },
+      "outcome": "allowed",
+      "reason": "ALLOWED",
+      "score": 82,
+      "intentHash": "0x0565afe3506dc5d9ad83ca3a5249ff86cd01a4ddb05d58294924fe689b1a7d94",
+      "commitTxHash": "0x2abd6cb3a930fa70e12b0d0cf646779e8a0fa6442ee88a9c6263c46fd3921524"
+    },
+    {
+      "type": "execution",
+      "tool": "treasury_quote",
+      "spendUsd": "0",
+      "result": {
+        "fromAsset": "MON",
+        "toAsset": "USDC",
+        "amountUsd": 250,
+        "rate": 1,
+        "feeUsd": 0.25,
+        "executable": true
+      }
+    },
+    {
+      "type": "settlement",
+      "tool": "treasury_quote",
+      "outcomeHash": "0xfbd90e5327160c14a8732c6f55060fb129d5867b2442ecbee36f0c71ff929d05",
+      "merkleRoot": "0x0fc5d5ded0b97d317570e999f72c7c6db4af7e46419016fa4f62934eebfe4c4b",
+      "attestTxHash": "0xbb34b8e76ece55f89652f6d41f917c4febdbde7402586b325aeea9dc61e2676d"
+    },
+    {
+      "type": "tool_call",
+      "id": "call-a3",
+      "tool": "treasury_swap",
+      "args": {
+        "fromAsset": "MON",
+        "toAsset": "USDC",
+        "amountUsd": 250
+      }
+    },
+    {
+      "type": "gate",
+      "tool": "treasury_swap",
+      "envelope": {
+        "maxSpendUsd": "500000000",
+        "allowedActions": [
+          "treasury.swap"
+        ],
+        "deadline": 1791125466
+      },
+      "outcome": "allowed",
+      "reason": "ALLOWED",
+      "score": 82,
+      "intentHash": "0x0f175015dbb3535e1b3f7f4bc62fcdca7555c087678d4169acbceef7e1cb4f5f",
+      "commitTxHash": "0x1b8b8388e3fd357db9429240835e575715ba3e8414bdd63f7dd4d11d630ac6e2"
+    },
+    {
+      "type": "execution",
+      "tool": "treasury_swap",
+      "spendUsd": "250000",
+      "result": {
+        "filledUsd": 250,
+        "feeUsd": 0.25,
+        "rate": 1,
+        "balances": {
+          "MON": 1000,
+          "USDC": 8249.75
+        }
+      }
+    },
+    {
+      "type": "settlement",
+      "tool": "treasury_swap",
+      "outcomeHash": "0x0412eb37341543c23d362b7d5a9ac79b078b741e14f5d48b7d71f8c6b35347c0",
+      "merkleRoot": "0xfff5ec462f27226ce2323b12ea7c84218d3719aae8c119aec65e8f4dd091945c",
+      "attestTxHash": "0x9edc2008ad0f5858a17eec3db4c1d4ba42ed66843f643340219bec70fc7365d7"
+    },
+    {
+      "type": "final",
+      "text": "Rebalance complete: swapped $250 MON for USDC at 10 bps cost; envelope respected, outcome anchored."
+    }
+  ]
+}

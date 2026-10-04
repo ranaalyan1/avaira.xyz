@@ -19,6 +19,7 @@ CHAIN_ID ?= 10143
         deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
         gateway dashboard score leaderboard demo-heist demo-sybil demo-cvi anvil \
         perpl-provision perpl perpl-block perpl-test \
+        qwen-install qwen-demo qwen-test \
         smoke-kimi smoke-privy fmt clean legacy-dev
 
 help:
@@ -123,6 +124,19 @@ perpl-block:
 
 perpl-test:
 	cd services/perpl-bot && npm test
+
+# ── Qwen treasury agent (Workstream 4) ───────────────────────────────────────
+# Live Qwen 3.8 Max via DashScope when QWEN_API_KEY is set; otherwise a
+# deterministic offline script records the same three scenarios.
+qwen-install:
+	cd services/qwen-agent && npm install --no-audit --no-fund
+
+qwen-demo:
+	cd services/qwen-agent \
+		&& AVAIRA_DEPLOYMENT=../../deployments/$(CHAIN_ID).local.json AVAIRA_RPC_URL=http://127.0.0.1:8545 npm run demo:qwen
+
+qwen-test:
+	cd services/qwen-agent && npm test
 
 anvil:
 	anvil --chain-id $(CHAIN_ID) --block-time 0.4

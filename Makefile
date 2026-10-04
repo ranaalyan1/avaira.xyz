@@ -18,6 +18,7 @@ CHAIN_ID ?= 10143
 .PHONY: help install test test-contracts test-sdk test-scorer test-python \
         deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
         gateway dashboard score leaderboard demo-heist demo-sybil demo-cvi anvil \
+        perpl-provision perpl perpl-block perpl-test \
         smoke-kimi smoke-privy fmt clean legacy-dev
 
 help:
@@ -103,6 +104,25 @@ demo-sybil:
 # LIVE=1 runs against Monad Testnet with OPERATOR_PRIVATE_KEY from the environment.
 demo-cvi:
 	./scripts/cvi-cva-demo.sh
+
+# ── Perpl trading bot (Workstream 3) ─────────────────────────────────────────
+# Every cycle is gated by avaira.run(). Provisioning registers/stakes/scores a
+# fresh agent; `perpl` runs the loop; `perpl-block` records one intentionally
+# blocked cycle; `perpl-test` runs the 19 unit tests. Requires anvil up (make anvil).
+perpl-provision:
+	cd services/perpl-bot && npm install --no-audit --no-fund \
+		&& AVAIRA_DEPLOYMENT=../../deployments/$(CHAIN_ID).local.json AVAIRA_RPC_URL=http://127.0.0.1:8545 npm run provision
+
+perpl:
+	cd services/perpl-bot \
+		&& AVAIRA_DEPLOYMENT=../../deployments/$(CHAIN_ID).local.json AVAIRA_RPC_URL=http://127.0.0.1:8545 npm start
+
+perpl-block:
+	cd services/perpl-bot \
+		&& AVAIRA_DEPLOYMENT=../../deployments/$(CHAIN_ID).local.json AVAIRA_RPC_URL=http://127.0.0.1:8545 npm run demo:block
+
+perpl-test:
+	cd services/perpl-bot && npm test
 
 anvil:
 	anvil --chain-id $(CHAIN_ID) --block-time 0.4

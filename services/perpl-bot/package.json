@@ -1,0 +1,27 @@
+{
+  "name": "@avaira/perpl-bot",
+  "version": "1.0.0",
+  "description": "Perpl trading agent for Monad: grid/market-making on MON/USDC where every cycle is gated by avaira.run() (Proof-of-Intent pre-execution gate), with an audit trail per order, hard risk caps, a drawdown kill-switch, and a /status telemetry endpoint.",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "provision": "tsx src/provision.ts",
+    "demo:block": "tsx src/demo-block.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

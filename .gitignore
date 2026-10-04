@@ -98,3 +98,4 @@ contracts/deployments/*.local.json
 services/perpl-bot/state/
 services/perpl-bot/*.log
 services/qwen-agent/transcripts/*.local.json
+services/perpl-bot/data/

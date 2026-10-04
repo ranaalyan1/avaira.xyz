@@ -83,6 +83,28 @@ export const GATE_INTENT_ABI = [
   },
 ] as const;
 
+/** Cleanverse CVI/CVA compliance gate (Travel-Rule identity gating for CVA transfers). */
+export const COMPLIANCE_GATE_ABI = parseAbi([
+  "function verifyCVI(address wallet, bytes32 credentialHash, uint64 expiry, bytes issuerSignature)",
+  "function revokeCVI(address wallet)",
+  "function gateCVATransfer(address from, address to, uint256 amount)",
+  "function checkCVATransfer(address from, address to) view returns (bool allowed, address failing, uint8 reason)",
+  "function credentialOf(address wallet) view returns ((address wallet, bytes32 credentialHash, uint64 expiry, uint8 status, address issuer, uint64 verifiedAt))",
+  "function statusOf(address wallet) view returns (uint8)",
+  "function isWalletVerified(address wallet) view returns (bool)",
+  "function checkWallets(address[] wallets) view returns (bool ok, address failing)",
+  "function issuer() view returns (address)",
+  "function credentialCount() view returns (uint256)",
+  "event CVIVerified(address indexed wallet, bytes32 credentialHash, uint256 expiry)",
+  "event CVIRevoked(address indexed wallet, address indexed revoker)",
+  "event CVATransferGated(address indexed from, address indexed to, uint256 amount, bool allowed)",
+  "error CVI_MISSING(address wallet)",
+  "error CVI_EXPIRED(address wallet, uint64 expiredAt)",
+  "error CVI_REVOKED(address wallet)",
+  "error InvalidIssuerSignature(address wallet, address expectedIssuer)",
+  "error InvalidCredential()",
+]);
+
 export const STAKE_REGISTRY_ABI = parseAbi([
   "function stake(uint256 agentId, uint256 amount)",
   "function unstake(uint256 agentId, uint256 amount)",

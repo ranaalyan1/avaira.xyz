@@ -27,7 +27,23 @@ export enum GateReason {
   INTENT_EXPIRED = 7,
   INTENT_ALREADY_EXECUTED = 8,
   ENVELOPE_MISMATCH = 9,
+  CVI_UNVERIFIED = 10,
 }
+
+/** Effective state of a wallet's Cleanverse CVI credential (mirrors `CVIStatus`). */
+export enum CVIStatus {
+  NONE = 0,
+  VALID = 1,
+  EXPIRED = 2,
+  REVOKED = 3,
+}
+
+export const CVI_STATUS_TEXT: Record<CVIStatus, string> = {
+  [CVIStatus.NONE]: "no CVI credential registered",
+  [CVIStatus.VALID]: "valid",
+  [CVIStatus.EXPIRED]: "expired",
+  [CVIStatus.REVOKED]: "revoked",
+};
 
 /** Human-readable gate reasons, used in `run()` results and logs. */
 export const GATE_REASON_TEXT: Record<GateReason, string> = {
@@ -41,6 +57,8 @@ export const GATE_REASON_TEXT: Record<GateReason, string> = {
   [GateReason.INTENT_EXPIRED]: "intent expired: the risk envelope deadline has passed",
   [GateReason.INTENT_ALREADY_EXECUTED]: "intent already executed: one commitment = one execution",
   [GateReason.ENVELOPE_MISMATCH]: "envelope mismatch: the local risk envelope differs from the committed one",
+  [GateReason.CVI_UNVERIFIED]:
+    "CVI unverified: a cva.* action requires a valid Cleanverse CVI credential for every involved wallet",
 };
 
 /**
@@ -78,6 +96,7 @@ export interface AvairaConfig {
     validationRegistry?: `0x${string}`;
     creditMarket?: `0x${string}`;
     settlementToken?: `0x${string}`;
+    complianceGate?: `0x${string}`;
   };
   /** Agent operator account. Privy smart accounts (ERC-1271) work here. */
   account?: unknown;

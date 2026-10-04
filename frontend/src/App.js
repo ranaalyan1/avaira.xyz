@@ -13,6 +13,7 @@ import FreezeSlash from "@/pages/FreezeSlash";
 import Treasury from "@/pages/Treasury";
 import Reputation from "@/pages/Reputation";
 import Underwriters from "@/pages/Underwriters";
+import Compliance from "@/pages/Compliance";
 import SDKDocs from "@/pages/SDKDocs";
 import HardeningReport from "@/pages/HardeningReport";
 import { Toaster } from "sonner";
@@ -52,6 +53,7 @@ function AppRoutes() {
           <Route path="/treasury" element={<Treasury />} />
           <Route path="/reputation" element={<Reputation />} />
           <Route path="/underwriters" element={<Underwriters />} />
+          <Route path="/compliance" element={<Compliance />} />
           <Route path="/hardening-report" element={<HardeningReport />} />
           <Route path="/sdk" element={<SDKDocs />} />
         </Route>

@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, Code, Menu, X, Users, BookOpen, LogOut } from "lucide-react";
+import { LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, Code, Menu, X, Users, BookOpen, LogOut, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/App";
 
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { path: "/agents", label: "AGENT REGISTRY", icon: UserCheck },
   { path: "/executions", label: "EXECUTION FLOW", icon: Workflow },
   { path: "/underwriters", label: "UNDERWRITERS", icon: Users },
+  { path: "/compliance", label: "COMPLIANCE", icon: ShieldCheck },
   { path: "/freeze", label: "FREEZE / SLASH", icon: ShieldOff },
   { path: "/treasury", label: "TREASURY", icon: Wallet },
   { path: "/reputation", label: "REPUTATION", icon: TrendingUp },
@@ -19,6 +20,7 @@ const PAGE_META = {
   "/agents": "Registration, risk envelopes, and status control",
   "/executions": "Lifecycle traces and trust verification",
   "/underwriters": "Mission markets and underwriting coverage",
+  "/compliance": "Cleanverse CVI credentials and gated CVA transfers",
   "/freeze": "Policy enforcement, freeze and slash actions",
   "/treasury": "Fee capture, split accounting, and treasury flow",
   "/reputation": "Score engine, rank movement, and trust data",

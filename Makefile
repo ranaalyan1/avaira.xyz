@@ -17,7 +17,7 @@ CHAIN_ID ?= 10143
 
 .PHONY: help install test test-contracts test-sdk test-scorer test-python \
         deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
-        gateway dashboard score leaderboard demo-heist demo-sybil anvil \
+        gateway dashboard score leaderboard demo-heist demo-sybil demo-cvi anvil \
         smoke-kimi smoke-privy fmt clean legacy-dev
 
 help:
@@ -97,6 +97,12 @@ demo-heist:
 
 demo-sybil:
 	cd demo && ./sybil.sh
+
+# Cleanverse CVI/CVA compliance demo: fresh local anvil deploy + 5 scenarios
+# (Travel-Rule gating, CVI_MISSING / CVI_EXPIRED reverts, CVI_UNVERIFIED gate block).
+# LIVE=1 runs against Monad Testnet with OPERATOR_PRIVATE_KEY from the environment.
+demo-cvi:
+	./scripts/cvi-cva-demo.sh
 
 anvil:
 	anvil --chain-id $(CHAIN_ID) --block-time 0.4

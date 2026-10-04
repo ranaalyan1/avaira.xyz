@@ -90,3 +90,11 @@ frontend/node_modules/.cache/default-development/1.pack
 frontend/node_modules/.cache/default-development/3.pack
 frontend/node_modules/.cache/default-development/6.pack
 frontend/node_modules/.cache/default-development/0.pack
+
+# Avaira demo scripts — local state and local-only manifests (anvil)
+scripts/.demo-state.json
+deployments/*.local.json
+contracts/deployments/*.local.json
+services/perpl-bot/state/
+services/perpl-bot/*.log
+services/qwen-agent/transcripts/*.local.json

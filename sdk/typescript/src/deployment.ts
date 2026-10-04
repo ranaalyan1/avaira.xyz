@@ -18,6 +18,10 @@ export interface DeploymentManifest {
   intentVault: `0x${string}`;
   creditMarket: `0x${string}`;
   settlementToken: `0x${string}`;
+  /** Cleanverse CVI/CVA compliance gate (present from the CVI workstream onward). */
+  complianceGate?: `0x${string}`;
+  /** Cleanverse CVI issuer address whose signatures attest CVI credentials. */
+  cviIssuer?: `0x${string}`;
   admin: `0x${string}`;
   treasury: `0x${string}`;
   /** ERC-8004 registry identifier: `eip155:{chainId}:{identityRegistry}`. */

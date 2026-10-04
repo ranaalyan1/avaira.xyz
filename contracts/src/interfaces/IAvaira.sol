@@ -14,7 +14,8 @@ enum GateReason {
     INTENT_NOT_COMMITTED, // 6 — no matching commitment for the given hash
     INTENT_EXPIRED, // 7 — envelope deadline passed
     INTENT_ALREADY_EXECUTED, // 8 — single-use intent already attested
-    ENVELOPE_MISMATCH // 9 — the stored envelope does not match the committed hash
+    ENVELOPE_MISMATCH, // 9 — the stored envelope does not match the committed hash
+    CVI_UNVERIFIED // 10 — intent touches cva.* but a party lacks a valid Cleanverse CVI
 }
 
 /// @notice Minimal EIP-3009 surface (native USDC on Monad exposes this).

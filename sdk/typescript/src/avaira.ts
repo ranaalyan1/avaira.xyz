@@ -32,6 +32,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import { AuditTrail } from "./audit.js";
 import {
+  COMPLIANCE_GATE_ABI,
   GATE_AGENT_ABI,
   GATE_INTENT_ABI,
   IDENTITY_REGISTRY_ABI,
@@ -44,6 +45,7 @@ import {
 import { MetricsReporter } from "./metrics.js";
 import {
   AgentStatus,
+  CVIStatus,
   GateReason,
   GATE_REASON_TEXT,
   type AvairaConfig,
@@ -372,6 +374,93 @@ export class Avaira {
       functionName: "ownerOf",
       args: [agentId],
     });
+  }
+
+  /* ─────────────────────── Cleanverse CVI/CVA compliance ─────────────────── */
+
+  private complianceGateAddress(): `0x${string}` {
+    const gate = this.config.contracts.complianceGate;
+    if (!gate) throw new Error("Avaira: complianceGate not configured for this deployment");
+    return gate;
+  }
+
+  /** Effective Cleanverse CVI status of `wallet` (NONE/VALID/EXPIRED/REVOKED). */
+  async cviStatusOf(wallet: `0x${string}`): Promise<CVIStatus> {
+    const status = await this.publicClient.readContract({
+      address: this.complianceGateAddress(),
+      abi: COMPLIANCE_GATE_ABI,
+      functionName: "statusOf",
+      args: [wallet],
+    });
+    return Number(status) as CVIStatus;
+  }
+
+  /** True when `wallet` holds a valid, unexpired, unrevoked CVI credential. */
+  async isCviVerified(wallet: `0x${string}`): Promise<boolean> {
+    return this.publicClient.readContract({
+      address: this.complianceGateAddress(),
+      abi: COMPLIANCE_GATE_ABI,
+      functionName: "isWalletVerified",
+      args: [wallet],
+    });
+  }
+
+  /** Non-reverting Travel-Rule check for a CVA transfer. */
+  async checkCvaTransfer(
+    from: `0x${string}`,
+    to: `0x${string}`,
+  ): Promise<{ allowed: boolean; failing: `0x${string}`; reason: CVIStatus }> {
+    const [allowed, failing, reason] = await this.publicClient.readContract({
+      address: this.complianceGateAddress(),
+      abi: COMPLIANCE_GATE_ABI,
+      functionName: "checkCVATransfer",
+      args: [from, to],
+    });
+    return { allowed, failing, reason: Number(reason) as CVIStatus };
+  }
+
+  /**
+   * Registers (or refreshes) a wallet-bound CVI credential onchain.
+   *
+   * `issuerSignature` must be the configured Cleanverse issuer's EIP-191 personal
+   * signature over `keccak256(abi.encode(wallet, credentialHash, expiry))`. This is
+   * normally produced by the offchain CVI verification service (`services/cvi`),
+   * which calls the Cleanverse CCP API before signing; exposed here so tests and
+   * demos can drive the full flow with a locally held issuer key.
+   */
+  async verifyCvi(
+    wallet: `0x${string}`,
+    credentialHash: `0x${string}`,
+    expiry: bigint,
+    issuerSignature: `0x${string}`,
+  ): Promise<`0x${string}`> {
+    const w = this.requireWallet();
+    return w.writeContract({
+      address: this.complianceGateAddress(),
+      abi: COMPLIANCE_GATE_ABI,
+      functionName: "verifyCVI",
+      args: [wallet, credentialHash, expiry, issuerSignature],
+      account: this.account!,
+      chain: null,
+    });
+  }
+
+  /**
+   * Builds the EIP-191 personal-sign digest payload the Cleanverse issuer signs for a
+   * CVI credential: `keccak256(abi.encode(wallet, credentialHash, expiry))`.
+   */
+  cviCredentialPayload(wallet: `0x${string}`, credentialHash: `0x${string}`, expiry: bigint): Hex {
+    return keccak256(
+      encodeAbiParameters(
+        parseAbiParameters("bytes32 typehash, address wallet, bytes32 credentialHash, uint64 expiry"),
+        [
+          keccak256(toHex("CVICredential(address wallet,bytes32 credentialHash,uint64 expiry)")),
+          wallet,
+          credentialHash,
+          expiry,
+        ],
+      ),
+    );
   }
 
   /* ─────────────────────────────────  helpers  ──────────────────────────────── */

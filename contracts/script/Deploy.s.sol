@@ -9,6 +9,7 @@ import {AvairaValidationRegistry} from "avaira/core/AvairaValidationRegistry.sol
 import {AvairaStakeRegistry} from "avaira/core/AvairaStakeRegistry.sol";
 import {AvairaIntentVault} from "avaira/core/AvairaIntentVault.sol";
 import {AvairaCreditMarket} from "avaira/core/AvairaCreditMarket.sol";
+import {AvairaComplianceGate} from "avaira/core/AvairaComplianceGate.sol";
 import {MockUSDC} from "avaira/tokens/MockUSDC.sol";
 
 /// @title DeployAvaira
@@ -32,6 +33,8 @@ import {MockUSDC} from "avaira/tokens/MockUSDC.sol";
 ///   CHALLENGER_BOND_USDC — anti-spam bond for challengers (default 5e6)
 ///   MIN_GROUNDED_PAYMENT — minimum settled payment to ground feedback (default 0.1e6)
 ///   SEED_LIQUIDITY_USDC  — credit-market liquidity to seed (default 500_000e6, mock USDC only)
+///   CVI_ISSUER           — Cleanverse CVI issuer address (defaults to the deployer)
+///   MANIFEST_FILE        — override the manifest path (default deployments/{chainId}.json)
 contract DeployAvaira is Script {
     struct Deployment {
         address identity;
@@ -41,6 +44,8 @@ contract DeployAvaira is Script {
         address vault;
         address market;
         address usdc;
+        address compliance;
+        address cviIssuer;
     }
 
     function run() external returns (Deployment memory deployment) {
@@ -73,6 +78,13 @@ contract DeployAvaira is Script {
         deployment.market = address(new AvairaCreditMarket(usdc, deployment.stake, deployment.identity, admin));
         deployment.usdc = usdc;
 
+        // Cleanverse CVI/CVA compliance gate: identity verification structurally
+        // coupled to asset movement. `cviIssuer` is the Cleanverse issuer address
+        // whose signatures attest wallet-bound CVI credentials (defaults to the
+        // deployer so the offchain CVI service can sign with the deployer key).
+        deployment.cviIssuer = vm.envOr("CVI_ISSUER", deployer);
+        deployment.compliance = address(new AvairaComplianceGate(deployment.cviIssuer, admin));
+
         // ---- cross-contract wiring -------------------------------------------------
         AvairaReputationRegistry(deployment.reputation).setScorerConfig(deployment.stake, usdc, minGroundedPayment);
         AvairaIdentityRegistry(payable(deployment.identity)).setEnforcer(deployment.stake);
@@ -85,6 +97,7 @@ contract DeployAvaira is Script {
         AvairaIntentVault vault = AvairaIntentVault(deployment.vault);
         vault.setChallengerBond(challengerBond);
         vault.setTreasury(treasury);
+        vault.setComplianceGate(deployment.compliance);
 
         // ---- demo liquidity (mock USDC only) ---------------------------------------
         if (mockUsdc && seedLiquidity > 0) {
@@ -99,6 +112,12 @@ contract DeployAvaira is Script {
             deployment, admin, treasury, registrationBond, minStake, minScore, challengeWindow, challengerBond, minGroundedPayment
         );
         _log(deployment);
+    }
+
+    /// @dev Default manifest path is deployments/{chainId}.json; MANIFEST_FILE overrides
+    ///      it so local/anvil demos do not clobber the canonical testnet manifest.
+    function _manifestPath() private view returns (string memory) {
+        return vm.envOr("MANIFEST_FILE", string.concat("deployments/", vm.toString(block.chainid), ".json"));
     }
 
     function _writeDeployment(
@@ -121,6 +140,8 @@ contract DeployAvaira is Script {
         vm.serializeAddress(objectKey, "intentVault", d.vault);
         vm.serializeAddress(objectKey, "creditMarket", d.market);
         vm.serializeAddress(objectKey, "settlementToken", d.usdc);
+        vm.serializeAddress(objectKey, "complianceGate", d.compliance);
+        vm.serializeAddress(objectKey, "cviIssuer", d.cviIssuer);
         vm.serializeAddress(objectKey, "admin", admin);
         vm.serializeAddress(objectKey, "treasury", treasury);
         vm.serializeUint(objectKey, "registrationBond", registrationBond);
@@ -135,7 +156,9 @@ contract DeployAvaira is Script {
             objectKey, "agentRegistry", string.concat("eip155:", vm.toString(block.chainid), ":", vm.toString(d.identity))
         );
 
-        string memory path = string.concat("deployments/", vm.toString(block.chainid), ".json");
+        string memory path = _manifestPath();
+        // vm.writeJson does not create directories; ensure the default one exists.
+        vm.createDir("deployments", true);
         vm.writeJson(json, path);
         console2.log("wrote deployment manifest to", path);
     }
@@ -147,6 +170,8 @@ contract DeployAvaira is Script {
         console2.log("AvairaStakeRegistry      ", d.stake);
         console2.log("AvairaIntentVault        ", d.vault);
         console2.log("AvairaCreditMarket       ", d.market);
+        console2.log("AvairaComplianceGate     ", d.compliance);
+        console2.log("Cleanverse CVI issuer    ", d.cviIssuer);
         console2.log("settlement token         ", d.usdc);
     }
 }

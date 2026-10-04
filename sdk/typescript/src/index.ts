@@ -41,6 +41,8 @@ export {
   AgentStatus,
   GateReason,
   GATE_REASON_TEXT,
+  CVIStatus,
+  CVI_STATUS_TEXT,
 } from "./types.js";
 export type {
   AvairaConfig,
@@ -55,6 +57,7 @@ export { monadMainnet, monadTestnet } from "./abi.js";
 export { loadDeployment, defaultRpcUrl } from "./deployment.js";
 export type { DeploymentManifest } from "./deployment.js";
 export {
+  COMPLIANCE_GATE_ABI,
   CREDIT_MARKET_ABI,
   ERC20_ABI,
   GATE_AGENT_ABI,
@@ -78,4 +81,5 @@ export const GATE_REASON_LABELS = [
   "intent expired",
   "intent already executed",
   "envelope mismatch",
+  "CVI unverified",
 ] as const;

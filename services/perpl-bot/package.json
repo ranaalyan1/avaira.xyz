@@ -1,0 +1,25 @@
+{
+  "name": "@avaira/perpl-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Avaira-gated grid market maker for the Perpl DEX (Workstream 3)",
+  "scripts": {
+    "start": "tsx src/index.ts start",
+    "once": "tsx src/index.ts once",
+    "demo:blocked": "tsx src/index.ts demo:blocked",
+    "demo:drawdown": "tsx src/index.ts demo:drawdown",
+    "status": "tsx src/index.ts status",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:../../sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

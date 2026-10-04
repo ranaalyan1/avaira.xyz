@@ -1,0 +1,91 @@
+{
+  "task": "Rebalance 4000 USDC of the settlement reserve into the yield sleeve without exceeding the cycle budget",
+  "role": "treasury",
+  "planner": "offline",
+  "model": "offline-planner",
+  "budgetUsd": "1000.0",
+  "spendUsd": "1000.0",
+  "startedAt": "2026-10-04T14:37:39.578Z",
+  "finishedAt": "2026-10-04T14:37:46.318Z",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 1,
+      "tool": "read_balances",
+      "action": "treasury.read",
+      "requestedUsd": "0.0",
+      "rationale": "check the reserve balance before rebalancing",
+      "gate": {
+        "kind": "avaira",
+        "allowed": true,
+        "reason": "OK",
+        "reasonText": "allowed",
+        "score": 78,
+        "intentHash": "0x4ef81f786b9dd7472494fd3b765cae4efd15a8829add5121b39757449771d39a",
+        "merkleRoot": "0xf2bb38c323ee4870209c243786785cca58b35f30bd491dd5e05c978052e65993"
+      },
+      "executed": true,
+      "detail": "CVA balance 14038999999999998000000000",
+      "spendUsd": "0.0"
+    },
+    {
+      "step": 2,
+      "tool": "swap_usdc_to_cva",
+      "action": "cva.transfer",
+      "requestedUsd": "500.0",
+      "rationale": "rebalance 500.0 USD into the CVA sleeve",
+      "gate": {
+        "kind": "avaira",
+        "allowed": true,
+        "reason": "OK",
+        "reasonText": "allowed",
+        "score": 78,
+        "intentHash": "0x5d38f914936c3aa3d72736176472f7525adff6afbeffc20acb7375a4abce973d",
+        "merkleRoot": "0x11557a30db1faf8a7adb036020415cf702315da3f6427751c1ca98015a71e74d"
+      },
+      "executed": true,
+      "detail": "CVA transferred to 0x0D2B70C9…",
+      "spendUsd": "500.0",
+      "txHash": "0xb6884f49b8b1d6a9a26fb5328ccd442fc13988f7353a9636e6e76c494330dbdc"
+    },
+    {
+      "step": 3,
+      "tool": "settle",
+      "action": "cva.settle",
+      "requestedUsd": "500.0",
+      "rationale": "settle the outstanding Cleanverse leg",
+      "gate": {
+        "kind": "avaira",
+        "allowed": true,
+        "reason": "OK",
+        "reasonText": "allowed",
+        "score": 78,
+        "intentHash": "0x22f3b87c58d6a1cc16cfaa9c94f1b28b464fa7f75365b5506d7934aeb6cb9eb3",
+        "merkleRoot": "0xf398a9528143d0eebc72c98e7a343549624a2ca8a2f1c6920ee1774a04d32f4c"
+      },
+      "executed": true,
+      "detail": "settled 0 leg on-chain",
+      "spendUsd": "500.0"
+    }
+  ],
+  "commitments": [
+    {
+      "intentHash": "0x4ef81f786b9dd7472494fd3b765cae4efd15a8829add5121b39757449771d39a",
+      "commitTxHash": "0xacc433fb9ebb4bbc47436d1f7b395dcb61f6a5c7687e14ba8c7f042839f8b199",
+      "attestTxHash": "0x0c5bb46ace05ea219021f1d3bedf1e4ac03e0e40c180ffefb1e7a2bf61de096c",
+      "merkleRoot": "0xf2bb38c323ee4870209c243786785cca58b35f30bd491dd5e05c978052e65993"
+    },
+    {
+      "intentHash": "0x5d38f914936c3aa3d72736176472f7525adff6afbeffc20acb7375a4abce973d",
+      "commitTxHash": "0x68e5f0603b0801df62130a5eb05eb51e786734b2f3fa414c12c64ec35b9a2ef8",
+      "attestTxHash": "0xa2e393bd1b1ae29532ffe28bdbf58916c5da41df337c4df08c58c73e83176ada",
+      "merkleRoot": "0x11557a30db1faf8a7adb036020415cf702315da3f6427751c1ca98015a71e74d"
+    },
+    {
+      "intentHash": "0x22f3b87c58d6a1cc16cfaa9c94f1b28b464fa7f75365b5506d7934aeb6cb9eb3",
+      "commitTxHash": "0x65e96cadc6874babc2d8abe97dca19af26bfdd486957a492575cbfdd2ce6d459",
+      "attestTxHash": "0xea644aa20d530dca7da9c05e04d42c909124e99cdf248ddbb9e6f81392c2610a",
+      "merkleRoot": "0xf398a9528143d0eebc72c98e7a343549624a2ca8a2f1c6920ee1774a04d32f4c"
+    }
+  ]
+}

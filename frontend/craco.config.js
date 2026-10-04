@@ -37,6 +37,26 @@ let webpackConfig = {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
+      // Builds run on small boxes (the sandbox has ~4 GB RAM / 2 cores). CRA's
+      // terser defaults fork a worker per core, and the Dynamic + viem graph is
+      // big enough that the forked heap gets OOM-killed mid-minification. Run the
+      // minimizer in-process instead: slower, but it stays inside the ceiling.
+      const minimizer = (webpackConfig.optimization && webpackConfig.optimization.minimizer) || [];
+      webpackConfig.optimization = {
+        ...webpackConfig.optimization,
+        minimizer: minimizer.map((plugin) => {
+          const isTerser = plugin && plugin.constructor && /Terser/i.test(plugin.constructor.name);
+          if (isTerser && plugin.options) {
+            plugin.options.parallel = false;
+            plugin.options.terserOptions = {
+              ...(plugin.options.terserOptions || {}),
+              compress: { ...((plugin.options.terserOptions || {}).compress || {}), passes: 1 },
+            };
+          }
+          return plugin;
+        }),
+      };
+
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {

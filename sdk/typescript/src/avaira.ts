@@ -33,6 +33,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { AuditTrail } from "./audit.js";
 import {
   GATE_AGENT_ABI,
+  GATE_CVI_ABI,
   GATE_INTENT_ABI,
   IDENTITY_REGISTRY_ABI,
   INTENT_VAULT_ABI,
@@ -170,6 +171,10 @@ export class Avaira {
     const score = gate.score > 0 ? gate.score : agentScore;
 
     if (!gate.allowed) {
+      // A cva.* intent is blocked because a wallet lacks Cleanverse CVI verification:
+      // resolve *which* wallet, so the operator can fix onboarding instead of guessing.
+      const cviBlocker =
+        gate.reason === GateReason.CVI_UNVERIFIED ? await this.cviBlockerFor(agentId, planHash) : undefined;
       const decisionTxHash = options.recordDecisions
         ? await this.recordGateDecision(agentId, planHash, false, gate.reason, Math.round(timings.gateLatencyMs))
         : undefined;
@@ -188,6 +193,7 @@ export class Avaira {
         score,
         reason: gate.reason,
         message: GATE_REASON_TEXT[gate.reason],
+        cviBlocker,
         timings,
         commitTxHash,
         decisionTxHash,
@@ -307,6 +313,65 @@ export class Avaira {
       args: [agentId, intentHash, envelopeHash],
     });
     return [allowed, Number(score), Number(reason) as GateReason];
+  }
+
+  /**
+   * Gate read that also returns the wallet blocking a `cva.*` intent (zero address when the
+   * CVI requirement is satisfied). Freshly added alongside the Cleanverse CVI hook; the
+   * pre-existing `checkGate` overloads are untouched.
+   */
+  async checkGateWithCVI(agentId: bigint, intentHash: Hex): Promise<[boolean, number, GateReason, `0x${string}`]> {
+    const [allowed, score, reason, blocker] = await this.publicClient.readContract({
+      address: this.config.contracts.intentVault,
+      abi: GATE_CVI_ABI,
+      functionName: "checkGateWithCVI",
+      args: [agentId, intentHash],
+    });
+    return [allowed, Number(score), Number(reason) as GateReason, blocker as `0x${string}`];
+  }
+
+  /** The wallet failing the CVI requirement for an intent (undefined when not applicable). */
+  async cviBlockerFor(agentId: bigint, intentHash: Hex): Promise<`0x${string}` | undefined> {
+    try {
+      const [, , , blocker] = await this.checkGateWithCVI(agentId, intentHash);
+      return blocker === "0x0000000000000000000000000000000000000000" ? undefined : (blocker as `0x${string}`);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Proves that an executed intent left its committed risk envelope, slashing the agent's
+   * stake and paying the challenger's bounty. `leaf`/`proof` come straight from an
+   * `AuditTrail` (`deviations(envelope)` + `proofFor(seq)`), so a deviation is provable by
+   * anyone holding the trail the agent itself anchored.
+   */
+  async challengeDeviation(
+    agentId: bigint,
+    intentHash: Hex,
+    leaf: { agentId: bigint; intentHash: Hex; action: string; spendUsd: bigint; nonce: bigint },
+    merkleProof: Hex[],
+  ): Promise<Hex> {
+    if (!this.walletClient || !this.account) throw new Error("challengeDeviation requires a signer");
+    return this.walletClient.writeContract({
+      address: this.config.contracts.intentVault,
+      abi: INTENT_VAULT_ABI,
+      functionName: "challengeDeviation",
+      args: [agentId, intentHash, leaf, merkleProof],
+      chain: this.walletClient.chain,
+      account: this.account,
+    });
+  }
+
+  /** The committed intent as the vault stores it (post-execution fields included). */
+  async intentOf(agentId: bigint, intentHash: Hex) {
+    const intent = await this.publicClient.readContract({
+      address: this.config.contracts.intentVault,
+      abi: INTENT_VAULT_ABI,
+      functionName: "getIntent",
+      args: [agentId, intentHash],
+    });
+    return intent;
   }
 
   async statusOf(agentId: bigint): Promise<AgentStatus> {

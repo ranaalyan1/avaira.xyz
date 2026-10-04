@@ -1,0 +1,26 @@
+{
+  "name": "@avaira/cvi-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Avaira CVI service — verifies Cleanverse identities through the CCP API and registers wallet-bound CVI credentials on Monad.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts serve",
+    "verify": "tsx src/index.ts verify",
+    "revoke": "tsx src/index.ts revoke",
+    "status": "tsx src/index.ts status",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:../../sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

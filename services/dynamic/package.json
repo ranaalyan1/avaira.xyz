@@ -1,0 +1,19 @@
+{
+  "name": "@avaira/dynamic-binding",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Dynamic embedded-wallet EIP-712 agent binding + underwriter collateral (Workstream 2)",
+  "scripts": {
+    "demo": "tsx ../../scripts/demo-dynamic-binding.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

@@ -8,6 +8,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IAvairaIntentVault, IAvairaStakeRegistry, GateReason, DeviationLeaf} from "../interfaces/IAvaira.sol";
+import {IAvairaComplianceGate} from "../interfaces/IAvairaComplianceGate.sol";
 import {AgentStatus, SlashLevel, RiskEnvelope, RiskEnvelopeLib} from "../lib/AvairaTypes.sol";
 import {MerkleLib} from "../lib/MerkleLib.sol";
 
@@ -60,6 +61,8 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
     uint256 private constant MAX_ALLOWED_ACTIONS = 32;
     uint256 private constant MAX_ACTION_LENGTH = 96;
     bytes32 private constant DEVIATION_EVIDENCE_DOMAIN = keccak256("Avaira.DeviationEvidence.v1");
+    /// @dev ASCII `cva.` prefix — the action namespace that routes through the Cleanverse gate.
+    bytes4 private constant CVA_PREFIX = 0x6376612e;
 
     /* ---------------------------------- state -------------------------------- */
 
@@ -73,6 +76,9 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
     uint64 public challengeWindow;
     /// @notice Anti-spam bond required from a challenger; forfeited when the proof is bad.
     uint256 public challengerBond;
+    /// @notice CVI/CVA compliance gate consulted for intents whose envelope allows `cva.*`
+    ///         actions (Cleanverse Workstream). Zero address disables the hook.
+    IAvairaComplianceGate public complianceGate;
     /// @notice Treasury share of upheld-deviation slashes is handled by the stake registry.
 
     struct Intent {
@@ -209,7 +215,51 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
         if (intent.committedAt == 0) return (false, score, GateReason.INTENT_NOT_COMMITTED);
         if (intent.executed) return (false, score, GateReason.INTENT_ALREADY_EXECUTED);
         if (intent.deadline <= block.timestamp) return (false, score, GateReason.INTENT_EXPIRED);
+        // Cleanverse CVI hook: an intent whose envelope allows any `cva.*` action can only
+        // clear the gate when every wallet that would move the asset is CVI-verified.
+        if (_cviRequired(agentId, intentHash) && _cviBlockerWallet(agentId, intentHash) != address(0)) {
+            return (false, score, GateReason.CVI_UNVERIFIED);
+        }
         return (true, score, GateReason.ALLOWED);
+    }
+
+    /// @notice Gate check plus the wallet that failed the CVI requirement (zero when verified).
+    /// @dev Same decision as `checkGate(agentId, intentHash)`, with the blocker surfaced so the
+    ///      SDK can tell the operator *which* wallet needs a Cleanverse credential.
+    function checkGateWithCVI(uint256 agentId, bytes32 intentHash)
+        external
+        view
+        returns (bool allowed, uint8 score, GateReason reason, address blocker)
+    {
+        (allowed, score, reason) = checkGate(agentId, intentHash);
+        if (reason == GateReason.CVI_UNVERIFIED) blocker = _cviBlockerWallet(agentId, intentHash);
+    }
+
+    /// @notice True when the committed envelope contains at least one `cva.*` action.
+    function requiresCVI(uint256 agentId, bytes32 intentHash) external view returns (bool) {
+        return _cviRequired(agentId, intentHash);
+    }
+
+    /// @notice The wallet blocking a `cva.*` intent (zero when the requirement is met).
+    function cviBlocker(uint256 agentId, bytes32 intentHash) external view returns (address) {
+        return _cviBlockerWallet(agentId, intentHash);
+    }
+
+    /// @notice Actions committed for `intentHash` that route through the compliance gate.
+    function cvaActionsOf(uint256 agentId, bytes32 intentHash) external view returns (string[] memory matching) {
+        string[] storage actions = _allowedActions[agentId][intentHash];
+        uint256 count;
+        for (uint256 i; i < actions.length; ++i) {
+            if (_isCVAAction(actions[i])) count += 1;
+        }
+        matching = new string[](count);
+        uint256 cursor;
+        for (uint256 i; i < actions.length; ++i) {
+            if (_isCVAAction(actions[i])) {
+                matching[cursor] = actions[i];
+                cursor += 1;
+            }
+        }
     }
 
     /// @notice Gate check that also verifies the caller's local envelope matches the commitment.
@@ -332,7 +382,85 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
         treasury = newTreasury;
     }
 
+    /// @notice Points the CVI compliance hook at the Cleanverse gate (zero to disable).
+    /// @dev Adding the hook is backwards compatible: with no gate wired, `checkGate`
+    ///      behaves exactly as before.
+    function setComplianceGate(address newGate) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit ComplianceGateUpdated(address(complianceGate), newGate);
+        complianceGate = IAvairaComplianceGate(newGate);
+    }
+
+    /// @notice Traces the CVI requirement for a committed intent onchain.
+    /// @dev `checkGate` is a free `view` call and cannot emit; the operator (or the demo
+    ///      script) calls this after a `CVI_UNVERIFIED` decision so the denial is
+    ///      explorer-visible evidence rather than an off-chain log line.
+    function recordCVIRequirement(uint256 agentId, bytes32 intentHash) external {
+        if (!_isAgentOperator(agentId, msg.sender)) revert NotAgentOperator(agentId, msg.sender);
+        if (_intents[agentId][intentHash].committedAt == 0) revert UnknownIntent(agentId, intentHash);
+
+        IAvairaComplianceGate gate = complianceGate;
+        if (address(gate) == address(0)) {
+            emit CVIRequirementChecked(agentId, intentHash, address(0), true);
+            return;
+        }
+        string[] storage actions = _allowedActions[agentId][intentHash];
+        for (uint256 i; i < actions.length; ++i) {
+            if (!_isCVAAction(actions[i])) continue;
+            address committer = _intents[agentId][intentHash].committer;
+            emit CVIRequirementChecked(agentId, intentHash, committer, _safeIsCVIValid(gate, committer));
+            address wallet = _agentWallet(agentId);
+            if (wallet != address(0) && wallet != committer) {
+                emit CVIRequirementChecked(agentId, intentHash, wallet, _safeIsCVIValid(gate, wallet));
+            }
+        }
+    }
+
     /* -------------------------------- internals ------------------------------- */
+
+    /// @dev Namespace rule: any committed action starting with `cva.` (cva.transfer,
+    ///      cva.settle, ...) routes through the Cleanverse compliance gate.
+    function _isCVAAction(string storage action) private view returns (bool) {
+        bytes storage raw = bytes(action);
+        if (raw.length < 4) return false;
+        return CVA_PREFIX == bytes4(raw[0]) | (bytes4(raw[1]) >> 8) | (bytes4(raw[2]) >> 16) | (bytes4(raw[3]) >> 24);
+    }
+
+    /// @dev True when the committed envelope contains a `cva.*` action and a gate is wired.
+    function _cviRequired(uint256 agentId, bytes32 intentHash) private view returns (bool) {
+        IAvairaComplianceGate gate = complianceGate;
+        if (address(gate) == address(0) || address(gate).code.length == 0) return false;
+        string[] storage actions = _allowedActions[agentId][intentHash];
+        for (uint256 i; i < actions.length; ++i) {
+            if (_isCVAAction(actions[i])) return true;
+        }
+        return false;
+    }
+
+    /// @dev First wallet that fails the CVI requirement, or zero when every involved wallet
+    ///      is verified. The "involved wallets" are the intent's originator (the operator
+    ///      that committed it) and the agent's bound execution wallet — the Travel Rule
+    ///      pair for an agent-initiated CVA settlement.
+    function _cviBlockerWallet(uint256 agentId, bytes32 intentHash) private view returns (address) {
+        IAvairaComplianceGate gate = complianceGate;
+        if (!_cviRequired(agentId, intentHash)) return address(0);
+
+        address committer = _intents[agentId][intentHash].committer;
+        if (!_safeIsCVIValid(gate, committer)) return committer;
+
+        address wallet = _agentWallet(agentId);
+        if (wallet != address(0) && wallet != committer && !_safeIsCVIValid(gate, wallet)) return wallet;
+        return address(0);
+    }
+
+    /// @dev A gate that reverts must not brick the vault; a broken gate is treated as
+    ///      "unverified" for that wallet (fail closed on the compliance decision).
+    function _safeIsCVIValid(IAvairaComplianceGate gate, address wallet) private view returns (bool valid) {
+        try gate.isCVIValid(wallet) returns (bool ok) {
+            return ok;
+        } catch {
+            return false;
+        }
+    }
 
     function _isActionAllowed(uint256 agentId, bytes32 intentHash, string calldata action) private view returns (bool) {
         string[] storage actions = _allowedActions[agentId][intentHash];

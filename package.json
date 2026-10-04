@@ -1,0 +1,27 @@
+{
+  "name": "avaira",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Avaira \u2014 runtime governance for autonomous AI agents on Monad. Repository-level scripts (demos, deploy helpers).",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "demo:cvi-cva": "tsx scripts/demo-cvi-cva.ts",
+    "demo:dynamic": "tsx scripts/demo-dynamic-binding.ts",
+    "demo:qwen": "npm --prefix services/qwen-agent run demo:qwen",
+    "bot:perpl": "npm --prefix services/perpl-bot run start",
+    "bot:blocked": "npm --prefix services/perpl-bot run demo:blocked",
+    "bot:drawdown": "npm --prefix services/perpl-bot run demo:drawdown",
+    "cvi:serve": "npm --prefix services/cvi run start",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

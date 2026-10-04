@@ -1,0 +1,152 @@
+{
+  "overshoot": {
+    "task": "Rebalance 4000 USDC of the settlement reserve into the yield sleeve without exceeding the cycle budget",
+    "role": "treasury",
+    "planner": "offline",
+    "model": "offline-planner",
+    "budgetUsd": "1000.0",
+    "spendUsd": "0.0",
+    "startedAt": "2026-10-04T14:37:46.319Z",
+    "finishedAt": "2026-10-04T14:37:46.320Z",
+    "status": "blocked",
+    "steps": [
+      {
+        "step": 1,
+        "tool": "read_balances",
+        "action": "treasury.read",
+        "requestedUsd": "0.0",
+        "rationale": "check the reserve before moving anything",
+        "gate": {
+          "kind": "simulated",
+          "allowed": true,
+          "reason": "OK",
+          "reasonText": "allowed (simulated gate)",
+          "score": 78,
+          "intentHash": "0x737465702d312d32320000000000000000000000000000000000000000000000",
+          "auditHead": "0x5a143e906b7023b9f237c7fae6e0f301c63b265e19418aed1e2d2e688070581e"
+        },
+        "executed": true,
+        "detail": "balances read (offline)",
+        "spendUsd": "0.0"
+      },
+      {
+        "step": 2,
+        "tool": "swap_usdc_to_cva",
+        "action": "cva.transfer",
+        "requestedUsd": "2000.0",
+        "rationale": "move 2000.0 USD into CVA in a single leg",
+        "gate": {
+          "kind": "simulated",
+          "allowed": false,
+          "reason": "SPEND_EXCEEDED",
+          "reasonText": "proposed spend 2000.0 USD exceeds the remaining cycle budget 1000.0 USD",
+          "score": null
+        },
+        "executed": false,
+        "detail": "proposed spend 2000.0 USD exceeds the remaining cycle budget 1000.0 USD",
+        "spendUsd": "0"
+      }
+    ],
+    "commitments": [
+      {
+        "intentHash": "0x737465702d312d32320000000000000000000000000000000000000000000000"
+      }
+    ],
+    "blockedAtStep": 2,
+    "blockReason": "SPEND_EXCEEDED: proposed spend 2000.0 USD exceeds the remaining cycle budget 1000.0 USD"
+  },
+  "onchainRevokedCVI": {
+    "task": "Rebalance 4000 USDC of the settlement reserve into the yield sleeve without exceeding the cycle budget",
+    "role": "treasury",
+    "planner": "offline",
+    "model": "offline-planner",
+    "budgetUsd": "1000.0",
+    "spendUsd": "0.0",
+    "startedAt": "2026-10-04T14:38:22.444Z",
+    "finishedAt": "2026-10-04T14:38:24.321Z",
+    "status": "blocked",
+    "steps": [
+      {
+        "step": 1,
+        "tool": "read_balances",
+        "action": "treasury.read",
+        "requestedUsd": "0.0",
+        "rationale": "check the reserve balance before rebalancing",
+        "gate": {
+          "kind": "avaira",
+          "allowed": true,
+          "reason": "OK",
+          "reasonText": "allowed",
+          "score": 78,
+          "intentHash": "0xf5753b71ac524ef320bd0cf3210082f7d4ae8cbd3eb62515fdb3c13839d89fe4",
+          "merkleRoot": "0x14f9cfe51d111e8574c513acd44ff9390fa282858c619f697ad0cfd5bbcf9e30"
+        },
+        "executed": true,
+        "detail": "CVA balance 15038999999999997500000000",
+        "spendUsd": "0.0"
+      },
+      {
+        "step": 2,
+        "tool": "swap_usdc_to_cva",
+        "action": "cva.transfer",
+        "requestedUsd": "500.0",
+        "rationale": "rebalance 500.0 USD into the CVA sleeve",
+        "gate": {
+          "kind": "avaira",
+          "allowed": false,
+          "reason": "CVI_UNVERIFIED",
+          "reasonText": "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet",
+          "score": 78,
+          "intentHash": "0x1a37e91b73dba0ec2f678b22646e940c0a4c5ae76d0b115691a33dd865aea445",
+          "cviBlocker": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        },
+        "executed": false,
+        "detail": "CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet",
+        "spendUsd": "0.0"
+      }
+    ],
+    "commitments": [
+      {
+        "intentHash": "0xf5753b71ac524ef320bd0cf3210082f7d4ae8cbd3eb62515fdb3c13839d89fe4",
+        "commitTxHash": "0xad21a5c8f585b4bcb09bc44cd8e2883e76c884a02446ce8f627ed87bdfc2ead5",
+        "attestTxHash": "0x763b2562c9d9c71af75fc317ffb1ddf2b44f2d1048226450726da0c2174af8d1",
+        "merkleRoot": "0x14f9cfe51d111e8574c513acd44ff9390fa282858c619f697ad0cfd5bbcf9e30"
+      }
+    ],
+    "blockedAtStep": 2,
+    "blockReason": "CVI_UNVERIFIED: CVI unverified: a cva.* intent requires a valid Cleanverse wallet-bound identity credential for every involved wallet"
+  },
+  "commitRejected": {
+    "task": "Rebalance 4000 USDC of the settlement reserve into the yield sleeve without exceeding the cycle budget",
+    "role": "treasury",
+    "planner": "offline",
+    "model": "offline-planner",
+    "budgetUsd": "1000.0",
+    "spendUsd": "0",
+    "startedAt": "2026-10-04T14:38:52.417Z",
+    "finishedAt": "2026-10-04T14:38:52.423Z",
+    "status": "blocked",
+    "steps": [
+      {
+        "step": 1,
+        "tool": "read_balances",
+        "action": "treasury.read",
+        "requestedUsd": "0.0",
+        "rationale": "check the reserve balance before rebalancing",
+        "gate": {
+          "kind": "avaira",
+          "allowed": false,
+          "reason": "COMMIT_REJECTED",
+          "reasonText": "The contract function \"commitIntent\" reverted with the following signature:\n0xdee1b640",
+          "score": null
+        },
+        "executed": false,
+        "detail": "The contract function \"commitIntent\" reverted with the following signature:\n0xdee1b640",
+        "spendUsd": "0"
+      }
+    ],
+    "commitments": [],
+    "blockedAtStep": 1,
+    "blockReason": "COMMIT_REJECTED: The contract function \"commitIntent\" reverted with the following signature:\n0xdee1b640"
+  }
+}

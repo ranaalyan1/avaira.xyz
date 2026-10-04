@@ -2,7 +2,7 @@
   "name": "@avaira/scorer",
   "version": "2.0.0",
   "private": true,
-  "description": "Avaira Score — computes, adversarially audits and anchors a 0–100 accountability score from Monad state.",
+  "description": "Avaira Score \u2014 computes, adversarially audits and anchors a 0\u2013100 accountability score from Monad state.",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",

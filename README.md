@@ -48,6 +48,139 @@ make deploy-monad
 
 ---
 
+## 🏆 Hackathon Workstreams (Cleanverse × Dynamic × Perpl × Qwen)
+
+Four integration workstreams, all verified end to end on **chain ID 10143**.
+Everything runs offline-first: a local `anvil --chain-id 10143` node plays the
+role of Monad Testnet, so judges can reproduce every result without external
+network access. Live/testnet credentials are env-configurable everywhere
+(`.env.example` files per module); nothing sensitive is committed.
+
+### Workstream 1 — Cleanverse CVI/CVA Compliance Gate
+
+Wallet-bound **CVI** identity credentials gate **CVA** transfers (Travel Rule):
+both sides of a `cva.*` transfer must hold a valid CVI, and intents containing
+`cva.*` actions are refused at `checkGate` with reason `CVI_UNVERIFIED` before
+`execute_fn` can run.
+
+```bash
+make anvil &                # chain 10143 (0.4s blocks)
+make demo-cvi               # fresh deploy + 5 recorded scenarios (or ./scripts/cvi-cva-demo.sh)
+cd services/cvi && npm install && npm test   # off-chain Cleanverse CCP service (mock mode offline)
+```
+
+Demo scenarios: valid A→B transfer passes · A→C without CVI reverts
+`CVI_MISSING` · expired CVI reverts `CVI_EXPIRED` · `avaira.run(cva.transfer)`
+blocked pre-execution with `CVI_UNVERIFIED` · run completes once CVI restored.
+Dashboard page: **Compliance** (`frontend/src/pages/Compliance.js`).
+
+### Workstream 2 — Dynamic auth + embedded wallets (no Privy)
+
+`@dynamic-labs` SDK v5 signs operators/underwriters in; the **embedded wallet**
+signs the EIP-712 `AgentWalletSet` message that binds it as an agent's wallet
+(operator submits `setAgentWallet`), and underwriters deposit collateral /
+claim payouts from the same embedded wallet.
+
+```bash
+cd frontend && npm ci --legacy-peer-deps
+cp .env.example .env        # set REACT_APP_DYNAMIC_ENV_ID to enable Dynamic login
+npm start                   # dashboard on :3000 — Operator Tools & Underwriter cards
+# chain-level proof of the exact frontend flow (local anvil, chain 10143):
+cd ../scripts && npm install
+npx tsx verify-dynamic-binding.ts       # EIP-712 sign → setAgentWallet ✓
+npx tsx verify-deposit-collateral.ts    # embedded-wallet depositCollateral ✓
+```
+
+Graceful degradation: without `REACT_APP_DYNAMIC_ENV_ID` the app runs with the
+existing backend auth and the Dynamic sections simply do not render.
+
+### Workstream 3 — Perpl trading bot (every cycle gated)
+
+Grid market-making on **MON/USDC** where *every cycle* is one `avaira.run()`
+(commitIntent → gate → hash-chained audit trail → attestOutcome), with hard
+position caps, a drawdown kill switch, gas-aware sizing, score floor 60, JSON
+persistence and a `/status` telemetry endpoint.
+
+```bash
+make anvil &
+make perpl-provision        # registers/stakes/scores the trading agent
+make perpl                  # run the loop; telemetry on http://localhost:8401/status
+curl -X POST localhost:8401/admin/block-next   # arm one intentional gate block
+curl -X POST localhost:8401/admin/reset-halt   # resume after a halt
+make perpl-block            # one-shot recorded SCORE_TOO_LOW block
+make perpl-test             # 19 unit tests
+```
+
+Recorded results: 40+ gated cycles with mined `commitIntent`/`attestOutcome`
+transactions, fills/position/PnL on `/status`, kill switch tripped on
+drawdown, intentional block + resume round trip. `PERPL_MODE=live` +
+`PERPL_API_URL` targets a real Perpl endpoint for continuous testnet runs.
+
+### Workstream 4 — Qwen 3.8 Max treasury agent (every tool call gated)
+
+Qwen 3.8 Max via the DashScope OpenAI-compatible API; every tool call runs
+through `avaira.run()` behind a task-budget RiskEnvelope.
+
+```bash
+make qwen-install
+export QWEN_API_KEY=...     # live Qwen; omit for the deterministic offline script
+make qwen-demo              # records all three scenarios → services/qwen-agent/transcripts/
+make qwen-test              # 12 unit tests
+```
+
+Recorded scenarios (transcripts committed in `services/qwen-agent/transcripts/`,
+each showing plan / gate / settlement):
+
+| Scenario | Result |
+| :--- | :--- |
+| (a) happy-path swap inside the envelope | gate **ALLOWED** → executed → Merkle root anchored |
+| (b) $2,000 overspend vs $500 budget | **clamped** to budget; follow-up **BLOCKED** at the gate — `execute_fn` never ran |
+| (c) forged certificate | deviation leaf proven against the agent's own Merkle root → `challengeDeviation` **slashed 75 USDC, bounty 5 USDC**, agent `SUSPENDED` |
+
+### Judge access — local E2E in 5 minutes
+
+```bash
+make anvil &                # 1. chain 10143
+make install && make test   # 2. contracts (159 tests) + SDK + scorer suites
+make demo-cvi               # 3. Workstream 1
+make perpl-provision && make perpl &   # 4. Workstream 3 → :8401/status
+make qwen-demo              # 5. Workstream 4 transcripts
+cd frontend && npm ci --legacy-peer-deps && npm start   # 6. dashboard :3000
+```
+
+**Test credentials** — public anvil keys, safe to print:
+
+| Role | Address | Private key |
+| :--- | :--- | :--- |
+| Operator / admin / issuer | `0xf39F…2266` | `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80` |
+| Embedded-wallet stand-in | `0x7099…79C8` | `0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d` |
+| Challenger (bounty) | `0xBe39…8Bf8` | `0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b406d2892` |
+
+All three are pre-funded by anvil (10,000 MON each). **Pre-funded agent
+recipe**: `register{value: bond}` → mint+approve+`stake` MockUSDC →
+`postAvairaScore ≥ 60`; `make perpl-provision` and the qwen demo do this
+automatically, or use `scripts/verify-dynamic-binding.ts` which registers a
+fresh agent each run.
+
+**Canonical deployment manifest** — `deployments/10143.json` carries the
+verified chain-10143 addresses below (deterministic anvil CREATE sequence; a
+fresh `make deploy-monad` reproduces them). Deploying to the *real* Monad
+Testnet from a machine with network access regenerates the same file:
+`MONAD_TESTNET_RPC=https://testnet-rpc.monad.xyz DEPLOYER_PRIVATE_KEY=… make deploy-monad`.
+
+| Contract | Address |
+| :--- | :--- |
+| IdentityRegistry (ERC-8004) | `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512` |
+| IntentVault (gate + challenges) | `0x5FC8d32690cc91D4c39d9d3abcBD16989F875707` |
+| StakeRegistry | `0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9` |
+| ReputationRegistry | `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` |
+| ValidationRegistry | `0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9` |
+| CreditMarket | `0x0165878A594ca255338adfa4d48449f69242Eb8F` |
+| MockUSDC (settlement token) | `0x5FbDB2315678afecb367f032d93F642f64180aa3` |
+| AvairaComplianceGate (CVI) | `0xa513E6E4b8f2a923D98304ec87F64353C4D5C853` |
+
+---
+
 ## 🌐 Why Avaira?
 
 Autonomous AI agents can now hold wallets, call external APIs, and settle payments — yet most agent frameworks rely on **probabilistic prompts** and **post-hoc log inspection**. By the time a hallucinated trade, runaway loop, or prompt-injected tool call is detected in logs, the capital is already gone.

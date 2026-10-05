@@ -32,19 +32,56 @@
 
 ## ⚡ Quickstart
 
+**One command. ~7 seconds. No API keys, no wallet, no database, no `sudo`.**
+
 ```bash
 git clone https://github.com/ranaalyan1/avaira.xyz && cd avaira.xyz
-
-# 1. Install dependencies across contracts, TypeScript/Python SDKs & scorer service
-make install
-
-# 2. Run the verification suites (Foundry unit/fuzz/invariant + SDK + Scorer + Cognitive OS)
-make test
-python3 -m avaira_os.demos
-
-# 3. Deploy & verify the 6-contract stack on Monad Testnet (Chain ID 10143)
-make deploy-monad
+./setup.sh
 ```
+
+`setup.sh` creates a local `.venv`, installs the few small dependencies the core
+needs, and then **proves the install works** — running the four deterministic
+proof artifacts and all 21 Cognitive OS tests, and failing loudly if either
+regresses:
+
+```
+✓ proof artifacts: 4/4 PASS (self-correction, ambiguity, math-safety clamp, slash)
+✓ kernel tests: 21 passed
+✓ Avaira is set up and verified in 7s
+```
+
+| Level | Command | Time (cold) | Adds |
+| :--- | :--- | ---: | :--- |
+| **Core** (default) | `./setup.sh` | **~7s** | `.venv`, proof artifacts, 21 kernel tests |
+| **Developer** | `./setup.sh --dev` | ~11s | TypeScript SDK, Python SDK, scorer test suites |
+| **Full** | `./setup.sh --full` | 1–4 min | `contracts/.env` scaffold, Foundry suite, frontend deps |
+| **Console** | `./setup.sh --serve` | — | browser Quickstart Console on `:8402` |
+
+Every flag, the doctor mode (`--check`), `--json` for CI/agents, and the
+troubleshooting table live in [**SETUP.md**](SETUP.md). Deploying to Monad is a
+separate, deliberate step that needs a funded key (`make deploy-monad`) — nothing
+before it does.
+
+### 🤖 Or let your AI agent run it
+
+Paste this into Claude Code, Codex, Cursor, Copilot, or any agent with shell access:
+
+```text
+Set up the Avaira repo in this working directory for me.
+1. Read AGENTS.md.
+2. Run: ./setup.sh --yes --json
+3. Confirm exit code 0 and "status":"ok", with 4/4 proof artifacts and 21/21 kernel tests passing.
+4. Then run ./setup.sh --serve and give me the console URL.
+Do not install anything else, do not ask me for API keys or a wallet, and do not deploy contracts.
+```
+
+[`AGENTS.md`](AGENTS.md) carries the permission manifest (what the agent may
+install, and the explicit never-needed list: no keys, no wallet, no `sudo`, no
+database), the exact expected outputs, and a failure playbook — so the agent does
+not stop to ask you for credentials.
+
+[![Open in GitHub Codespaces](https://img.shields.io/badge/Open%20in-Codespaces-181717?style=for-the-badge&logo=github&logoColor=white)](https://codespaces.new/ranaalyan1/avaira.xyz)
+— the devcontainer runs `./setup.sh` automatically on create.
 
 ---
 
@@ -375,6 +412,11 @@ The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/))
 
 ```text
 avaira.xyz/
+├── setup.sh                          # One-command setup + self-verification (the fast path)
+├── AGENTS.md                         # Setup instructions, permission manifest & playbook for AI agents
+├── SETUP.md                          # Human setup guide: levels, flags, troubleshooting, optional stacks
+├── tools/quickstart/server.py        # Zero-dependency browser Quickstart Console (used by --serve)
+├── .devcontainer/                    # Codespaces/devcontainer — runs ./setup.sh on create
 ├── assets/
 │   └── logo.png                      # Official Avaira brand mark
 ├── avaira_os/                        # Cognitive OS v5.0 — offline mathematical safety kernel
@@ -415,6 +457,8 @@ avaira.xyz/
 
 ## 📚 Documentation & References
 
+- [**Setup Guide (`SETUP.md`)**](SETUP.md) — One-command setup, the four levels, doctor mode, what gets created, troubleshooting, and the optional control plane.
+- [**Agent Setup Contract (`AGENTS.md`)**](AGENTS.md) — Machine-readable instructions so an AI agent can set the repo up unattended, including the permission manifest and expected outputs.
 - [**Cognitive OS v5.0 Specification (`docs/cognitive-os-v5.md`)**](docs/cognitive-os-v5.md) — Formal verification chain, fail-closed invariants, and five-pillar kernel design.
 - [**Security Architecture (`SECURITY.md`)**](SECURITY.md) — Tamper-evident intent logging, OPA + SLM shield pipeline, TEE attestation, and vulnerability disclosure.
 - [**Security & Architecture Review (`REVIEW.md`)**](REVIEW.md) — Audit of the Zero-Trust execution pipeline, W3C Verifiable Credentials, and slashing mechanics.

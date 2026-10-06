@@ -171,11 +171,13 @@ interface IAvairaCreditMarket {
     event Borrowed(uint256 indexed agentId, address indexed borrower, uint256 amount, uint256 collateralRatioBps, uint8 score);
     event Repaid(uint256 indexed agentId, address indexed payer, uint256 amount, uint256 remainingDebt);
     event Liquidated(uint256 indexed agentId, address indexed liquidator, uint256 debtRepaid, uint256 collateralSeized);
+    event CollateralWithdrawn(uint256 indexed agentId, address indexed recipient, uint256 amount);
 
     /// @notice Collateralisation requirement (in bps, e.g. 11000 = 110%) for `agentId`.
     function collateralRatioBps(uint256 agentId) external view returns (uint256);
 
     function depositCollateral(uint256 agentId, uint256 amount) external;
+    function withdrawCollateral(uint256 agentId, uint256 amount) external;
     function borrow(uint256 agentId, uint256 amount) external;
     function repay(uint256 agentId, uint256 amount) external;
     function liquidate(uint256 agentId) external;

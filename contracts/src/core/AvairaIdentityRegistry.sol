@@ -369,19 +369,31 @@ contract AvairaIdentityRegistry is ERC721URIStorage, Ownable2Step, EIP712, Reent
         treasury = newTreasury;
     }
 
+    /// @param newEnforcer The AvairaStakeRegistry that propagates BAN outcomes. Zero is
+    ///        rejected: with no enforcer a BAN at the stake layer could never reach the
+    ///        identity, and the terminal state would silently stop being terminal.
     function setEnforcer(address newEnforcer) external onlyOwner {
+        if (newEnforcer == address(0)) revert NotAuthorized(newEnforcer);
         emit EnforcerUpdated(enforcer, newEnforcer);
         enforcer = newEnforcer;
     }
 
     /// @notice Withdraws a refund that could not be pushed to the recipient.
+    /// @dev If the push fails again (e.g. the recipient is a contract that rejects native
+    ///      value in this code path) the credit is re-escrowed instead of reverting, so the
+    ///      funds stay claimable rather than becoming permanently unreachable. (Audit E1.)
     function withdraw() external nonReentrant {
         uint256 amount = pendingWithdrawals[msg.sender];
         if (amount == 0) return;
         pendingWithdrawals[msg.sender] = 0;
         _totalEscrowed -= amount;
+
         (bool ok,) = msg.sender.call{value: amount}("");
-        if (!ok) revert NotAuthorized(msg.sender);
+        if (!ok) {
+            pendingWithdrawals[msg.sender] += amount;
+            _totalEscrowed += amount;
+            emit RefundEscrowed(msg.sender, amount);
+        }
     }
 
     /* -------------------------------- internals ------------------------------ */

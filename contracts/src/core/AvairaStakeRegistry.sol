@@ -112,7 +112,7 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
     function stake(uint256 agentId, uint256 amount) external override nonReentrant {
         if (amount == 0) revert ZeroAmount();
         AgentStatus status = _statusOf(agentId);
-        if (status == AgentStatus.BANNED) revert AgentIsBanned(agentId);
+        if (status == AgentStatus.BANNED || _isIdentityBanned(agentId)) revert AgentIsBanned(agentId);
         if (!_isAgentOperator(agentId, msg.sender)) revert NotAgentOperator(agentId, msg.sender);
 
         address staker = stakerOf[agentId];
@@ -144,7 +144,7 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
     /// @inheritdoc IAvairaStakeRegistry
     function unstake(uint256 agentId, uint256 amount) external override nonReentrant {
         AgentStatus status = _statusOf(agentId);
-        if (status == AgentStatus.BANNED) revert AgentIsBanned(agentId);
+        if (status == AgentStatus.BANNED || _isIdentityBanned(agentId)) revert AgentIsBanned(agentId);
         if (status == AgentStatus.SUSPENDED) revert AgentIsSuspended(agentId);
         if (stakerOf[agentId] != msg.sender) revert NotStaker(agentId, msg.sender);
 
@@ -198,7 +198,13 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
         slashCount[agentId] += 1;
         slashedTotal[agentId] += amountSlashed;
         address staker = stakerOf[agentId];
-        if (staker != address(0)) accountStake[staker] -= amountSlashed;
+        if (staker != address(0)) {
+            // Defensive: `accountStake` aggregates one staker across agents, and a slash is
+            // always <= that agent's stake, so this clamps rather than reverts. An underflow
+            // here would revert the whole slash and let an agent escape its punishment.
+            uint256 accounted = accountStake[staker];
+            accountStake[staker] = amountSlashed >= accounted ? 0 : accounted - amountSlashed;
+        }
 
         uint256 bounty;
         if (amountSlashed > 0) {
@@ -245,6 +251,9 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
 
     /// @inheritdoc IAvairaStakeRegistry
     function isEligible(uint256 agentId) public view override returns (bool) {
+        // A terminal ban is recorded in the identity registry; eligibility must reflect it
+        // even when the ban was not applied through this contract. (Audit finding A2.)
+        if (_isIdentityBanned(agentId)) return false;
         return _statusOf(agentId) == AgentStatus.ACTIVE && _stakeOf[agentId] >= minStake
             && scoreReader.scoreOf(agentId) >= minScore;
     }
@@ -342,6 +351,13 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
         } else {
             _status[agentId] = AgentStatus.PENDING;
         }
+    }
+
+    /// @dev Reads the terminal ban flag from the identity registry (optional surface).
+    function _isIdentityBanned(uint256 agentId) private view returns (bool) {
+        (bool ok, bytes memory data) =
+            identityRegistry.staticcall(abi.encodeWithSignature("isBanned(uint256)", agentId));
+        return ok && data.length >= 32 && abi.decode(data, (bool));
     }
 
     function _isAgentOperator(uint256 agentId, address account) private view returns (bool) {

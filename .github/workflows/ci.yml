@@ -68,7 +68,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install -r backend/requirements.txt pytest pytest-asyncio pytest-cov --break-system-packages
-      - run: pytest tests/test_backend_units.py tests/test_v2_core.py tests/test_cognitive_os.py -q --tb=short
+      - name: Backend unit + audit regression suite
+        run: |
+          pytest tests/test_backend_units.py tests/test_v2_core.py tests/test_cognitive_os.py \
+                 tests/test_audit_security.py tests/test_merkle_parity.py -q --tb=short
         env:
           MONGO_URL: mongodb://localhost:27017
           DB_NAME: avaira_test

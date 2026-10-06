@@ -26,10 +26,10 @@ from urllib.parse import urlencode, urlparse
 
 try:
     from .agent_runtime import AvairaAgent, RuntimeRiskEnvelope
-    from .permit import generate_permit, verify_permit
+    from .permit import generate_permit, verify_permit, PermitNonceRegistry
 except ImportError:  # pragma: no cover
     from agent_runtime import AvairaAgent, RuntimeRiskEnvelope
-    from permit import generate_permit, verify_permit
+    from permit import generate_permit, verify_permit, PermitNonceRegistry
 
 # Core Trust Engine Imports
 try:
@@ -71,6 +71,9 @@ mongo_url = _get_required_env("MONGO_URL")
 db_name = _get_required_env("DB_NAME")
 client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=3000)
 db = client[db_name]
+# Replay protection for execution permits: every consumed (agent, nonce) pair is
+# recorded once (unique index below), so a captured permit cannot be replayed.
+permit_nonces = PermitNonceRegistry(db.permit_nonces)
 api_router = APIRouter(prefix="/api")
 DATABASE_READY = True
 
@@ -194,7 +197,9 @@ async def ensure_indexes():
     await db.user_sessions.create_index("session_token_hash")
     await db.user_sessions.create_index("expires_at")
     await db.users.create_index("email", unique=True)
-    await db.permit_nonces.create_index("agent_id", unique=True)
+    # Unique per (agent, nonce) — the previous unique index on `agent_id` alone would
+    # have allowed exactly one permit *ever* per agent, and still left the nonce unread.
+    await db.permit_nonces.create_index([("agent_id", 1), ("nonce", 1)], unique=True)
 
 
 @asynccontextmanager
@@ -325,9 +330,13 @@ async def _normalize_score(agent: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return {"score": score, "grade": agent.get("grade", _grade_from_score(score))}
 
 
-async def _ensure_ai_agent_record(body: AgentThinkRequest) -> Dict[str, Any]:
+async def _ensure_ai_agent_record(body: AgentThinkRequest, user_id: Optional[str] = None) -> Dict[str, Any]:
     existing = await db.agents.find_one({"wallet_address": body.agent_address}, {"_id": 0})
     timestamp = datetime.now(timezone.utc).isoformat()
+    if existing and user_id:
+        owner = existing.get("user_id")
+        if owner not in (None, "", "system") and owner != user_id:
+            raise HTTPException(403, "You do not own this agent")
     # body.risk_envelope is a Dict[str, Any] as per AgentThinkRequest model
     if existing:
         updates = {
@@ -344,6 +353,7 @@ async def _ensure_ai_agent_record(body: AgentThinkRequest) -> Dict[str, Any]:
         "id": str(uuid.uuid4()),
         "name": f"AI Agent {body.agent_address[:6]}",
         "wallet_address": body.agent_address,
+        "user_id": user_id or "system",
         "collateral_amount": 0.1,
         "collateral_remaining": 0.1,
         "mission_intent": body.mission_goal,
@@ -727,6 +737,40 @@ async def require_admin_user(request: Request) -> Dict[str, Any]:
         raise HTTPException(403, "Admin privileges required")
     return user
 
+async def require_agent_access(request: Request, agent: Dict[str, Any]) -> Dict[str, Any]:
+    """Authorize the caller to act for `agent`.
+
+    Two legitimate callers exist:
+
+    * the agent itself, presenting its ``X-Avaira-API-Key`` (SDK / runtime path);
+    * a signed-in user who owns the agent (dashboard path).
+
+    Anonymous callers are refused: a public endpoint that freezes agents on "envelope
+    deviation" let anyone freeze any agent with one request (and dock it 20 reputation).
+    """
+    api_key = request.headers.get("X-Avaira-API-Key")
+    if api_key:
+        key_agent = await db.agents.find_one({"api_key_hash": _hash_api_key(api_key)}, {"_id": 0})
+        if key_agent and key_agent["id"] == agent["id"]:
+            return key_agent
+        raise HTTPException(403, "API key does not match this agent")
+
+    try:
+        user = await get_current_user(request)
+    except HTTPException:
+        raise HTTPException(401, "Sign in, or provide the agent's X-Avaira-API-Key")
+
+    owner = agent.get("user_id")
+    if owner in (None, "", "system"):
+        # Legacy/unclaimed record (created before ownership was recorded): the first
+        # authenticated caller claims it, instead of it staying world-writable.
+        await db.agents.update_one({"id": agent["id"]}, {"$set": {"user_id": user["user_id"]}})
+        agent["user_id"] = user["user_id"]
+    elif owner != user["user_id"]:
+        raise HTTPException(403, "You do not own this agent")
+    return agent
+
+
 @api_router.post("/auth/logout")
 async def logout(request: Request):
     token = request.cookies.get("session_token")
@@ -742,15 +786,21 @@ def _hash_api_key(key: str) -> str:
 # ─── AGENT ENDPOINTS ────────────────────────────────────────────
 @api_router.post("/agents/register")
 async def register_agent(body: AgentCreate, request: Request):
-    # Support both SDK (API Key) and Web (OAuth) registration
+    # Registration stays open for the SDK fast path, but it is rate limited and the
+    # swallowed exception is narrowed: a bare `except:` also swallowed programming
+    # errors (and BaseException), silently registering agents as "system".
+    await enforce_rate_limit(request, "agent_register", limit=10, window_seconds=60)
+
     user_id = "system"
     try:
         user = await get_current_user(request)
         user_id = user["user_id"]
-    except:
-        # If no session, check for a master registration key or just allow for now
-        # In production, we'd require a specific 'Developer API Key' to register new agents
-        pass
+    except Exception as exc:  # noqa: BLE001 - registration must not fail on optional auth
+        # Anonymous registration is allowed on purpose (agent-first onboarding), so any
+        # failure to resolve a session degrades to `user_id="system"`. Never a bare
+        # `except:`: BaseException (interrupts, shutdowns) must still propagate, and the
+        # reason is logged instead of being swallowed silently.
+        logger.debug("registration without a resolved session: %s", exc)
 
     agent_id = str(uuid.uuid4())
     api_key = secrets.token_urlsafe(32)
@@ -816,10 +866,12 @@ async def update_agent_status(agent_id: str, request: Request, status: str = Que
 
 # ─── EXECUTION ENDPOINTS ────────────────────────────────────────
 @api_router.post("/executions/request")
-async def create_execution_request(body: ExecutionRequestCreate):
+async def create_execution_request(body: ExecutionRequestCreate, request: Request):
+    await enforce_rate_limit(request, "execution_request", limit=60, window_seconds=60)
     agent = await db.agents.find_one({"id": body.agent_id}, {"_id": 0})
     if not agent:
         raise HTTPException(404, "Agent not found")
+    await require_agent_access(request, agent)
     if agent["status"] == "frozen":
         raise HTTPException(403, "Agent is frozen. Execution blocked.")
     if agent["status"] != "active":
@@ -1651,7 +1703,8 @@ async def get_agent_trust_proof(agent_id: str, agent: Dict = Depends(_get_agent_
     }
 
 @api_router.post("/verify-proof")
-async def verify_trust_proof(body: Dict[str, Any]):
+async def verify_trust_proof(body: Dict[str, Any], request: Request):
+    await enforce_rate_limit(request, "verify_proof", limit=30, window_seconds=60)
     agent_id = body.get("agent_id")
     if not agent_id: raise HTTPException(400, "Missing agent_id")
 
@@ -1672,9 +1725,20 @@ async def verify_trust_proof(body: Dict[str, Any]):
     # Consensus: requires at least 2 witnesses
     trusted = (valid_sigs >= 2)
 
+    # `simulated` is True while the witness keyring is a local simulation: the caller
+    # must not treat it as an independent third-party quorum.
+    if trusted and wn.simulated:
+        return {
+            "trusted": True,
+            "witness_count": valid_sigs,
+            "simulated": True,
+            "detail": "Co-signatures verified against the local witness keyring (simulation, "
+                      "not an independent quorum). Set AVAIRA_WITNESS_SEED with real witness keys."
+        }
     return {
         "trusted": trusted,
         "witness_count": valid_sigs,
+        "simulated": wn.simulated,
         "detail": "Quorum of co-signatures verified" if trusted else "Insufficient witness co-signatures"
     }
 
@@ -1732,8 +1796,10 @@ async def issue_insurance(body: InsuranceRequest, _user: Dict[str, Any] = Depend
 
 @api_router.post("/agents/{agent_id}/slash")
 async def slash_agent_internal(agent_id: str, request: Request):
-    admin_key = request.headers.get("X-Avaira-Admin-Key")
-    if not AVAIRA_ADMIN_KEY or admin_key != AVAIRA_ADMIN_KEY:
+    await enforce_rate_limit(request, "admin_actions", limit=60, window_seconds=60)
+    admin_key = request.headers.get("X-Avaira-Admin-Key") or ""
+    # Constant-time comparison: `!=` on secrets leaks the shared key byte by byte.
+    if not AVAIRA_ADMIN_KEY or not hmac.compare_digest(admin_key, AVAIRA_ADMIN_KEY):
         raise HTTPException(401, "Unauthorized admin action")
 
     body = await request.json()
@@ -1756,17 +1822,21 @@ async def get_agent_slash_history(agent_id: str, agent: Dict = Depends(_get_agen
     return slashes
 
 @api_router.post("/appeal/{slash_id}")
-async def appeal_slash(slash_id: str, body: Dict[str, Any]):
-    # In a real app we'd get agent_id from session or slash_id
+async def appeal_slash(slash_id: str, body: Dict[str, Any], request: Request):
     slash = await db.slash_events.find_one({"id": slash_id})
     if not slash: raise HTTPException(404, "Slash not found")
+
+    # Only the slashed agent's operator (API key or owning session) may appeal.
+    agent = await db.agents.find_one({"id": slash["agent_id"]}, {"_id": 0})
+    if not agent: raise HTTPException(404, "Agent not found")
+    await require_agent_access(request, agent)
 
     result = await slash_engine.appeal(slash["agent_id"], slash_id, body.get("evidence", ""))
     return result.model_dump()
 
 @api_router.post("/agent/think")
-async def agent_think(body: AgentThinkRequest):
-    # Backward compatibility or internal use
+async def agent_think(body: AgentThinkRequest, request: Request, user: Dict[str, Any] = Depends(require_authenticated_user)):
+    await enforce_rate_limit(request, "agent_think", limit=30, window_seconds=60, identity=user.get("user_id"))
     agent = await db.agents.find_one({"id": body.agent_address})
     if not agent:
         agent = await db.agents.find_one({"wallet_address": body.agent_address})
@@ -1778,11 +1848,12 @@ async def agent_think(body: AgentThinkRequest):
 
 
 @api_router.post("/agent/simulate-full-lifecycle")
-async def simulate_full_lifecycle(body: AgentThinkRequest):
+async def simulate_full_lifecycle(body: AgentThinkRequest, request: Request, user: Dict[str, Any] = Depends(require_authenticated_user)):
+    await enforce_rate_limit(request, "simulate_lifecycle", limit=10, window_seconds=60, identity=user.get("user_id"))
     if not is_valid_evm_address(body.agent_address):
         raise HTTPException(400, "Invalid agent wallet address")
 
-    agent = await _ensure_ai_agent_record(body)
+    agent = await _ensure_ai_agent_record(body, user_id=user.get("user_id"))
     runtime = AvairaAgent(body.agent_address, body.risk_envelope, body.mission_goal)
     lifecycle = []
 
@@ -1810,9 +1881,20 @@ async def simulate_full_lifecycle(body: AgentThinkRequest):
     score_before = score_payload_before["score"]
 
     if validation["valid"]:
-        nonce = int(agent.get("runtime_nonce", 0)) + 1
+        # Reserve the next nonce atomically and persist it: the old code derived the
+        # nonce from a field it never wrote back, so every run reused the same nonce
+        # (and could regenerate the same permit).
+        counter = await db.agents.find_one_and_update(
+            {"id": agent["id"]},
+            {"$inc": {"runtime_nonce": 1}},
+            return_document=ReturnDocument.AFTER,
+        )
+        nonce = int((counter or {}).get("runtime_nonce", 1))
         permit_bundle = generate_permit(body.agent_address, intent.action, intent.target, intent.value_usd, nonce)
         permit_ok = verify_permit(permit_bundle["permit"], permit_bundle["signature"], body.agent_address)
+        if permit_ok:
+            # One execution per permit, even if the signature is replayed later.
+            permit_ok = await permit_nonces.consume(body.agent_address, nonce)
         lifecycle.append({
             "stage": 4,
             "name": "permit",

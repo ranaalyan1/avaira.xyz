@@ -1,39 +1,75 @@
 import hashlib
+import hmac
 import json
-from typing import Dict, Any, List
+import logging
+from typing import Dict, Any
+
 from pydantic import BaseModel
 
+from .secret_store import get_or_create_secret
+
+logger = logging.getLogger(__name__)
+
+
 class ZKProof(BaseModel):
-    proof_type: str = "Groth16"
+    proof_type: str = "zk-simulator/hmac-sha256"
     circuit_name: str
     public_inputs: Dict[str, Any]
-    proof_data: str # Hex encoded proof
-    verifiable: bool
+    proof_data: str  # hex encoded proof commitment
+    # Kept for backwards compatibility with earlier clients; it now mirrors `verify`.
+    verifiable: bool = True
+    # This deployment ships a *simulator*, not a real SNARK: the commitment proves the
+    # server computed the public inputs, it does not prove knowledge of private intent.
+    simulated: bool = True
+
 
 class ZKAuditVault:
     """
-    Zero-Knowledge Audit Vault.
-    Allows agents to prove compliance with Risk Envelopes without revealing
-    the actual intents, prompts, or private data.
+    Zero-Knowledge Audit Vault (simulator).
+
+    The protocol uses a keyed commitment so that a proof can only be produced by
+    someone holding ``AVAIRA_ZK_SECRET`` (or the per-installation secret generated on
+    first use) and can be *verified* by recomputing that commitment from the public
+    inputs. Previously ``verify_compliance_proof`` simply returned the caller-supplied
+    ``verifiable`` flag, so every proof was valid by construction.
+
+    Real ZK proving (Noir/Risc0/snarkjs) is still a roadmap item; until then this
+    class must not be advertised as a zero-knowledge proof system.
     """
+
     def __init__(self, secret: str = None):
-        self.secret = secret or "zk-avaira-secret-v2"
+        if secret is not None:
+            self.secret, self.secret_source = secret, "explicit"
+        else:
+            self.secret, self.secret_source = get_or_create_secret(
+                "AVAIRA_ZK_SECRET", "zk_secret", allow_ephemeral=False
+            )
+        self.simulated = True
+
+    # ── commitment ────────────────────────────────────────────────────────────
+    @staticmethod
+    def _canonical(public_inputs: Dict[str, Any]) -> str:
+        return json.dumps(public_inputs, sort_keys=True, separators=(",", ":"))
+
+    def _commit(self, public_inputs: Dict[str, Any]) -> str:
+        return hmac.new(
+            self.secret.encode(), self._canonical(public_inputs).encode(), hashlib.sha256
+        ).hexdigest()
 
     async def generate_compliance_proof(self,
                                      intent: Dict[str, Any],
                                      envelope: Dict[str, Any],
                                      audit_id: str) -> ZKProof:
         """
-        Simulates generation of a ZK-proof (e.g. via Noir or RiscZero).
-        The proof demonstrates:
-        1. hash(private_intent) == intent_hash
-        2. private_intent.value <= envelope.max_spend_usd
-        3. private_intent.action in envelope.allowed_actions
+        Generates a compliance commitment for an intent against a risk envelope.
+
+        The public inputs commit to the intent hash and to the envelope bounds, so a
+        verifier learns that *some* intent under the same hash was inside the envelope
+        without seeing the intent itself.
         """
         intent_json = json.dumps(intent, sort_keys=True)
         intent_hash = hashlib.sha256(intent_json.encode()).hexdigest()
 
-        # Public inputs are the only things revealed
         public_inputs = {
             "intent_hash": intent_hash,
             "max_spend_usd": envelope.get("max_spend_usd"),
@@ -41,22 +77,25 @@ class ZKAuditVault:
             "audit_id": audit_id
         }
 
-        # Mocking the ZK proof generation process
-        # In a real implementation, we would call a WASM-based prover here
-        proof_data = hashlib.sha3_256((intent_json + self.secret).encode()).hexdigest()
-
         return ZKProof(
             circuit_name="RiskEnvelopeCompliance",
             public_inputs=public_inputs,
-            proof_data=proof_data,
-            verifiable=True
+            proof_data=self._commit(public_inputs),
+            verifiable=True,
+            simulated=True,
         )
 
     def verify_compliance_proof(self, proof: ZKProof) -> bool:
         """
-        Verifies the ZK proof using only public inputs.
+        Verifies the commitment using only the public inputs: the proof is accepted
+        only if it was produced by this vault's secret over exactly these inputs.
         """
-        # In a real implementation, we would use a ZK Verifier (e.g. snarkjs or a Noir verifier)
-        # For the simulation, we check if the proof_data is a valid hash of something we can't see
-        # but the prover claims to know.
-        return proof.verifiable
+        try:
+            expected = self._commit(proof.public_inputs)
+        except (TypeError, ValueError):
+            return False
+        if not hmac.compare_digest(expected, proof.proof_data or ""):
+            return False
+
+        required = {"intent_hash", "allowed_actions_hash", "audit_id"}
+        return required.issubset(proof.public_inputs.keys())

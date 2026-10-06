@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from motor.motor_asyncio import AsyncIOMotorClient
+from .secret_store import get_or_create_secret
 from .witness_network import WitnessNetwork, WitnessSignature
 
 class LogEntry(BaseModel):
@@ -57,7 +58,11 @@ class IntentLogger:
             self.db = db_client
 
         self.collection = self.db.intent_logs
-        self.secret = os.environ.get("AVAIRA_LOG_SECRET", "default_secret_32_bytes_long_!!!!!")
+        # Never a shared repository literal: an env-provided secret in production, a
+        # per-installation secret file otherwise (see core/secret_store.py). The secret
+        # derives both the AES-GCM audit-log key and the per-agent signing keys, so a
+        # guessable default let anyone decrypt the trail and forge agent signatures.
+        self.secret, self.secret_source = get_or_create_secret("AVAIRA_LOG_SECRET", "log_secret")
         self.key = hashlib.sha256(self.secret.encode()).digest()
         self.aesgcm = AESGCM(self.key)
         self.witness_net = WitnessNetwork()

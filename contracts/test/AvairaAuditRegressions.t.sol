@@ -147,15 +147,18 @@ contract AvairaAuditRegressionsTest is AvairaFixture {
 
     /// @dev Idle collateral is the agent's own capital; it must be withdrawable.
     function test_WithdrawCollateral_FreesIdleCapital() public {
+        // Measured as a delta: setUp already spent MIN_STAKE of alice's USDC on her stake.
+        uint256 idle = usdc.balanceOf(alice);
+
         vm.startPrank(alice);
         market.depositCollateral(aliceAgent, 300e6);
-        assertEq(usdc.balanceOf(alice), 10_000e6 - 300e6);
+        assertEq(usdc.balanceOf(alice), idle - 300e6);
 
         market.withdrawCollateral(aliceAgent, 300e6);
         vm.stopPrank();
 
         assertEq(market.collateral(aliceAgent), 0);
-        assertEq(usdc.balanceOf(alice), 10_000e6, "capital returned in full");
+        assertEq(usdc.balanceOf(alice), idle, "capital returned in full");
     }
 
     /// @dev A withdrawal that would leave the debt under-collateralised must revert — the
@@ -220,6 +223,10 @@ contract AvairaAuditRegressionsTest is AvairaFixture {
     function test_Withdraw_ReEscrowsWhenPushStillFails() public {
         NativeRejector rejector = new NativeRejector();
         vm.deal(address(rejector), 1 ether);
+        // Deltas: setUp already registered four bonded agents, so absolute totals include them.
+        uint256 registryBalanceBefore = address(identity).balance;
+        uint256 bondsBefore = identity.totalBonds();
+
         vm.prank(address(rejector));
         uint256 agentId = identity.register{value: REGISTRATION_BOND + 0.1 ether}(
             string.concat("ipfs://agent/rejector-", vm.toString(agentId0))
@@ -229,8 +236,12 @@ contract AvairaAuditRegressionsTest is AvairaFixture {
         registry_withdraw_expectReEscrow(rejector);
 
         assertEq(identity.pendingWithdrawals(address(rejector)), 0.1 ether, "still claimable");
-        assertEq(address(identity).balance, REGISTRATION_BOND + 0.1 ether, "no value lost");
-        assertEq(identity.totalBonds(), REGISTRATION_BOND);
+        assertEq(
+            address(identity).balance,
+            registryBalanceBefore + REGISTRATION_BOND + 0.1 ether,
+            "no value lost"
+        );
+        assertEq(identity.totalBonds(), bondsBefore + REGISTRATION_BOND);
         vm.prank(address(rejector));
         identity.exitAgent(agentId);
     }

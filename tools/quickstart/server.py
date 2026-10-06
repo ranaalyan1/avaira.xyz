@@ -235,7 +235,7 @@ const esc = (s) => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}
 
 async function loadHealth() {
   try {
-    const h = await (await fetch('api/health')).json();
+    const h = await (await fetch('/api/health', { cache: 'no-store' })).json();
     const pills = [];
     pills.push(`<span class="pill ${h.coreReady ? 'ok' : 'no'}"><i class="dot"></i>${h.coreReady
       ? 'Cognitive OS ready · pydantic ' + h.core.pydantic + ' · py ' + h.core.python
@@ -262,7 +262,13 @@ async function run(id) {
   btn.disabled = true;
   out.textContent = `Running ${label}…`;
   try {
-    const r = await (await fetch('api/run/' + id, { method: 'POST' })).json();
+    let r;
+    try {
+      r = await (await fetch('/api/run/' + id, { method: 'POST' })).json();
+    } catch (postFailed) {
+      // Some proxies refuse POST; the endpoint accepts GET too.
+      r = await (await fetch('/api/run/' + id)).json();
+    }
     const head = r.ok
       ? `✓ ${r.label}: ${r.summary} — ${r.durationMs} ms\n`
       : `✗ ${r.label}: ${r.summary} (exit ${r.exitCode}) — ${r.durationMs} ms\n`;
@@ -284,6 +290,9 @@ loadHealth();
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "AvairaQuickstart/1.0"
+    # HTTP/1.1 + an accurate Content-Length on every response keeps the sandbox
+    # preview proxy happy; 1.0 forces a reconnect per request.
+    protocol_version = "HTTP/1.1"
 
     def _send(self, code: int, body: bytes, ctype: str) -> None:
         self.send_response(code)
@@ -300,20 +309,30 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         if path in ("/", "/index.html"):
             self._send(200, PAGE.encode(), "text/html; charset=utf-8")
+        elif path == "/favicon.ico":
+            self._send(204, b"", "image/x-icon")
         elif path == "/api/health":
             self._json(health())
+        elif path.startswith("/api/run/"):
+            # GET is accepted as well as POST: some proxies and prefetchers drop POST.
+            self._run(path.rsplit("/", 1)[-1])
         else:
             self._json({"error": "not found"}, 404)
 
-    def do_POST(self) -> None:  # noqa: N802
-        path = self.path.split("?")[0]
-        key = path.rsplit("/", 1)[-1] if path.startswith("/api/run/") else ""
+    def _run(self, key: str) -> None:
         if key not in ACTIONS:
             self._json({"error": "unknown action"}, 404)
             return
         # One heavy subprocess at a time; the deterministic runs are short anyway.
         with _run_lock:
             self._json(run_action(key))
+
+    def do_POST(self) -> None:  # noqa: N802
+        path = self.path.split("?")[0]
+        if path.startswith("/api/run/"):
+            self._run(path.rsplit("/", 1)[-1])
+        else:
+            self._json({"error": "not found"}, 404)
 
     def log_message(self, fmt: str, *args) -> None:  # quieter logs
         sys.stderr.write("  · %s\n" % (fmt % args))

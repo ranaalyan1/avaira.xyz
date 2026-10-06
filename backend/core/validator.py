@@ -118,7 +118,34 @@ class AvairaValidator:
         """
         STAGE 3: Post-Execution Outcome Verification
         Ensures the agent actually did what it said it would do.
+
+        This returned `True` unconditionally ("Simplified for now"), so every caller that
+        relied on the post-execution pillar got a rubber stamp. It now compares the realized
+        outcome against the approved intent and the envelope, and refuses anything it cannot
+        substantiate.
         """
-        # Logic to compare intent vs actual outcome
-        # If intent was 'swap 1 AVAX' but outcome was 'transfer 100 AVAX', this fails.
-        return True # Simplified for now
+        if not isinstance(intent, dict) or not isinstance(outcome, dict) or not outcome:
+            return False
+
+        status = str(outcome.get("status", "completed")).lower()
+        if status not in ("completed", "success", "succeeded"):
+            return False
+
+        # The action that ran must be the action that was approved.
+        if outcome.get("action", intent.get("action")) != intent.get("action"):
+            return False
+
+        # …and it must have hit the target that was approved.
+        if outcome.get("target", intent.get("target")) != intent.get("target"):
+            return False
+
+        envelope = risk_envelope if isinstance(risk_envelope, dict) else {}
+        try:
+            spend = float(outcome.get("value_usd", outcome.get("spend_usd", intent.get("value_usd", 0.0))))
+            cap = float(envelope.get("max_spend_usd", envelope.get("max_tx_value", float("inf"))))
+        except (TypeError, ValueError):
+            return False
+        if spend < 0 or spend > cap:
+            return False
+
+        return True

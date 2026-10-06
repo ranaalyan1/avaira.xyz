@@ -349,3 +349,125 @@ class TestRateLimiting:
         assert exc.value.status_code == 429
         # …and a different identity is unaffected.
         await avaira_server.enforce_rate_limit(request, scope, limit=3, window_seconds=60, identity="agent-y")
+
+
+# ── OAuth state (login CSRF / replay) ─────────────────────────────────────────
+class TestOAuthState:
+    def _state(self, provider="google"):
+        return avaira_server._build_oauth_state(provider, "http://localhost:3000/dashboard")
+
+    def test_state_round_trip_and_expiry(self):
+        state = self._state()
+        payload = avaira_server._parse_oauth_state(state)
+        assert payload["provider"] == "google" and payload["nonce"]
+
+        # Expired states are refused.
+        expired = avaira_server._base64url_encode(
+            __import__("json").dumps({"provider": "google", "redirect": "http://localhost:3000/dashboard", "exp": 1, "nonce": "n"}).encode()
+        )
+        sig = __import__("hmac").new(
+            avaira_server._oauth_state_key(), expired.encode(), __import__("hashlib").sha256
+        ).hexdigest()
+        with pytest.raises(HTTPException):
+            avaira_server._parse_oauth_state(f"{expired}.{sig}")
+
+    def test_tampered_state_signature_is_refused(self):
+        state = self._state()
+        payload_b64, _sig = state.split(".", 1)
+        with pytest.raises(HTTPException):
+            avaira_server._parse_oauth_state(f"{payload_b64}.{'0' * 64}")
+
+    def test_state_cookie_must_match_the_starting_browser(self):
+        state = self._state()
+        nonce = avaira_server._parse_oauth_state(state)["nonce"]
+
+        matching = _request()
+        matching.cookies = {"oauth_state_google": nonce}
+        avaira_server._require_matching_state_cookie(matching, state, "google")  # no raise
+
+        stolen = _request()  # attacker replays the callback URL in a victim's browser
+        stolen.cookies = {}
+        with pytest.raises(HTTPException) as exc:
+            avaira_server._require_matching_state_cookie(stolen, state, "google")
+        assert exc.value.status_code == 400
+
+        wrong = _request()
+        wrong.cookies = {"oauth_state_google": "not-the-nonce"}
+        with pytest.raises(HTTPException):
+            avaira_server._require_matching_state_cookie(wrong, state, "google")
+
+    @pytest.mark.asyncio
+    async def test_state_can_only_be_consumed_once(self, monkeypatch):
+        from pymongo.errors import DuplicateKeyError
+
+        class _States:
+            def __init__(self):
+                self.seen = set()
+
+            async def insert_one(self, document):
+                if document["nonce"] in self.seen:
+                    raise DuplicateKeyError("duplicate key")
+                self.seen.add(document["nonce"])
+
+        fake_db = MagicMock()
+        fake_db.oauth_states = _States()
+        monkeypatch.setattr(avaira_server, "db", fake_db)
+
+        state = self._state()
+        await avaira_server._bind_oauth_state(state, "google")
+        with pytest.raises(HTTPException) as exc:
+            await avaira_server._bind_oauth_state(state, "google")
+        assert exc.value.status_code == 400
+
+
+# ── avaira_os kernel root secret ──────────────────────────────────────────────
+from avaira_os.schemas import SafetyCertificate, Verdict  # noqa: E402
+from avaira_os.secrets import resolve_root_secret  # noqa: E402
+
+
+class TestKernelRootSecret:
+    def test_no_repository_default(self, monkeypatch):
+        """The kernel used to sign certificates with a literal from this repository."""
+        monkeypatch.delenv("AVAIRA_OS_SECRET", raising=False)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as data_dir:
+            monkeypatch.setenv("AVAIRA_DATA_DIR", data_dir)
+            secret, source = resolve_root_secret()
+        assert source == "file"
+        assert secret != "avaira-v5-hardware-root-of-trust"
+
+    def test_secret_is_persisted_for_deterministic_demos(self, monkeypatch):
+        monkeypatch.delenv("AVAIRA_OS_SECRET", raising=False)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as data_dir:
+            monkeypatch.setenv("AVAIRA_DATA_DIR", data_dir)
+            first, _ = resolve_root_secret()
+            second, _ = resolve_root_secret()
+        assert first == second
+
+    def test_certificate_signed_with_the_old_literal_is_rejected(self, monkeypatch):
+        monkeypatch.delenv("AVAIRA_OS_SECRET", raising=False)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as data_dir:
+            monkeypatch.setenv("AVAIRA_DATA_DIR", data_dir)
+            from avaira_os.execution_gate import ExecutionGate
+
+            gate = ExecutionGate()
+            forged = SafetyCertificate(
+                plan_hash="deadbeef", verdict=Verdict.SAFE, nonce="n", issued_tick=0
+            ).sign("avaira-v5-hardware-root-of-trust")
+            assert gate.secret != "avaira-v5-hardware-root-of-trust"
+            assert forged.verify(gate.secret) is False
+
+    def test_env_secret_wins_and_too_short_is_refused(self, monkeypatch):
+        monkeypatch.setenv("AVAIRA_OS_SECRET", "k" * 32)
+        assert resolve_root_secret() == ("k" * 32, "env")
+
+        monkeypatch.setenv("AVAIRA_OS_SECRET", "short")
+        from avaira_os.secrets import MissingKernelSecretError
+
+        with pytest.raises(MissingKernelSecretError):
+            resolve_root_secret()

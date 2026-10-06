@@ -165,6 +165,7 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
         override
     {
         if (!_isAgentOperator(agentId, msg.sender)) revert NotAgentOperator(agentId, msg.sender);
+        if (_isIdentityBanned(agentId)) revert AgentIsBanned(agentId);
         Intent storage intent = _intents[agentId][intentHash];
         if (intent.committedAt == 0) revert UnknownIntent(agentId, intentHash);
         if (intent.executed) revert OutcomeAlreadyAttested(agentId, intentHash);
@@ -185,6 +186,11 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
         AgentStatus status = stakeRegistry.statusOf(agentId);
         score = stakeRegistry.scoreOf(agentId);
 
+        // A BAN is terminal and lives in the identity registry. The stake registry only
+        // mirrors it when *it* is the one slashing, so a ban applied directly at the
+        // identity registry (owner or enforcer) must be read from there too — otherwise a
+        // banned agent keeps passing the gate it was banned from. (Audit finding A3.)
+        if (_isIdentityBanned(agentId)) return (false, score, GateReason.BANNED);
         if (status == AgentStatus.NONE) return (false, score, GateReason.UNKNOWN_AGENT);
         if (status == AgentStatus.BANNED) return (false, score, GateReason.BANNED);
         if (status == AgentStatus.SUSPENDED) return (false, score, GateReason.SUSPENDED);

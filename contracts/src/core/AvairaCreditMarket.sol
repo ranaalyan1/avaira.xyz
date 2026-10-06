@@ -8,6 +8,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IAvairaCreditMarket, IAvairaStakeRegistry} from "../interfaces/IAvaira.sol";
+import {AgentStatus} from "../lib/AvairaTypes.sol";
 
 /// @title AvairaCreditMarket — reputation becomes capital access
 /// @notice Mini money-market where the collateral requirement is a function of the
@@ -33,6 +34,8 @@ contract AvairaCreditMarket is AccessControl, ReentrancyGuard, IAvairaCreditMark
     error InsufficientLiquidity(uint256 available, uint256 requested);
     error NotLiquidatable(uint256 agentId, uint256 currentRatioBps, uint256 requiredRatioBps);
     error RepayTooMuch(uint256 debt, uint256 requested);
+    error AgentNotEligibleForCredit(uint256 agentId, AgentStatus status);
+    error CollateralTooSmall(uint256 required, uint256 provided);
     error ZeroAddress();
     error ZeroAmount();
 
@@ -116,10 +119,40 @@ contract AvairaCreditMarket is AccessControl, ReentrancyGuard, IAvairaCreditMark
     }
 
     /// @inheritdoc IAvairaCreditMarket
+    /// @dev Collateral that is not securing outstanding debt is the agent's own capital and
+    ///      must be recoverable — otherwise the only way collateral ever leaves this contract
+    ///      is a liquidation. The invariant is the same one `borrow` enforces: after the
+    ///      withdrawal the remaining collateral still covers `debt * ratio`.
+    function withdrawCollateral(uint256 agentId, uint256 amount) external override nonReentrant {
+        if (amount == 0) revert ZeroAmount();
+        if (!_isAgentOperator(agentId, msg.sender)) revert NotAgentOperator(agentId, msg.sender);
+
+        uint256 posted = collateral[agentId];
+        if (amount > posted) revert InsufficientCollateral(posted, amount);
+
+        uint256 remaining = posted - amount;
+        uint256 owed = debt[agentId];
+        if (owed > 0) {
+            uint256 required = (owed * collateralRatioBps(agentId)) / BPS;
+            if (required > remaining) revert CollateralTooSmall(required, remaining);
+        }
+
+        collateral[agentId] = remaining;
+        asset.safeTransfer(msg.sender, amount);
+        emit CollateralWithdrawn(agentId, msg.sender, amount);
+    }
+
+    /// @inheritdoc IAvairaCreditMarket
     function borrow(uint256 agentId, uint256 amount) external override nonReentrant {
         if (amount == 0) revert ZeroAmount();
         if (!_isAgentOperator(agentId, msg.sender)) revert NotAgentOperator(agentId, msg.sender);
         if (_isBanned(agentId)) revert AgentIsBanned(agentId);
+
+        // Credit is only extended to agents the accountability layer still backs: a
+        // suspended, banned or under-staked agent must not be able to draw new debt, which
+        // is what the protocol documents as "Borrowing Frozen". (Audit finding B3.)
+        AgentStatus status = stakeRegistry.statusOf(agentId);
+        if (status != AgentStatus.ACTIVE) revert AgentNotEligibleForCredit(agentId, status);
 
         uint256 available = availableLiquidity();
         if (amount > available) revert InsufficientLiquidity(available, amount);

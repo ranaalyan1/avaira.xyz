@@ -7,6 +7,41 @@ on:
     branches: [main]
 
 jobs:
+  # Guards the one-command onboarding path: if `./setup.sh` stops taking a clean
+  # clone to a verified state on Ubuntu or macOS, this job fails.
+  quickstart:
+    name: Quickstart (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: One-command setup with structured result
+        run: ./setup.sh --yes --json | tee /tmp/setup.json
+      - name: Assert the fast path is verified
+        run: |
+          python3 -c '
+          import json
+          r = json.load(open("/tmp/setup.json"))
+          s = {x["name"]: x["status"] for x in r["steps"]}
+          assert r["status"] == "ok", r
+          assert s["proof-artifacts"] == "ok" and s["kernel-tests"] == "ok", r
+          print("fast path verified in", r["elapsedSeconds"], "s")
+          '
+      - name: Doctor mode runs clean
+        run: ./setup.sh --check
+      - name: Quickstart Console serves health and runs the proofs
+        run: |
+          ./setup.sh --serve --port 8402 &
+          for _ in $(seq 1 30); do curl -sf localhost:8402/api/health >/dev/null && break; sleep 1; done
+          curl -sf localhost:8402/api/health | python3 -c "import json,sys; assert json.load(sys.stdin)['coreReady']"
+          curl -sf -X POST localhost:8402/api/run/demos | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'], d; print(d['summary'])"
+          kill %1
+
   contracts:
     name: Contracts
     runs-on: ubuntu-latest
@@ -14,9 +49,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
+      # package.json exists only to vendor @openzeppelin/contracts for the solc
+      # remapping; build/test/deploy are Foundry (there is no `compile` script).
       - run: cd contracts && npm ci
-      - run: cd contracts && npm run compile
-      - run: cd contracts && npm test
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: cd contracts && forge --version
+      - run: cd contracts && forge test
 
   backend:
     name: Backend
@@ -30,7 +68,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install -r backend/requirements.txt pytest pytest-asyncio pytest-cov --break-system-packages
-      - run: pytest tests/test_backend_units.py tests/test_v2_core.py tests/test_cognitive_os.py -q --tb=short
+      - name: Backend unit + audit regression suite
+        run: |
+          pytest tests/test_backend_units.py tests/test_v2_core.py tests/test_cognitive_os.py \
+                 tests/test_audit_security.py tests/test_merkle_parity.py -q --tb=short
         env:
           MONGO_URL: mongodb://localhost:27017
           DB_NAME: avaira_test

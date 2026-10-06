@@ -26,10 +26,10 @@ from urllib.parse import urlencode, urlparse
 
 try:
     from .agent_runtime import AvairaAgent, RuntimeRiskEnvelope
-    from .permit import generate_permit, verify_permit
+    from .permit import generate_permit, verify_permit, PermitNonceRegistry
 except ImportError:  # pragma: no cover
     from agent_runtime import AvairaAgent, RuntimeRiskEnvelope
-    from permit import generate_permit, verify_permit
+    from permit import generate_permit, verify_permit, PermitNonceRegistry
 
 # Core Trust Engine Imports
 try:
@@ -71,6 +71,9 @@ mongo_url = _get_required_env("MONGO_URL")
 db_name = _get_required_env("DB_NAME")
 client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=3000)
 db = client[db_name]
+# Replay protection for execution permits: every consumed (agent, nonce) pair is
+# recorded once (unique index below), so a captured permit cannot be replayed.
+permit_nonces = PermitNonceRegistry(db.permit_nonces)
 api_router = APIRouter(prefix="/api")
 DATABASE_READY = True
 
@@ -194,7 +197,11 @@ async def ensure_indexes():
     await db.user_sessions.create_index("session_token_hash")
     await db.user_sessions.create_index("expires_at")
     await db.users.create_index("email", unique=True)
-    await db.permit_nonces.create_index("agent_id", unique=True)
+    # Unique per (agent, nonce) — the previous unique index on `agent_id` alone would
+    # have allowed exactly one permit *ever* per agent, and still left the nonce unread.
+    await db.permit_nonces.create_index([("agent_id", 1), ("nonce", 1)], unique=True)
+    # Single-use OAuth state: the unique index is what makes replay impossible.
+    await db.oauth_states.create_index("nonce", unique=True)
 
 
 @asynccontextmanager
@@ -325,9 +332,13 @@ async def _normalize_score(agent: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         return {"score": score, "grade": agent.get("grade", _grade_from_score(score))}
 
 
-async def _ensure_ai_agent_record(body: AgentThinkRequest) -> Dict[str, Any]:
+async def _ensure_ai_agent_record(body: AgentThinkRequest, user_id: Optional[str] = None) -> Dict[str, Any]:
     existing = await db.agents.find_one({"wallet_address": body.agent_address}, {"_id": 0})
     timestamp = datetime.now(timezone.utc).isoformat()
+    if existing and user_id:
+        owner = existing.get("user_id")
+        if owner not in (None, "", "system") and owner != user_id:
+            raise HTTPException(403, "You do not own this agent")
     # body.risk_envelope is a Dict[str, Any] as per AgentThinkRequest model
     if existing:
         updates = {
@@ -344,6 +355,7 @@ async def _ensure_ai_agent_record(body: AgentThinkRequest) -> Dict[str, Any]:
         "id": str(uuid.uuid4()),
         "name": f"AI Agent {body.agent_address[:6]}",
         "wallet_address": body.agent_address,
+        "user_id": user_id or "system",
         "collateral_amount": 0.1,
         "collateral_remaining": 0.1,
         "mission_intent": body.mission_goal,
@@ -466,6 +478,45 @@ def _is_allowed_redirect(target: str) -> bool:
     return origin in ALLOWED_REDIRECT_ORIGINS
 
 
+def _oauth_state_key() -> bytes:
+    """Dedicated key for OAuth state tokens (never the permit signing secret itself)."""
+    return hashlib.sha256(b"avaira.oauth.state.v1" + PERMIT_SECRET.encode()).digest()
+
+
+def _oauth_state_cookie_name(provider: str) -> str:
+    return f"oauth_state_{provider}"
+
+
+async def _bind_oauth_state(state: str, provider: str) -> None:
+    """Consume the state exactly once, refusing replays.
+
+    The state is a signed, expiring token, but nothing stopped a captured state (or the
+    whole callback URL) from being replayed: an attacker could complete a login flow with
+    their own account inside a victim's browser (login CSRF) or reuse a state they
+    obtained. The nonce is now recorded once, with a unique index, on first use.
+    """
+    payload = _parse_oauth_state(state)
+    nonce = payload.get("nonce", "")
+    if not nonce:
+        raise HTTPException(400, "OAuth state is missing its nonce")
+    try:
+        await db.oauth_states.insert_one({
+            "nonce": nonce,
+            "provider": provider,
+            "used_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception as exc:  # DuplicateKeyError, or a rejected write
+        raise HTTPException(400, "OAuth state has already been used") from exc
+
+
+def _require_matching_state_cookie(request: Request, state: str, provider: str) -> None:
+    """The callback must arrive from the same browser that started the flow."""
+    parsed = _parse_oauth_state(state)
+    cookie_value = request.cookies.get(_oauth_state_cookie_name(provider))
+    if not cookie_value or not hmac.compare_digest(str(cookie_value), str(parsed.get("nonce", ""))):
+        raise HTTPException(400, "OAuth state does not match this browser")
+
+
 def _resolve_post_login_redirect(redirect: Optional[str]) -> str:
     target = (redirect or DEFAULT_POST_LOGIN_REDIRECT).strip()
     if not _is_allowed_redirect(target):
@@ -484,7 +535,7 @@ def _build_oauth_state(provider: str, redirect: str, code_verifier: Optional[str
         payload["cv"] = code_verifier
     payload_raw = json.dumps(payload, separators=(",", ":")).encode()
     payload_b64 = _base64url_encode(payload_raw)
-    sig = hmac.new(PERMIT_SECRET.encode(), payload_b64.encode(), hashlib.sha256).hexdigest()
+    sig = hmac.new(_oauth_state_key(), payload_b64.encode(), hashlib.sha256).hexdigest()
     return f"{payload_b64}.{sig}"
 
 
@@ -493,7 +544,7 @@ def _parse_oauth_state(state: str) -> Dict[str, Any]:
         payload_b64, sig = state.split(".", 1)
     except ValueError as exc:
         raise HTTPException(400, "Invalid OAuth state") from exc
-    expected_sig = hmac.new(PERMIT_SECRET.encode(), payload_b64.encode(), hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(_oauth_state_key(), payload_b64.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(sig, expected_sig):
         raise HTTPException(400, "Invalid OAuth state signature")
     try:
@@ -562,6 +613,7 @@ async def auth_google_login(redirect: Optional[str] = None):
     _require_google_oauth_config()
     target_redirect = _resolve_post_login_redirect(redirect)
     state = _build_oauth_state("google", target_redirect)
+    nonce = json.loads(_base64url_decode(state.split(".", 1)[0]).decode())["nonce"]
     params = urlencode({
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -571,15 +623,22 @@ async def auth_google_login(redirect: Optional[str] = None):
         "access_type": "offline",
         "prompt": "select_account",
     })
-    return RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{params}")
+    response = RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{params}")
+    response.set_cookie(
+        _oauth_state_cookie_name("google"), nonce, httponly=True, secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE, path="/", max_age=600,
+    )
+    return response
 
 
 @api_router.get("/auth/google/callback")
-async def auth_google_callback(code: str, state: str):
+async def auth_google_callback(code: str, state: str, request: Request):
     _require_google_oauth_config()
     parsed_state = _parse_oauth_state(state)
     if parsed_state.get("provider") != "google":
         raise HTTPException(400, "OAuth provider mismatch")
+    _require_matching_state_cookie(request, state, "google")
+    await _bind_oauth_state(state, "google")
 
     async with httpx.AsyncClient(timeout=20) as http_client:
         token_resp = await http_client.post(
@@ -615,6 +674,7 @@ async def auth_google_callback(code: str, state: str):
     session = await _create_local_session(email=email, name=name, picture=picture)
     resp = RedirectResponse(parsed_state["redirect"])
     _set_session_cookie(resp, session["session_token"])
+    resp.delete_cookie(_oauth_state_cookie_name("google"), path="/")
     return resp
 
 
@@ -624,6 +684,7 @@ async def auth_x_login(redirect: Optional[str] = None):
     target_redirect = _resolve_post_login_redirect(redirect)
     code_verifier = secrets.token_urlsafe(64)
     state = _build_oauth_state("x", target_redirect, code_verifier=code_verifier)
+    nonce = json.loads(_base64url_decode(state.split(".", 1)[0]).decode())["nonce"]
     params = urlencode({
         "response_type": "code",
         "client_id": X_CLIENT_ID,
@@ -633,15 +694,22 @@ async def auth_x_login(redirect: Optional[str] = None):
         "code_challenge": _pkce_challenge(code_verifier),
         "code_challenge_method": "S256",
     })
-    return RedirectResponse(f"https://twitter.com/i/oauth2/authorize?{params}")
+    response = RedirectResponse(f"https://twitter.com/i/oauth2/authorize?{params}")
+    response.set_cookie(
+        _oauth_state_cookie_name("x"), nonce, httponly=True, secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE, path="/", max_age=600,
+    )
+    return response
 
 
 @api_router.get("/auth/x/callback")
-async def auth_x_callback(code: str, state: str):
+async def auth_x_callback(code: str, state: str, request: Request):
     _require_x_oauth_config()
     parsed_state = _parse_oauth_state(state)
     if parsed_state.get("provider") != "x":
         raise HTTPException(400, "OAuth provider mismatch")
+    _require_matching_state_cookie(request, state, "x")
+    await _bind_oauth_state(state, "x")
     code_verifier = parsed_state.get("cv", "")
     if not code_verifier:
         raise HTTPException(400, "Missing PKCE verifier")
@@ -684,6 +752,7 @@ async def auth_x_callback(code: str, state: str):
     session = await _create_local_session(email=email, name=name, picture=picture)
     resp = RedirectResponse(parsed_state["redirect"])
     _set_session_cookie(resp, session["session_token"])
+    resp.delete_cookie(_oauth_state_cookie_name("x"), path="/")
     return resp
 
 @api_router.get("/auth/me")
@@ -727,6 +796,40 @@ async def require_admin_user(request: Request) -> Dict[str, Any]:
         raise HTTPException(403, "Admin privileges required")
     return user
 
+async def require_agent_access(request: Request, agent: Dict[str, Any]) -> Dict[str, Any]:
+    """Authorize the caller to act for `agent`.
+
+    Two legitimate callers exist:
+
+    * the agent itself, presenting its ``X-Avaira-API-Key`` (SDK / runtime path);
+    * a signed-in user who owns the agent (dashboard path).
+
+    Anonymous callers are refused: a public endpoint that freezes agents on "envelope
+    deviation" let anyone freeze any agent with one request (and dock it 20 reputation).
+    """
+    api_key = request.headers.get("X-Avaira-API-Key")
+    if api_key:
+        key_agent = await db.agents.find_one({"api_key_hash": _hash_api_key(api_key)}, {"_id": 0})
+        if key_agent and key_agent["id"] == agent["id"]:
+            return key_agent
+        raise HTTPException(403, "API key does not match this agent")
+
+    try:
+        user = await get_current_user(request)
+    except HTTPException:
+        raise HTTPException(401, "Sign in, or provide the agent's X-Avaira-API-Key")
+
+    owner = agent.get("user_id")
+    if owner in (None, "", "system"):
+        # Legacy/unclaimed record (created before ownership was recorded): the first
+        # authenticated caller claims it, instead of it staying world-writable.
+        await db.agents.update_one({"id": agent["id"]}, {"$set": {"user_id": user["user_id"]}})
+        agent["user_id"] = user["user_id"]
+    elif owner != user["user_id"]:
+        raise HTTPException(403, "You do not own this agent")
+    return agent
+
+
 @api_router.post("/auth/logout")
 async def logout(request: Request):
     token = request.cookies.get("session_token")
@@ -742,15 +845,21 @@ def _hash_api_key(key: str) -> str:
 # ─── AGENT ENDPOINTS ────────────────────────────────────────────
 @api_router.post("/agents/register")
 async def register_agent(body: AgentCreate, request: Request):
-    # Support both SDK (API Key) and Web (OAuth) registration
+    # Registration stays open for the SDK fast path, but it is rate limited and the
+    # swallowed exception is narrowed: a bare `except:` also swallowed programming
+    # errors (and BaseException), silently registering agents as "system".
+    await enforce_rate_limit(request, "agent_register", limit=10, window_seconds=60)
+
     user_id = "system"
     try:
         user = await get_current_user(request)
         user_id = user["user_id"]
-    except:
-        # If no session, check for a master registration key or just allow for now
-        # In production, we'd require a specific 'Developer API Key' to register new agents
-        pass
+    except Exception as exc:  # noqa: BLE001 - registration must not fail on optional auth
+        # Anonymous registration is allowed on purpose (agent-first onboarding), so any
+        # failure to resolve a session degrades to `user_id="system"`. Never a bare
+        # `except:`: BaseException (interrupts, shutdowns) must still propagate, and the
+        # reason is logged instead of being swallowed silently.
+        logger.debug("registration without a resolved session: %s", exc)
 
     agent_id = str(uuid.uuid4())
     api_key = secrets.token_urlsafe(32)
@@ -816,10 +925,12 @@ async def update_agent_status(agent_id: str, request: Request, status: str = Que
 
 # ─── EXECUTION ENDPOINTS ────────────────────────────────────────
 @api_router.post("/executions/request")
-async def create_execution_request(body: ExecutionRequestCreate):
+async def create_execution_request(body: ExecutionRequestCreate, request: Request):
+    await enforce_rate_limit(request, "execution_request", limit=60, window_seconds=60)
     agent = await db.agents.find_one({"id": body.agent_id}, {"_id": 0})
     if not agent:
         raise HTTPException(404, "Agent not found")
+    await require_agent_access(request, agent)
     if agent["status"] == "frozen":
         raise HTTPException(403, "Agent is frozen. Execution blocked.")
     if agent["status"] != "active":
@@ -1413,6 +1524,7 @@ async def register_underwriter(body: UnderwriterCreate, request: Request, _user:
     uw = {
         "id": str(uuid.uuid4()),
         "name": body.name,
+        "user_id": _user.get("user_id") or "system",
         "wallet_address": body.wallet_address or ("0x" + secrets.token_hex(20)),
         "capital_amount": body.capital_amount,
         "capital_available": body.capital_amount,
@@ -1441,10 +1553,13 @@ async def get_underwriter(uw_id: str):
 
 # ─── MISSION ENDPOINTS ──────────────────────────────────────────
 @api_router.post("/missions/create")
-async def create_mission(body: MissionCreate):
+async def create_mission(body: MissionCreate, request: Request):
+    await enforce_rate_limit(request, "mission_create", limit=20, window_seconds=60)
     agent = await db.agents.find_one({"id": body.agent_id}, {"_id": 0})
     if not agent:
         raise HTTPException(404, "Agent not found")
+    # Only the agent itself or its owner may open a mission in its name.
+    await require_agent_access(request, agent)
     if agent["status"] != "active":
         raise HTTPException(403, f"Agent is {agent['status']}")
     score = calculate_avaira_score(agent)
@@ -1486,18 +1601,39 @@ async def get_mission(mission_id: str):
     return mission
 
 @api_router.post("/missions/{mission_id}/stake")
-async def stake_on_mission(mission_id: str, body: MissionStake):
+async def stake_on_mission(mission_id: str, body: MissionStake, request: Request):
+    # Underwriting capital is moved here, so the caller must own the underwriter or be
+    # the agent's operator: this endpoint used to let anyone lock any underwriter's
+    # capital onto a mission of their choosing.
+    user = await require_authenticated_user(request)
+    await enforce_rate_limit(request, "mission_stake", limit=30, window_seconds=60, identity=user.get("user_id"))
+
     mission = await db.missions.find_one({"id": mission_id}, {"_id": 0})
     if not mission:
         raise HTTPException(404, "Mission not found")
     if mission["status"] != "open":
         raise HTTPException(400, "Mission not open for staking")
+    if body.amount <= 0:
+        raise HTTPException(400, "Stake amount must be positive")
+
     uw = await db.underwriters.find_one({"id": body.underwriter_id}, {"_id": 0})
     if not uw:
         raise HTTPException(404, "Underwriter not found")
-    if uw["capital_available"] < body.amount:
+    owner = uw.get("user_id")
+    if owner in (None, "", "system"):
+        await db.underwriters.update_one({"id": uw["id"]}, {"$set": {"user_id": user["user_id"]}})
+        uw["user_id"] = user["user_id"]
+    elif owner != user["user_id"]:
+        raise HTTPException(403, "You do not own this underwriter")
+
+    # Conditional update: the previous read-then-write could commit the same capacity
+    # twice when two requests interleaved.
+    result = await db.underwriters.update_one(
+        {"id": body.underwriter_id, "capital_available": {"$gte": body.amount}},
+        {"$inc": {"capital_available": -body.amount, "capital_staked": body.amount}},
+    )
+    if result.modified_count != 1:
         raise HTTPException(400, "Insufficient capital")
-    await db.underwriters.update_one({"id": body.underwriter_id}, {"$inc": {"capital_available": -body.amount, "capital_staked": body.amount}})
     stake_entry = {"underwriter_id": body.underwriter_id, "underwriter_name": uw["name"], "amount": body.amount, "staked_at": datetime.now(timezone.utc).isoformat()}
     await db.missions.update_one({"id": mission_id}, {"$push": {"underwriters": stake_entry}, "$inc": {"total_staked": body.amount}})
     updated = await db.missions.find_one({"id": mission_id}, {"_id": 0})
@@ -1651,7 +1787,8 @@ async def get_agent_trust_proof(agent_id: str, agent: Dict = Depends(_get_agent_
     }
 
 @api_router.post("/verify-proof")
-async def verify_trust_proof(body: Dict[str, Any]):
+async def verify_trust_proof(body: Dict[str, Any], request: Request):
+    await enforce_rate_limit(request, "verify_proof", limit=30, window_seconds=60)
     agent_id = body.get("agent_id")
     if not agent_id: raise HTTPException(400, "Missing agent_id")
 
@@ -1672,9 +1809,20 @@ async def verify_trust_proof(body: Dict[str, Any]):
     # Consensus: requires at least 2 witnesses
     trusted = (valid_sigs >= 2)
 
+    # `simulated` is True while the witness keyring is a local simulation: the caller
+    # must not treat it as an independent third-party quorum.
+    if trusted and wn.simulated:
+        return {
+            "trusted": True,
+            "witness_count": valid_sigs,
+            "simulated": True,
+            "detail": "Co-signatures verified against the local witness keyring (simulation, "
+                      "not an independent quorum). Set AVAIRA_WITNESS_SEED with real witness keys."
+        }
     return {
         "trusted": trusted,
         "witness_count": valid_sigs,
+        "simulated": wn.simulated,
         "detail": "Quorum of co-signatures verified" if trusted else "Insufficient witness co-signatures"
     }
 
@@ -1732,8 +1880,10 @@ async def issue_insurance(body: InsuranceRequest, _user: Dict[str, Any] = Depend
 
 @api_router.post("/agents/{agent_id}/slash")
 async def slash_agent_internal(agent_id: str, request: Request):
-    admin_key = request.headers.get("X-Avaira-Admin-Key")
-    if not AVAIRA_ADMIN_KEY or admin_key != AVAIRA_ADMIN_KEY:
+    await enforce_rate_limit(request, "admin_actions", limit=60, window_seconds=60)
+    admin_key = request.headers.get("X-Avaira-Admin-Key") or ""
+    # Constant-time comparison: `!=` on secrets leaks the shared key byte by byte.
+    if not AVAIRA_ADMIN_KEY or not hmac.compare_digest(admin_key, AVAIRA_ADMIN_KEY):
         raise HTTPException(401, "Unauthorized admin action")
 
     body = await request.json()
@@ -1756,17 +1906,21 @@ async def get_agent_slash_history(agent_id: str, agent: Dict = Depends(_get_agen
     return slashes
 
 @api_router.post("/appeal/{slash_id}")
-async def appeal_slash(slash_id: str, body: Dict[str, Any]):
-    # In a real app we'd get agent_id from session or slash_id
+async def appeal_slash(slash_id: str, body: Dict[str, Any], request: Request):
     slash = await db.slash_events.find_one({"id": slash_id})
     if not slash: raise HTTPException(404, "Slash not found")
+
+    # Only the slashed agent's operator (API key or owning session) may appeal.
+    agent = await db.agents.find_one({"id": slash["agent_id"]}, {"_id": 0})
+    if not agent: raise HTTPException(404, "Agent not found")
+    await require_agent_access(request, agent)
 
     result = await slash_engine.appeal(slash["agent_id"], slash_id, body.get("evidence", ""))
     return result.model_dump()
 
 @api_router.post("/agent/think")
-async def agent_think(body: AgentThinkRequest):
-    # Backward compatibility or internal use
+async def agent_think(body: AgentThinkRequest, request: Request, user: Dict[str, Any] = Depends(require_authenticated_user)):
+    await enforce_rate_limit(request, "agent_think", limit=30, window_seconds=60, identity=user.get("user_id"))
     agent = await db.agents.find_one({"id": body.agent_address})
     if not agent:
         agent = await db.agents.find_one({"wallet_address": body.agent_address})
@@ -1778,11 +1932,12 @@ async def agent_think(body: AgentThinkRequest):
 
 
 @api_router.post("/agent/simulate-full-lifecycle")
-async def simulate_full_lifecycle(body: AgentThinkRequest):
+async def simulate_full_lifecycle(body: AgentThinkRequest, request: Request, user: Dict[str, Any] = Depends(require_authenticated_user)):
+    await enforce_rate_limit(request, "simulate_lifecycle", limit=10, window_seconds=60, identity=user.get("user_id"))
     if not is_valid_evm_address(body.agent_address):
         raise HTTPException(400, "Invalid agent wallet address")
 
-    agent = await _ensure_ai_agent_record(body)
+    agent = await _ensure_ai_agent_record(body, user_id=user.get("user_id"))
     runtime = AvairaAgent(body.agent_address, body.risk_envelope, body.mission_goal)
     lifecycle = []
 
@@ -1810,9 +1965,20 @@ async def simulate_full_lifecycle(body: AgentThinkRequest):
     score_before = score_payload_before["score"]
 
     if validation["valid"]:
-        nonce = int(agent.get("runtime_nonce", 0)) + 1
+        # Reserve the next nonce atomically and persist it: the old code derived the
+        # nonce from a field it never wrote back, so every run reused the same nonce
+        # (and could regenerate the same permit).
+        counter = await db.agents.find_one_and_update(
+            {"id": agent["id"]},
+            {"$inc": {"runtime_nonce": 1}},
+            return_document=ReturnDocument.AFTER,
+        )
+        nonce = int((counter or {}).get("runtime_nonce", 1))
         permit_bundle = generate_permit(body.agent_address, intent.action, intent.target, intent.value_usd, nonce)
         permit_ok = verify_permit(permit_bundle["permit"], permit_bundle["signature"], body.agent_address)
+        if permit_ok:
+            # One execution per permit, even if the signature is replayed later.
+            permit_ok = await permit_nonces.consume(body.agent_address, nonce)
         lifecycle.append({
             "stage": 4,
             "name": "permit",
@@ -1950,7 +2116,16 @@ async def validate_intent_endpoint(body: IntentValidateRequest, request: Request
     """
     Two-layer intent validation using AvairaValidator (Claude-powered).
     """
-    await enforce_rate_limit(request, "validate_intent", limit=30, window_seconds=60)
+    # Anonymous callers keep working (the SDK's `validate()` is public), but at a
+    # tighter budget: this endpoint fans out to a paid model.
+    api_key = request.headers.get("X-Avaira-API-Key")
+    key_agent = None
+    if isinstance(api_key, str) and api_key:
+        key_agent = await db.agents.find_one({"api_key_hash": _hash_api_key(api_key)}, {"_id": 0, "id": 1})
+    if key_agent:
+        await enforce_rate_limit(request, "validate_intent_agent", limit=60, window_seconds=60, identity=key_agent["id"])
+    else:
+        await enforce_rate_limit(request, "validate_intent", limit=10, window_seconds=60)
     result = await avaira_validator.validate(body.intent, body.risk_envelope)
     return result
 

@@ -9,7 +9,7 @@ before it was fixed; nothing is listed on the strength of reading alone.
 | Layer | How it was verified |
 | --- | --- |
 | Solidity | No Foundry in the audit sandbox (release hosts blocked), so the contracts were compiled with the repo's pinned solc 0.8.37 and executed against real bytecode with `@ethereumjs/vm` (Cancun, viaIR, optimizer 200). Findings were proven with an 12-check behavioural harness; regression tests for CI were added in `contracts/test/AvairaAuditRegressions.t.sol`. |
-| Backend / kernel | Probe scripts that flip from `VULNERABLE` to `safe` (see below), plus `pytest`: 103 → **143 passing** offline tests in this repo. New suites: `tests/test_audit_security.py` (40 tests), `tests/test_merkle_parity.py` (14 tests). |
+| Backend / kernel | Probe scripts that flip from `VULNERABLE` to `safe` (see below), plus `pytest`: **111 passing** offline tests in this repo (before this pass: 71). New suites: `tests/test_audit_security.py` (40 tests), `tests/test_merkle_parity.py` (14 tests). |
 | Cross-language claims | The Python SDK's Merkle commitment is now pinned to the same vectors the TypeScript SDK generates and the Foundry suite asserts. |
 | CI | `forge test` (Contracts), the Backend job (now including both new suites), the Cognitive OS determinism job and the Quickstart job remain the oracles. |
 

@@ -42,6 +42,7 @@ import {
   monadTestnet,
 } from "./abi.js";
 import { MetricsReporter } from "./metrics.js";
+import { canonicalJson } from "./canonical.js";
 import {
   AgentStatus,
   GateReason,
@@ -111,16 +112,7 @@ export class Avaira {
     const envelope = this.resolveEnvelope(options.envelope);
     const nonce = this.nextNonce();
     const envelopeHash = this.hashEnvelope(envelope);
-    const planHash = keccak256(
-      encodeAbiParameters(parseAbiParameters("string domain, uint256 agentId, string taskId, string taskJson, bytes32 envelopeHash, uint256 nonce"), [
-        "Avaira.Intent.v1",
-        agentId,
-        task.id,
-        JSON.stringify(task),
-        envelopeHash,
-        nonce,
-      ]),
-    );
+    const planHash = this.hashIntent(agentId, task, envelopeHash, nonce);
 
     // ── 1. the free agent-level gate: no commitment required, one RPC round trip ──
     const agentGateStart = now();
@@ -375,6 +367,20 @@ export class Avaira {
   }
 
   /* ─────────────────────────────────  helpers  ──────────────────────────────── */
+
+  /**
+   * The intent commitment: keccak of (domain, agentId, taskId, canonical plan JSON, envelope hash,
+   * nonce). Public and pure so an auditor — or a different SDK in another language — can recompute
+   * exactly what an agent committed to, from the plan alone.
+   */
+  hashIntent(agentId: bigint, task: { id: string } & Record<string, unknown>, envelopeHash: Hex, nonce: bigint): Hex {
+    return keccak256(
+      encodeAbiParameters(
+        parseAbiParameters("string domain, uint256 agentId, string taskId, string taskJson, bytes32 envelopeHash, uint256 nonce"),
+        ["Avaira.Intent.v1", agentId, task.id, canonicalJson(task), envelopeHash, nonce],
+      ),
+    );
+  }
 
   /** EIP-712-style struct hash of an envelope; identical to `RiskEnvelopeLib.hash`. */
   hashEnvelope(envelope: RiskEnvelope): Hex {

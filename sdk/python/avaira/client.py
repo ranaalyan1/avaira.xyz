@@ -183,7 +183,7 @@ class Avaira:
         )
         nonce = self._next_nonce()
         envelope_hash = self.hash_envelope(envelope)
-        intent_hash = self._hash_intent(agent_id, task, envelope_hash, nonce)
+        intent_hash = self.hash_intent(agent_id, task, envelope_hash, nonce)
         timings = GateTimings()
 
         # 1. agent-level gate — free, one eth_call, no commitment needed
@@ -340,7 +340,9 @@ class Avaira:
         )
         return "0x" + keccak(encoded).hex()
 
-    def _hash_intent(self, agent_id: int, task: dict[str, Any], envelope_hash: str, nonce: int) -> str:
+    def hash_intent(self, agent_id: int, task: dict[str, Any], envelope_hash: str, nonce: int) -> str:
+        # `canonicalJson` in @avaira/sdk pins the same bytes: keys sorted at every depth,
+        # printable-ASCII only, no insignificant whitespace. See FINDINGS.md AV-013.
         task_json = json.dumps(task, sort_keys=True, separators=(",", ":"))
         encoded = abi_encode(
             ["string", "uint256", "string", "string", "bytes32", "uint256"],

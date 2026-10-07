@@ -1,0 +1,14 @@
+{
+  "name": "avaira-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Toolchain-free verification harness: compiles the Avaira contracts with solc-js and runs invariant/stateful fuzz campaigns against the real bytecode inside py-evm.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "compile": "node compile.mjs"
+  },
+  "dependencies": {
+    "solc": "0.8.37"
+  }
+}

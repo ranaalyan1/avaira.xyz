@@ -47,6 +47,14 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
     /// @notice Role allowed to slash (the intent vault and the protocol operator).
     bytes32 public constant SLASHER_ROLE = keccak256("AVAIRA_SLASHER_ROLE");
 
+    /* --------------------------------- events --------------------------------- */
+
+    /// @notice A terminal slash could not propagate the ban to the identity registry.
+    /// @dev The slash itself still happens. This event exists so operators and indexers can tell
+    ///      "banned in the stake registry, still active in the identity registry" apart from a
+    ///      clean ban; it almost always means `setEnforcer` was never called at deploy time.
+    event BanPropagationFailed(uint256 indexed agentId, address registry);
+
     /* -------------------------------- constants ------------------------------- */
 
     uint16 private constant BPS_DENOMINATOR = 10_000;
@@ -217,9 +225,13 @@ contract AvairaStakeRegistry is AccessControl, ReentrancyGuard, IAvairaStakeRegi
                 stakeToken.safeTransfer(treasury, _stakeOf[agentId]);
                 _stakeOf[agentId] = 0;
             }
-            // Propagate the terminal state to the identity registry.
+            // Propagate the terminal state to the identity registry. The slash must not be
+            // reverted by a registry that refuses the ban (the capital penalty is the point), but
+            // swallowing it silently leaves the two registries disagreeing about whether this
+            // agent is banned — see FINDINGS.md AV-010. So the failure is emitted, and
+            // `script/Deploy.s.sol` asserts the wiring at deploy time.
             (bool ok,) = identityRegistry.call(abi.encodeWithSignature("banAgent(uint256,string)", agentId, reason));
-            ok; // a registry that refuses to ban must not block the slash
+            if (!ok) emit BanPropagationFailed(agentId, identityRegistry);
         } else if (level == SlashLevel.SUSPENSION) {
             uint64 until = uint64(block.timestamp) + suspensionCooldown;
             suspendedUntil[agentId] = until;

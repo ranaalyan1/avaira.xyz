@@ -28,9 +28,11 @@
 | `make install` works on a PEP 668 system and without the gateway | retry with `--break-system-packages`, then a venv hint; `services/gateway` warns and skips instead of failing the install | `make install` |
 
 **126 Solidity test functions** exist under `contracts/test/` (124 in unit/module tests + 2 invariant
-tests). They need `forge`, which is **not installed in this sandbox** — CI runs them on every push
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)); this file claims nothing about them beyond
-"they exist and CI runs them", because I will not write "passing" for a suite I did not execute here.
+tests). They need `forge`, which is **not installed in this sandbox**, so nobody ran them while this
+package was being written. CI does run them ([`.github/workflows/ci.yml`](.github/workflows/ci.yml),
+the `Contracts` job) and is green on this branch's head — that is CI's evidence, not mine, and the
+distinction matters: "the suite exists and CI executes it" is verifiable from the run, "I ran it" would
+not be. If a future change makes those tests moot, delete this line rather than let it accrete.
 
 ## Not verified — read this column before you trust the other one
 

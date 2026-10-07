@@ -33,11 +33,10 @@ jobs:
         with: { node-version: '20' }
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
+      # One source of truth for dependencies: the same target a contributor runs. An earlier
+      # hand-written list here drifted from `make install` and CI failed on a missing solc-js.
       - name: Install dependencies
-        run: |
-          python -m pip install -r verification/requirements.txt --break-system-packages
-          (cd sdk/typescript && npm ci --no-audit --no-fund || npm install --no-audit --no-fund)
-          (cd services/scorer && npm ci --no-audit --no-fund || npm install --no-audit --no-fund)
+        run: make install
       - name: Compile (solc-js, Foundry profile)
         run: node tools/compile.mjs
       - name: SDK + scorer suites

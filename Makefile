@@ -43,6 +43,8 @@ help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
 
 install:
+	@echo "→ verification toolchain (solc-js)"
+	@cd tools && (test -d node_modules || npm install --no-audit --no-fund)
 	@echo "→ contracts"
 	cd contracts && (test -d node_modules || npm install --no-audit --no-fund)
 	@echo "→ SDK (typescript)"

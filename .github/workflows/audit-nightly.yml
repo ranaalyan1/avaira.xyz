@@ -1,0 +1,60 @@
+name: Audit nightly — campaign matrix
+
+# The PR CI runs the fast, deterministic parts (`make check`). This is the slow half: the campaign
+# matrix, bigger than anything worth blocking a merge with. It exists because the numbers quoted in
+# `STATE.md` and `audit/` have to keep being *reproducible*, not because they were true once.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      sequences:
+        description: sequences per shard
+        default: "1500"
+      depth:
+        description: operations per sequence
+        default: "16"
+      seeds:
+        description: space-separated seeds
+        default: "20261007 991 4242 777 31337 104729"
+
+jobs:
+  matrix:
+    name: Campaign matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python -m pip install -r verification/requirements.txt --break-system-packages
+      - run: node tools/compile.mjs
+      - name: Run the shards
+        env:
+          SEEDS: ${{ github.event.inputs.seeds || '20261007 991 4242 777 31337 104729' }}
+          FUZZ_SEQUENCES: ${{ github.event.inputs.sequences || '1500' }}
+          FUZZ_DEPTH: ${{ github.event.inputs.depth || '16' }}
+        run: |
+          make fuzz SEEDS="$SEEDS" FUZZ_SEQUENCES=$FUZZ_SEQUENCES FUZZ_DEPTH=$FUZZ_DEPTH FUZZ_JOBS=3
+      - name: Summarise
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          r = json.loads(pathlib.Path("verification/reports/campaign.json").read_text())
+          t = r["totals"]
+          print(f"{r['verdict']} · {t['shards']} shards · {t['sequences']} sequences · "
+                f"{t['calls']} calls ({t['reverts']} reverted) · {t['invariantEvaluations']} invariant evaluations · "
+                f"{t['violations']} violations · build {r['build']['sourceDigest'][:18]}…")
+          dead = r.get("invariantsNeverEvaluated") or []
+          if dead:
+              raise SystemExit(f"invariants declared but never evaluated: {dead}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: campaign-matrix
+          path: verification/reports/campaign*.json
+          if-no-files-found: error

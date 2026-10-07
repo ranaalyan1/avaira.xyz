@@ -40,16 +40,19 @@ const SLASH_PENALTY: Record<number, number> = {
   3: 20, // BAN
 };
 
+/**
+ * Grade bands. These are **not** free to change: `AvairaReputationRegistry.gradeOfScore`
+ * (contracts/src/core/AvairaReputationRegistry.sol) publishes a grade onchain, and the two
+ * tables must be identical or the same agent has two different grades depending on whether you
+ * read the API or the chain. `services/scorer/test/grade-parity.test.ts` asserts every score
+ * 0–100 against the onchain mapping, and `tools/avaira_evm/attacks.py --id AV-009` asserts it
+ * against the compiled bytecode. See FINDINGS.md AV-009.
+ */
 const GRADE_BANDS: { min: number; grade: string }[] = [
-  { min: 95, grade: "A+" },
-  { min: 90, grade: "A" },
-  { min: 85, grade: "A-" },
-  { min: 80, grade: "B+" },
-  { min: 75, grade: "B" },
-  { min: 70, grade: "B-" },
-  { min: 65, grade: "C+" },
+  { min: 90, grade: "A+" },
+  { min: 80, grade: "A" },
+  { min: 70, grade: "B" },
   { min: 60, grade: "C" },
-  { min: 55, grade: "C-" },
   { min: 0, grade: "D" },
 ];
 

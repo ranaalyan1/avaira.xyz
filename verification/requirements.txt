@@ -1,0 +1,20 @@
+# Verification environment — what `make redteam|fuzz|parity|demo` actually needs.
+#
+# The Python SDK itself only needs web3/eth-account/httpx. The *harness* additionally needs an
+# in-process EVM (eth-tester + py-evm) and a local ABI encoder; `tools/parity` additionally needs
+# keccak without a node. These are the versions every report under verification/reports/ was
+# produced with, pinned because a fuzz report is only reproducible if the EVM is.
+#
+#   python3 -m pip install -r verification/requirements.txt
+#
+web3>=7.0.0,<8
+eth-tester[py-evm]==0.14.0b1
+py-evm==0.12.1b1
+eth-account>=0.13.0
+eth-abi>=5.1.0
+eth-utils>=5.0.0
+hexbytes>=1.2.0
+pycryptodome>=3.20.0
+cryptography>=42.0.0
+requests>=2.31.0
+pytest>=8.0.0

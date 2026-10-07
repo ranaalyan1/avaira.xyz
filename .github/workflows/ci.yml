@@ -12,11 +12,55 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: cd contracts && npm ci
-      - run: cd contracts && npm run compile
+      - run: cd contracts && npm run build
       - run: cd contracts && npm test
+
+  # The claims in FINDINGS.md / audit/ are executable, so CI runs them instead of trusting them:
+  # solc-js build → attack scenarios → cross-language parity → deterministic demo trace → doctor.
+  # Kept off `contracts` because it uses the solc-js build (`node tools/compile.mjs`), not forge, so
+  # the EVM harness works on an image without Foundry.
+  verification:
+    name: Verification (redteam + parity + demo + doctor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      # One source of truth for dependencies: the same target a contributor runs. An earlier
+      # hand-written list here drifted from `make install` and CI failed on a missing solc-js.
+      - name: Install dependencies
+        run: make install
+      - name: Compile (solc-js, Foundry profile)
+        run: node tools/compile.mjs
+      - name: SDK + scorer suites
+        run: |
+          cd sdk/typescript && npm run typecheck && npm test
+          cd ../../services/scorer && npm run typecheck && npm test
+      - name: Attack scenarios (FINDINGS.md tripwire)
+        run: python tools/avaira_evm/attacks.py --json verification/reports/redteam.json
+      - name: Cross-language parity
+        run: python tools/parity/compare.py --json verification/reports/parity.json
+      - name: Deterministic demo trace (must match the committed golden file)
+        run: python tools/demo.py --check
+      - name: Docs and claims self-consistency
+        # Deliberately not `--strict-warnings` yet: three open warnings are real product gaps
+        # (SP-02 gateway missing, SP-06 scorer `main`/`smoke:kimi`) that this PR does not touch.
+        # Tighten this line to --strict-warnings when those land; `make doctor` prints them either way.
+        run: python tools/doctor.py
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-reports
+          path: verification/reports/*.json
+          if-no-files-found: warn
 
   backend:
     name: Backend

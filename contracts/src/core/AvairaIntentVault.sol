@@ -54,11 +54,21 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
     error NoDeviation();
     error EnvelopeMismatch(bytes32 expected, bytes32 provided);
     error ZeroAddress();
+    /// @notice The challenge window would push `attestOutcome`'s deadline past `type(uint64).max`.
+    error ChallengeWindowTooLarge(uint64 requested, uint64 maximum);
 
     /* -------------------------------- constants ------------------------------- */
 
     uint256 private constant MAX_ALLOWED_ACTIONS = 32;
     uint256 private constant MAX_ACTION_LENGTH = 96;
+
+    /// @notice Upper bound on `challengeWindow`.
+    /// @dev `attestOutcome` computes `challengeEndsAt = uint64(block.timestamp) + challengeWindow`.
+    ///      With an unbounded window a single admin transaction (`setChallengeWindow(type(uint64).max)`)
+    ///      makes that addition overflow, so *every* honest attestation reverts and the whole
+    ///      protocol stops. The bound keeps the sum inside uint64 for any plausible timestamp and is
+    ///      enforced in both the constructor and the setter. See FINDINGS.md AV-007.
+    uint64 private constant MAX_CHALLENGE_WINDOW = 3650 days;
     bytes32 private constant DEVIATION_EVIDENCE_DOMAIN = keccak256("Avaira.DeviationEvidence.v1");
 
     /* ---------------------------------- state -------------------------------- */
@@ -107,6 +117,7 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
         if (identityRegistry_ == address(0) || stakeRegistry_ == address(0) || stakeToken_ == address(0) || admin == address(0)) {
             revert ZeroAddress();
         }
+        if (challengeWindow_ > MAX_CHALLENGE_WINDOW) revert ChallengeWindowTooLarge(challengeWindow_, MAX_CHALLENGE_WINDOW);
         identityRegistry = IERC721(identityRegistry_);
         stakeRegistry = IAvairaStakeRegistry(stakeRegistry_);
         stakeToken = IERC20(stakeToken_);
@@ -263,7 +274,9 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
             return;
         }
 
-        bool overSpend = intent.maxSpendUsd > 0 && leaf.spendUsd > intent.maxSpendUsd;
+        // `maxSpendUsd == 0` means "this intent may spend nothing at all", never "unlimited":
+        // guarding on `> 0` let an agent opt out of overspend detection by committing a zero cap.
+        bool overSpend = leaf.spendUsd > intent.maxSpendUsd;
         bool actionOutsideEnvelope = !_isActionAllowed(agentId, intentHash, leaf.action);
         if (!overSpend && !actionOutsideEnvelope) {
             _rejectChallenge(agentId, intentHash, bond);
@@ -317,6 +330,7 @@ contract AvairaIntentVault is AccessControl, ReentrancyGuard, IAvairaIntentVault
     }
 
     function setChallengeWindow(uint64 newWindow) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (newWindow > MAX_CHALLENGE_WINDOW) revert ChallengeWindowTooLarge(newWindow, MAX_CHALLENGE_WINDOW);
         emit ChallengeWindowUpdated(challengeWindow, newWindow);
         challengeWindow = newWindow;
     }

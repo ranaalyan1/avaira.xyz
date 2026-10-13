@@ -101,7 +101,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: cd frontend && yarn install --frozen-lockfile
-      - run: cd frontend && yarn build
-      - run: cd frontend && yarn test --passWithNoTests --watchAll=false
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      # npm ci — the exact command Vercel runs (root vercel.json installCommand), so
+      # CI tests the tree the deploy ships instead of a sibling resolution of it.
+      # frontend/.npmrc pins legacy-peer-deps=true, so the React 19 peers resolve.
+      # This job used to run `yarn install --frozen-lockfile` against a second
+      # lockfile (frontend/yarn.lock, now deleted). The two happened to agree on
+      # every declared range, but nothing kept them in sync and only npm is used by
+      # the deploy — so now there is one lockfile and one tree.
+      - run: cd frontend && npm ci
+      - run: cd frontend && CI=false npm run build
+      - run: cd frontend && CI=true npm test -- --watchAll=false --passWithNoTests

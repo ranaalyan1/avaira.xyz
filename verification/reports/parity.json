@@ -16,8 +16,8 @@
       "status": "skipped"
     },
     "typescript": {
-      "detail": null,
-      "status": "compared"
+      "detail": "tsx not installed \u2014 run `npm ci` in sdk/typescript",
+      "status": "skipped"
     }
   },
   "build": {
@@ -25,7 +25,7 @@
       "name": "solc-js",
       "version": "0.8.37"
     },
-    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "sourceDigest": "0xf618ec08633d9af4a228402d4d7609be67cd997a7cf1b81e3f673484b2237684",
     "viaIR": true
   },
   "corpus": {

@@ -11,11 +11,11 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaIdentityRegistry.sol` |
-| source sha256 | `46a69155421852402eb24ecd92adac11e2c972a0957c524750d6437c876b26ac` |
+| source sha256 | `e170f678a6fbb63de2cafc3ce491ee97d5b3f34e69cc9b5e86e14582f2b7e7cb` |
 | external functions | 52 |
 | events | 19 |
 | custom errors | 27 |
-| deployed bytecode | 12671 bytes |
+| deployed bytecode | 12764 bytes |
 
 ## Functions
 
@@ -59,7 +59,7 @@
 | `0x0af28bd3` | `setAgentURI(uint256,string)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
 | `0x2d1ef5ae` | `setAgentWallet(uint256,address,uint256,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry @dev `signature` is an EIP-712 `AgentWalletSet` authorisation produced by `newWallet`. EOAs are verified with `ecrecover`, contract wallets (e.g. Privy passkey smart accounts) with… |
 | `0xa22cb465` | `setApprovalForAll(address,bool)` | nonpayable | — |
-| `0xcb6e3ef7` | `setEnforcer(address)` | nonpayable | — |
+| `0xcb6e3ef7` | `setEnforcer(address)` | nonpayable | @param newEnforcer The AvairaStakeRegistry that propagates BAN outcomes. Zero is rejected: with no enforcer a BAN at the stake layer could never reach the identity, and the terminal state would silently stop being ter… |
 | `0x466648da` | `setMetadata(uint256,string,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
 | `0x2b8add56` | `setRegistrationBond(uint256)` | nonpayable | — |
 | `0xf0f44260` | `setTreasury(address)` | nonpayable | — |
@@ -72,7 +72,7 @@
 | `0xf2fde38b` | `transferOwnership(address)` | nonpayable | — |
 | `0x61d027b3` | `treasury()` → (address) | view | — |
 | `0x3fddcf19` | `unsetAgentWallet(uint256)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
-| `0x3ccfd60b` | `withdraw()` | nonpayable | @notice Withdraws a refund that could not be pushed to the recipient. |
+| `0x3ccfd60b` | `withdraw()` | nonpayable | @notice Withdraws a refund that could not be pushed to the recipient. @dev If the push fails again (e.g. the recipient is a contract that rejects native value in this code path) the credit is re-escrowed instead of re… |
 
 ## Custom errors
 

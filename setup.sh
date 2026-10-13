@@ -363,20 +363,22 @@ check_full() {
     ok "frontend/node_modules present"
     record "frontend" "ok" "deps present"
   elif [ "$ASSUME_YES" = 1 ]; then
-    # CI uses yarn against frontend/yarn.lock; npm needs --legacy-peer-deps because
-    # the CRA + shadcn dependency tree has long-standing peer conflicts.
+    # npm is the only package manager this repo uses now: ``npm ci`` is what both CI
+    # and Vercel run, against the single lockfile ``frontend/package-lock.json``.
+    # ``npm ci`` is exact but deletes node_modules, so only use it when there is
+    # nothing to preserve; otherwise fall back to a plain install.
     local fe_ok=0
-    if need_cmd yarn && [ -f frontend/yarn.lock ]; then
-      if run_quiet "frontend yarn install" bash -c 'cd frontend && yarn install --frozen-lockfile'; then
-        ok "frontend dependencies installed (yarn)"
-        record "frontend" "ok" "yarn install done"
+    if [ -f frontend/package-lock.json ]; then
+      if run "frontend npm ci" npm --prefix frontend ci --no-audit --no-fund; then
+        ok "frontend dependencies installed (npm ci)"
+        record "frontend" "ok" "npm ci done"
         fe_ok=1
       else
-        note "yarn failed (often a stale local yarn cache) — retrying with npm"
+        note "npm ci failed (no node_modules to reuse, or a lock/package mismatch) — retrying with npm install"
       fi
     fi
     if [ "$fe_ok" = 0 ]; then
-      # npm needs --legacy-peer-deps: the CRA + shadcn tree has long-standing peer conflicts.
+      # npm install needs --legacy-peer-deps: the CRA + shadcn tree has long-standing peer conflicts.
       if run "frontend npm install" npm --prefix frontend install --no-audit --no-fund --legacy-peer-deps; then
         ok "frontend dependencies installed (npm)"
         record "frontend" "ok" "npm install done"

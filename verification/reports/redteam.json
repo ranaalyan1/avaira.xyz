@@ -4,20 +4,21 @@
       "name": "solc-js",
       "version": "0.8.37"
     },
-    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "sourceDigest": "0xf618ec08633d9af4a228402d4d7609be67cd997a7cf1b81e3f673484b2237684",
     "viaIR": true
   },
   "mismatches": [],
   "scenarios": [
     {
       "evidence": {
-        "authorCanRevoke": true,
+        "authorCanRevoke": false,
         "costToGrieve": "minStake (100 USDC) + one feedback call",
         "detailAfterRevoke": "ok",
-        "extremeRecordAccepted": true,
+        "extremeRecordAccepted": false,
         "getSummaryDetail": "ok",
         "getSummaryOk": true,
         "getSummaryOkAfterAuthorRevokes": true,
+        "guard": "ValueOutOfRange(int128)(170141183460469231731687303715884105727)  [AvairaReputationRegistry] src/core/AvairaReputationRegistry.sol:53",
         "wideDecimalsRecordAccepted": true
       },
       "expected": "BLOCKED",
@@ -146,10 +147,10 @@
       "evidence": {
         "deployTimeGuard": "require(enforcer == stakeRegistry) in script/Deploy.s.sol",
         "harnessGuard": "AvairaChain.deploy_stack refuses to boot without the wiring",
-        "identityRegistryBanned": false,
-        "identityRegistryStillActive": true,
+        "identityRegistryBanned": true,
+        "identityRegistryStillActive": false,
         "identityStillOwnedBy": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
-        "propagationFailureEmitted": true,
+        "propagationFailureEmitted": false,
         "residual": "a registry that refuses banAgent still cannot block the slash by design",
         "slashOk": true,
         "stakeRegistryStatus": 4

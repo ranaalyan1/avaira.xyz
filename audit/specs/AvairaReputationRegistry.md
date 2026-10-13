@@ -11,11 +11,11 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaReputationRegistry.sol` |
-| source sha256 | `2830a2f6fc1632267e178760a14197c35b761ef9f0ef6b691e4b14362ee19748` |
+| source sha256 | `e583c05d83749f5ef74cba30c76c0862972ddc98f3548968d8de0d756a23bfd4` |
 | external functions | 32 |
 | events | 9 |
-| custom errors | 19 |
-| deployed bytecode | 13770 bytes |
+| custom errors | 21 |
+| deployed bytecode | 14113 bytes |
 
 ## Functions
 
@@ -75,10 +75,12 @@
 | `0x3beb8e0f` | `PaymentTooSmall(uint256,uint256)` | `AvairaReputationRegistry:42` | — |
 | `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
 | `0x37ee2ff9` | `ReviewerIsAgentOperator(address,uint256)` | `AvairaReputationRegistry:39` | — |
+| `0x7797ab29` | `StringTooLong(string,uint256)` | `AvairaReputationRegistry:54` | — |
 | `0xb8270118` | `UnknownFeedback(uint256,address,uint64)` | `AvairaReputationRegistry:46` | — |
 | `0x0b535f7f` | `UnsupportedSettlementToken(address)` | `AvairaReputationRegistry:41` | — |
 | `0x119605cc` | `UnsupportedTag(string)` | `AvairaReputationRegistry:37` | — |
 | `0x848beaf2` | `ValueDecimalsTooLarge(uint8)` | `AvairaReputationRegistry:49` | — |
+| `0x13ca4d69` | `ValueOutOfRange(int128)` | `AvairaReputationRegistry:53` | — |
 
 ## Events
 

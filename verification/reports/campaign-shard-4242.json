@@ -5,15 +5,15 @@
       "version": "0.8.37"
     },
     "matchesFoundryProfile": true,
-    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "sourceDigest": "0xf618ec08633d9af4a228402d4d7609be67cd997a7cf1b81e3f673484b2237684",
     "viaIR": true
   },
   "calls": 8088,
   "depth": 12,
-  "elapsedSeconds": 391.7,
+  "elapsedSeconds": 306.1,
   "engine": "py-evm (eth-tester) @ Cancun, solc-js build",
   "gas": {
-    "totalUsed": 384565679
+    "totalUsed": 387768422
   },
   "invariantEvaluations": 10186,
   "invariantEvaluationsById": {
@@ -56,8 +56,8 @@
     "AgentIsSuspended(uint256)(2)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 86,
     "AgentIsSuspended(uint256)(3)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 70,
     "AgentIsSuspended(uint256)(4)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 90,
-    "InsufficientCollateral(uint256,uint256)(1, 0)  [AvairaCreditMarket] src/core/Ava": 74,
-    "InsufficientCollateral(uint256,uint256)(1500000000, 0)  [AvairaCreditMarket] src": 53,
+    "InsufficientCollateral(uint256,uint256)(1, 0)  [AvairaCreditMarket] src/core/Ava": 63,
+    "InsufficientCollateral(uint256,uint256)(1500000000, 0)  [AvairaCreditMarket] src": 48,
     "InsufficientStake(uint256,uint256)(500000000, 1000000000)  [AvairaStakeRegistry]": 50,
     "NotAuthorized(address)(0x0e3957d7aca68b729d388baf6b26655160a4b224)  [AvairaIdent": 45,
     "NotAuthorized(address)(0xd41c057fd1c78805aac12b0a94a405c0461a6fbb)  [AvairaIdent": 47,
@@ -72,11 +72,11 @@
     "ValueDecimalsTooLarge(uint8)(19)  [AvairaReputationRegistry] src/core/AvairaRepu": 56,
     "ZeroAmount()()  [AvairaStakeRegistry] src/core/AvairaStakeRegistry.sol:42": 222
   },
-  "reverts": 3247,
+  "reverts": 3261,
   "schema": "avaira.campaign-report/v1",
   "seed": 4242,
   "sequences": 500,
-  "throughputCallsPerSecond": 20.6,
+  "throughputCallsPerSecond": 26.4,
   "transitions": 5855,
   "verdict": "PASS",
   "violations": []

@@ -399,6 +399,18 @@ def main() -> int:
     rendered["README.md"] = "\n".join(index) + "\n"
 
     if args.check:
+        # Without eth_utils every selector renders as "—", so a degraded run would compare its
+        # own dashes against committed dashes and call the specs fresh. A check that cannot see
+        # the hashes must not certify them: fail and name the interpreter that can.
+        if keccak4("probe()") == "—":
+            print(
+                "cannot verify specs: eth_utils is not importable here, so 4-byte selectors\n"
+                "  would render as '—' and the comparison would silently pass.\n"
+                "  Re-run with an interpreter that has it: .venv/bin/python tools/gen_contract_specs.py --check",
+                file=sys.stderr,
+            )
+            return 1
+
         stale = []
         for n, body in rendered.items():
             dest = OUT_DIR / n

@@ -11,11 +11,11 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaCreditMarket.sol` |
-| source sha256 | `c7c9fe55787fd6f2aed395aeb7016efff76ddfc01d014b4e9fd90ef7cae0f0ed` |
-| external functions | 32 |
-| events | 7 |
-| custom errors | 12 |
-| deployed bytecode | 5119 bytes |
+| source sha256 | `fdf630e74e9b69db894265cec95d5fe80684278f907a57cb18801b45146bfd3a` |
+| external functions | 33 |
+| events | 8 |
+| custom errors | 14 |
+| deployed bytecode | 5579 bytes |
 
 ## Functions
 
@@ -53,6 +53,7 @@
 | `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
 | `0x15770f92` | `totalLiquidity()` → (uint256) | view | — |
 | `0x16078d04` | `totalOutstanding()` → (uint256) | view | — |
+| `0x767a7b05` | `withdrawCollateral(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket @dev Collateral that is not securing outstanding debt is the agent's own capital and must be recoverable — otherwise the only way collateral ever leaves this contract is a liquidation. … |
 
 ## Custom errors
 
@@ -61,12 +62,14 @@
 | `0x6697b232` | `AccessControlBadConfirmation()` | `AvairaIntentVault:0` | — |
 | `0xe2517d3f` | `AccessControlUnauthorizedAccount(address,bytes32)` | `AvairaIntentVault:0` | — |
 | `0x56172fd6` | `AgentIsBanned(uint256)` | `AvairaIntentVault:40` | — |
-| `0xb07e3bc4` | `InsufficientCollateral(uint256,uint256)` | `AvairaCreditMarket:32` | — |
-| `0xa17e11d5` | `InsufficientLiquidity(uint256,uint256)` | `AvairaCreditMarket:33` | — |
+| `0x4d5289b7` | `AgentNotEligibleForCredit(uint256,uint8)` | `AvairaCreditMarket:37` | — |
+| `0x4436949f` | `CollateralTooSmall(uint256,uint256)` | `AvairaCreditMarket:38` | — |
+| `0xb07e3bc4` | `InsufficientCollateral(uint256,uint256)` | `AvairaCreditMarket:33` | — |
+| `0xa17e11d5` | `InsufficientLiquidity(uint256,uint256)` | `AvairaCreditMarket:34` | — |
 | `0x4b03c457` | `NotAgentOperator(uint256,address)` | `AvairaIntentVault:41` | — |
-| `0x20be17d1` | `NotLiquidatable(uint256,uint256,uint256)` | `AvairaCreditMarket:34` | — |
+| `0x20be17d1` | `NotLiquidatable(uint256,uint256,uint256)` | `AvairaCreditMarket:35` | — |
 | `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
-| `0x3eb67429` | `RepayTooMuch(uint256,uint256)` | `AvairaCreditMarket:35` | — |
+| `0x3eb67429` | `RepayTooMuch(uint256,uint256)` | `AvairaCreditMarket:36` | — |
 | `0x5274afe7` | `SafeERC20FailedOperation(address)` | `AvairaIntentVault:0` | — |
 | `0xd92e233d` | `ZeroAddress()` | `AvairaIntentVault:56` | — |
 | `0x1f2a2005` | `ZeroAmount()` | `AvairaStakeRegistry:42` | — |
@@ -77,6 +80,7 @@
 | --- | --- |
 | `Borrowed(uint256 indexed, address indexed, uint256, uint256, uint8)` | 2/5 |
 | `CollateralDeposited(uint256 indexed, address indexed, uint256)` | 2/3 |
+| `CollateralWithdrawn(uint256 indexed, address indexed, uint256)` | 2/3 |
 | `Liquidated(uint256 indexed, address indexed, uint256, uint256)` | 2/4 |
 | `Repaid(uint256 indexed, address indexed, uint256, uint256)` | 2/4 |
 | `RoleAdminChanged(bytes32 indexed, bytes32 indexed, bytes32 indexed)` | 3/3 |

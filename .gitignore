@@ -98,3 +98,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 build/avaira/
+
+# Deployment gate run artifacts (written by `make verify-deploy` / `make verify-monad`).
+# The scripts' *reports* are inputs to a submission decision, not source: regenerate
+# them with the command rather than committing a stale copy of someone's run.
+verification/reports/deployed.json
+verification/reports/monad.json

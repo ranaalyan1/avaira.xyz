@@ -11,11 +11,11 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaStakeRegistry.sol` |
-| source sha256 | `7a3dade2a1d40195034aeb146893f7aaf48b18c930145594d95d9346e58f71fc` |
+| source sha256 | `0f6a4796d7b4a7826c2561f0b1814570eda841111609c6bcf54f852b84b09296` |
 | external functions | 39 |
 | events | 14 |
 | custom errors | 16 |
-| deployed bytecode | 8182 bytes |
+| deployed bytecode | 8419 bytes |
 
 ## Functions
 

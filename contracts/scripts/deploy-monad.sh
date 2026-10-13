@@ -16,7 +16,25 @@ if [[ -f .env ]]; then
   set +a
 fi
 
-: "${DEPLOYER_PRIVATE_KEY:?Set DEPLOYER_PRIVATE_KEY in contracts/.env (see .env.example)}"
+# MONAD_DEPLOYER_KEY is accepted as an alias so the name used in the docs and the
+# name used by other tooling both work; DEPLOYER_PRIVATE_KEY stays canonical.
+DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-${MONAD_DEPLOYER_KEY:-}}"
+export DEPLOYER_PRIVATE_KEY
+
+if [[ -z "$DEPLOYER_PRIVATE_KEY" ]]; then
+  cat >&2 <<'MSG'
+✗ no deployer key — nothing was broadcast.
+
+  Three steps to a real deployment:
+    1. Fund a wallet at https://faucet.monad.xyz          (testnet MON)
+    2. cd contracts && cp .env.example .env               then set DEPLOYER_PRIVATE_KEY=0x…
+    3. make deploy-monad                                  writes deployments/10143.json
+
+  No key yet? `make deploy-dry-run` proves the wiring in-process and spends nothing.
+MSG
+  exit 1
+fi
+
 RPC="${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz}"
 CHAIN_ID=$(cast chain-id --rpc-url "$RPC")
 
@@ -43,7 +61,26 @@ forge script script/Deploy.s.sol:DeployAvaira \
 echo
 echo "✓ deployment manifest written to deployments/$CHAIN_ID.json"
 echo
+
+# Fold forge's broadcast receipts in: the manifest gets the deploy tx hashes (what an
+# explorer link or a judge actually needs), not just the addresses the script knows.
+REPO_ROOT="$(cd .. && pwd)"
+if [[ -f "broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json" ]]; then
+  python3 "$REPO_ROOT/tools/merge_deploy_txs.py" --chain "$CHAIN_ID" || {
+    echo "! tx hashes were not merged into the manifest — re-run: python3 tools/merge_deploy_txs.py --chain $CHAIN_ID" >&2
+  }
+else
+  echo "! no broadcast record found for chain $CHAIN_ID — tx hashes not merged" >&2
+fi
+
+echo
+# Liveness first (is it deployed and wired?), then source verification (is it readable?).
+python3 "$REPO_ROOT/tools/verify_monad.py" --chain "$CHAIN_ID" || {
+  echo "! liveness check failed — the addresses in deployments/$CHAIN_ID.json are not all live" >&2
+  exit 1
+}
+echo
 bash scripts/verify-monad.sh "$CHAIN_ID" || {
-  echo "! verification failed — deploy succeeded, re-run: make verify-monad" >&2
+  echo "! source verification failed — the deploy succeeded, re-run: make verify-monad-explorer" >&2
   exit 1
 }

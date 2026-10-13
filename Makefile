@@ -15,6 +15,7 @@
 #   make specs         regenerate audit/specs from the build
 #   make doctor        repo self-consistency: claims vs checks
 #   make verify        compile + check + redteam + parity + demo + doctor
+#   make verify-deploy assert the deployed site is really serving AVAIRA (URL=…)
 #
 # Everything reads contracts/.env (see contracts/.env.example).
 
@@ -37,7 +38,7 @@ REPORTS := verification/reports
         deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
         gateway dashboard score leaderboard demo-heist demo-sybil anvil \
         smoke-kimi smoke-privy fmt clean legacy-dev \
-        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify
+        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
@@ -135,6 +136,16 @@ demo-check: compile
 
 doctor:
 	$(PY) tools/doctor.py
+
+# ── Deployed site ───────────────────────────────────────────────────────────────
+
+# The last mile: a green CI build says the bundle compiles, not that the URL
+# serves it. Checks /, the SPA deep links, both bundles and the static files
+# against a live host (default https://avaira.vercel.app; override URL= for a
+# preview deployment).
+verify-deploy:
+	$(PY) tools/verify_deploy.py $(URL) --json $(REPORTS)/deployed.json
+
 
 verify: compile
 	@$(MAKE) --no-print-directory test-sdk test-scorer

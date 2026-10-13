@@ -16,6 +16,13 @@
 [![Coverage](https://img.shields.io/badge/Core_Coverage-94.4%25-10B981?style=for-the-badge)](contracts/metrics/coverage.txt)
 [![SDKs](https://img.shields.io/badge/SDK-TypeScript_%7C_Python_%7C_Rust-F59E0B?style=for-the-badge)](sdk/)
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Franaalyan1%2Favaira.xyz&project-name=avaira&repository-name=avaira&root-directory=frontend)
+
+<sub>The site is **not live yet** — `avaira.vercel.app` currently returns Vercel's 404, because the
+project is no longer connected to this repository. The button above (or the
+[deploy runbook](docs/deploy-vercel.md)) is the one step that fixes it; `make verify-deploy`
+then proves the URL is serving the app.</sub>
+
 [**Overview**](#-why-avaira) •
 [**3-Layer Architecture**](#-three-layer-architecture) •
 [**Smart Contracts**](#-on-chain-protocol-monad--erc-8004) •

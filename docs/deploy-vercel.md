@@ -99,8 +99,53 @@ or [Path B](#path-b--deploy-from-github-actions) below.
 5. **Deploy.** The production URL is `<project>.vercel.app`; add `avaira.xyz`
    under *Settings → Domains* when you are ready to cut over DNS.
 
+6. **Prove it, then update the two honesty markers.** Run `make verify-deploy`
+   (see below) and expect `✓ https://avaira.vercel.app is serving AVAIRA`. Only
+   after that:
+   * delete the "The site is **not live yet**" note under the deploy button in
+     `README.md`, and
+   * if you want the status badge, add it next to the other shields:
+     `[![Live](https://img.shields.io/badge/Protocol_Control_Center-avaira.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://avaira.vercel.app)`
+   Both are deliberately left out of the repo while the URL 404s: a badge that
+   links to a not-found page is an overclaim, and `tools/doctor.py` exists
+   precisely to keep the docs from drifting away from reality.
+
 Every push to `main` then deploys automatically (Vercel Git integration), and
 every branch/PR gets a preview URL.
+
+### One-click instead of steps 1–3
+
+The README carries a **Deploy with Vercel** button that opens the import flow with
+the repository and the project name `avaira` pre-filled:
+
+```
+https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Franaalyan1%2Favaira.xyz
+  &project-name=avaira&repository-name=avaira&root-directory=frontend
+```
+
+Vercel still asks you to pick the account/team and confirm the build settings —
+that is by design; the button cannot silently deploy someone else's code.
+
+### Verify the deployment, don't assume it
+
+A green Vercel build proves the bundle compiled, not that the URL serves it. The
+repo ships the check for the live host:
+
+```bash
+make verify-deploy                                  # https://avaira.vercel.app
+make verify-deploy URL=https://avaira-git-main.vercel.app   # any preview URL
+python3 tools/verify_deploy.py --json verification/reports/deployed.json
+```
+
+It asserts that `/` returns HTML with the AVAIRA title, that the response is
+**not** Vercel's `NOT_FOUND` page, that every deep link (`/gate`, `/score`,
+`/evidence`, `/docs`) returns the same SPA shell bytes as `/` — the rewrite, not
+just the homepage — that both bundles download at full size, and that
+`robots.txt` / `sitemap.xml` are served. Exit code 1 on any failure, and each
+verdict (`not-deployed`, `unreachable`, `error`, `broken`) prints its own cause
+and fix instead of a generic stack trace. Run it from a machine with open egress:
+a sandbox without internet reports `unreachable`, which says nothing about the
+deployment.
 
 ### Verified build command
 

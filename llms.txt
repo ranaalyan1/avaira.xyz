@@ -1,0 +1,33 @@
+# Avaira
+
+> Real-time accountability, a deterministic cognitive OS, and pre-execution
+> execution control for autonomous AI agents on Monad + ERC-8004. Proof-of-Intent,
+> a free `checkGate` circuit breaker, stake-backed reputation, and a 0–100 Avaira
+> Score — enforced before an agent acts instead of audited afterwards.
+
+## Setup (start here)
+
+- [AGENTS.md](https://github.com/ranaalyan1/avaira.xyz/blob/main/AGENTS.md): Instructions, permission manifest and failure playbook for an AI agent setting the repo up unattended.
+- [SETUP.md](https://github.com/ranaalyan1/avaira.xyz/blob/main/SETUP.md): Human setup guide — one-command install, four levels, flags, what gets created, troubleshooting.
+- [setup.sh](https://github.com/ranaalyan1/avaira.xyz/blob/main/setup.sh): The single entry point. `./setup.sh` (~7s: venv + deps + 4/4 proof artifacts + 21/21 kernel tests), `--dev` (SDKs + scorer), `--full` (contracts + frontend), `--serve` (browser Quickstart Console on :8402), `--check` (doctor), `--json` (machine-readable).
+
+## Core concepts
+
+- [README](https://github.com/ranaalyan1/avaira.xyz/blob/main/README.md): Architecture overview, the pre-execution gate, the Avaira Score, gas benchmarks and coverage.
+- [Cognitive OS v5.0](https://github.com/ranaalyan1/avaira.xyz/blob/main/docs/cognitive-os-v5.md): The offline PLAN → PROVE → SIMULATE → EXECUTE kernel — interval-arithmetic prover, 200× Monte-Carlo sandbox, hardened execution gate.
+- [Security architecture](https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md): Tamper-evident intent logging, OPA + SLM shield pipeline, TEE attestation, disclosure policy.
+- [Chainless trust model](https://github.com/ranaalyan1/avaira.xyz/blob/main/CHAINLESS.md): Sub-50ms hash-chain enforcement for off-chain enterprise deployments.
+
+## SDKs and services
+
+- [TypeScript SDK](https://github.com/ranaalyan1/avaira.xyz/tree/main/sdk/typescript): `@avaira/sdk` v2 — viem-based on-chain gate and Merkle audit trail.
+- [Python SDK](https://github.com/ranaalyan1/avaira.xyz/tree/main/sdk/python): `avaira` v2 — web3.py RiskEnvelope and AuditTrail.
+- [Agent frameworks](https://github.com/ranaalyan1/avaira.xyz/tree/main/sdk/avaira_shield): LangChain and CrewAI drop-in protection.
+- [Scorer service](https://github.com/ranaalyan1/avaira.xyz/tree/main/services/scorer): Deterministic six-component Avaira Score engine.
+- [Contracts](https://github.com/ranaalyan1/avaira.xyz/tree/main/contracts): Six Solidity contracts (Identity, Reputation, Validation, IntentVault, Stake, CreditMarket) with 123 Foundry tests.
+
+## Notes for agents
+
+- The verified setup path needs no credentials: never ask the user for API keys, a private key, a wallet or funds to complete setup.
+- Deploying to Monad (`make deploy-monad`) is the only step that needs a funded wallet, and it must be explicitly requested by the user.
+- Prefer `./setup.sh --yes --json` over hand-rolled install commands; it is idempotent and reports structured results on stdout.

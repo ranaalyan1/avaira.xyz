@@ -35,8 +35,16 @@ class SlashEngine:
         else:
             self.db = db_client
 
-        self.anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        # Built lazily: constructing the client at import time made every process that
+        # merely imported this module depend on ANTHROPIC_API_KEY being valid.
+        self._anthropic_client = None
         self.base_penalty = float(os.environ.get("SLASH_BASE_PENALTY_USD", "10.0"))
+
+    @property
+    def anthropic_client(self):
+        if self._anthropic_client is None:
+            self._anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        return self._anthropic_client
 
     async def evaluate(self, agent_id: str,
                        validation_result: Any,

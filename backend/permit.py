@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict
@@ -10,6 +12,7 @@ from eth_account.messages import encode_typed_data
 from eth_utils.address import to_checksum_address
 from eth_utils.crypto import keccak
 
+logger = logging.getLogger(__name__)
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
@@ -95,44 +98,108 @@ def generate_permit(agent_address: str, action: str, target: str, value: float |
     }
 
 
-def verify_permit(permit: Dict[str, Any], signature: str, agent_address: str) -> bool:
-    typed_data = {
-        "types": {
-            "EIP712Domain": [
-                {"name": "name", "type": "string"},
-                {"name": "version", "type": "string"},
-                {"name": "chainId", "type": "uint256"},
-                {"name": "verifyingContract", "type": "address"},
-            ],
-            "ExecutionPermit": [
-                {"name": "agent", "type": "address"},
-                {"name": "action", "type": "string"},
-                {"name": "target", "type": "address"},
-                {"name": "value", "type": "uint256"},
-                {"name": "nonce", "type": "uint256"},
-                {"name": "deadline", "type": "uint256"},
-            ],
-        },
-        "primaryType": "ExecutionPermit",
-        "domain": {
-            "name": "AvairaProtocol",
-            "version": "1",
-            "chainId": int(permit.get("chainId", 43113) or 43113),
-            "verifyingContract": to_checksum_address(permit.get("verifyingContract") or os.environ.get("EXECUTION_WALLET_ADDRESS", ZERO_ADDRESS) or ZERO_ADDRESS),
-        },
-        "message": {
-            "agent": to_checksum_address(permit["agent"]),
-            "action": permit["action"],
-            "target": to_checksum_address(permit["target"]),
-            "value": int(permit["value"]),
-            "nonce": int(permit["nonce"]),
-            "deadline": int(permit["deadline"]),
-        },
-    }
-    signable = encode_typed_data(full_message=typed_data)
-    recovered = Account.recover_message(signable, signature=signature)
-    accepted_signers = {
-        to_checksum_address(agent_address).lower(),
-        _permit_signer().address.lower(),
-    }
-    return recovered.lower() in accepted_signers
+def verify_permit(
+    permit: Dict[str, Any],
+    signature: str,
+    agent_address: str,
+    *,
+    now: int | None = None,
+) -> bool:
+    """Verify an execution permit against the protocol signer.
+
+    Rules enforced here (all of them were previously missing or too weak):
+
+    * the signature must be produced by the *protocol* signer — accepting the agent's
+      own address as a valid signer made every agent able to self-issue permits, which
+      defeats the point of the protocol co-signing an execution;
+    * the permit must be scoped to ``agent_address`` (otherwise a permit signed for
+      agent A authorises agent B);
+    * the permit's ``deadline`` must still be in the future (expired permits were
+      accepted forever);
+    * malformed input is rejected, not raised — this is a verifier that may be fed
+      hostile payloads.
+
+    Replay protection is intentionally *not* implemented here (it needs storage):
+    callers must consume ``permit["nonce"]`` once via :class:`PermitNonceRegistry`.
+    """
+    try:
+        if not signature or not permit:
+            return False
+
+        permit_agent = to_checksum_address(permit["agent"])
+        if permit_agent.lower() != to_checksum_address(agent_address).lower():
+            return False
+
+        deadline = int(permit["deadline"])
+        if deadline <= int(time.time() if now is None else now):
+            return False
+
+        typed_data = {
+            "types": {
+                "EIP712Domain": [
+                    {"name": "name", "type": "string"},
+                    {"name": "version", "type": "string"},
+                    {"name": "chainId", "type": "uint256"},
+                    {"name": "verifyingContract", "type": "address"},
+                ],
+                "ExecutionPermit": [
+                    {"name": "agent", "type": "address"},
+                    {"name": "action", "type": "string"},
+                    {"name": "target", "type": "address"},
+                    {"name": "value", "type": "uint256"},
+                    {"name": "nonce", "type": "uint256"},
+                    {"name": "deadline", "type": "uint256"},
+                ],
+            },
+            "primaryType": "ExecutionPermit",
+            "domain": {
+                "name": "AvairaProtocol",
+                "version": "1",
+                "chainId": int(permit.get("chainId", 43113) or 43113),
+                "verifyingContract": to_checksum_address(permit.get("verifyingContract") or os.environ.get("EXECUTION_WALLET_ADDRESS", ZERO_ADDRESS) or ZERO_ADDRESS),
+            },
+            "message": {
+                "agent": permit_agent,
+                "action": permit["action"],
+                "target": to_checksum_address(permit["target"]),
+                "value": int(permit["value"]),
+                "nonce": int(permit["nonce"]),
+                "deadline": deadline,
+            },
+        }
+        signable = encode_typed_data(full_message=typed_data)
+        recovered = Account.recover_message(signable, signature=signature)
+    except Exception as exc:  # malformed permit, bad signature hex, unknown address…
+        logger.warning("permit verification rejected malformed input: %s", exc)
+        return False
+
+    expected_signer = _permit_signer().address
+    return recovered.lower() == expected_signer.lower()
+
+
+class PermitNonceRegistry:
+    """Single-use nonce bookkeeping for execution permits.
+
+    Backed by a unique ``(agent_id, nonce)`` index on ``db.permit_nonces``: the insert
+    either wins (permit may execute) or trips the duplicate-key error (replay). The
+    previous code created a unique index on ``agent_id`` alone and never queried it, so
+    a captured permit could be replayed indefinitely.
+    """
+
+    def __init__(self, collection):
+        self.collection = collection
+
+    async def consume(self, agent_address: str, nonce: int) -> bool:
+        """Atomically mark ``(agent, nonce)`` as used. False means it was already used."""
+        from pymongo.errors import DuplicateKeyError
+
+        document = {
+            "agent_id": to_checksum_address(agent_address).lower(),
+            "nonce": int(nonce),
+            "used_at": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            await self.collection.insert_one(document)
+            return True
+        except DuplicateKeyError:
+            return False

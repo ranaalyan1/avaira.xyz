@@ -1,0 +1,30 @@
+{
+  "name": "Avaira",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  // Setup runs itself on create: ~7s, no keys, no wallet, no database.
+  "postCreateCommand": "./setup.sh --yes",
+  "forwardPorts": [8402],
+  "portsAttributes": {
+    "8402": {
+      "label": "Avaira Quickstart Console",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "NomicFoundation.hardhat-solidity"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}

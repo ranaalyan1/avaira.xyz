@@ -54,7 +54,8 @@
       "info": "#2563EB",
       "hairline": "#E8E9EC",
       "hairline_strong": "#D5D8DD"
-    }
+    },
+    "third_scope": "Image scope. `.hero` and `.band` on the landing page sit on photographs and re-declare the type tokens for a dark ground (--text-primary: 255 255 255, --text-secondary, --text-muted, a brighter --accent, --hairline-art). The same .mk- utilities stay readable there without any component knowing that it is standing on art."
   },
   "colors": {
     "rule": "Red means danger only — frozen agents, slashed collateral, blocked intents, destructive actions. Everything else (navigation, primary buttons, links, focus rings, charts) uses the indigo accent.",
@@ -100,20 +101,36 @@
   },
   "visual_enhancers": {
     "allowed": [
-      "Pastel glow blobs (.mk-glow) behind hero and CTA content on the marketing surface",
-      "Fine grid background (.mk-grid-bg) with a radial mask at the top of marketing pages",
-      "Protocol artefacts as first-class visuals: gate traces (stage/ms/payload rows), the 3D corridor, the GateReason enum, the score ladder",
-      "Scroll-scrubbed motion (anime.js ScrollObserver) where the page position drives the animation, and it runs backwards on the way up",
-      "Pointer tilt on hero art (usePointerTilt) — fine pointers only, a few degrees, never on data tables",
+      "Full-bleed rendered frames in public/art (webp), each with a written alt text",
+      "Scroll-scrubbed art bands: perspective lift, scale settle and parallax on the frame, copy revealed on the same scroll position",
+      "Pastel glow blobs (.mk-glow) behind the closing CTA",
+      "Fine grid background (.mk-grid-bg) on the hero and the sign-in page",
+      "Protocol artefacts as first-class visuals: gate traces, the 3D corridor, the GateReason enum, the score ladder",
       "Count-ups and reveal-in on scroll, created only through hooks in src/lib/motion.js"
     ],
     "disallowed": [
       "Neon glows, scanlines, glitch text",
-      "Emoji or symbol glyphs (arrows, checkmarks, keyboard glyphs) standing in for an icon or a sentence — use lucide-react icons or words",
+      "Emoji or symbol glyphs standing in for an icon or a sentence — lucide-react or words",
+      "Pricing surfaces, tiers, per-check charges and revenue projections: the marketing page states mechanism and measured figures only",
       "Gradients over text",
+      "Bitmap screenshots of the console as decoration — the frames are rendered objects, not UI captures",
       "Literal hex values in components — only lib/palette.js and the marketing mock frames carry hex",
-      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js so reduced motion and static rendering stay correct"
+      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js"
     ]
+  },
+  "art_direction": {
+    "rule": "One rendered object per claim, on black, with the protocol's colour. No stock, no screenshots, no illustration.",
+    "palette_lock": "Every frame is restricted to near-black #08090C, indigo #6E6BF2, violet #9A6BFF plus neutral metal and glass. A frame that introduces another hue is regenerated.",
+    "assets": {
+      "hero-gate": "/art/hero-gate.webp — a card of light passing through four glass planes (hero)",
+      "gate-3d": "/art/gate-3d.webp — a glass gate with wireframe threads (pillar: Clear)",
+      "score-3d": "/art/score-3d.webp — concentric machined rings (pillar: Rate)",
+      "underwrite-3d": "/art/underwrite-3d.webp — a bonded plate on a slab (pillar: Insure)",
+      "decision-3d": "/art/decision-3d.webp — one lit channel splitting from a sealed one (the fork)",
+      "underwriter-network": "/art/underwriter-network.webp — a lattice of lit spheres (underwriting)"
+    },
+    "processing": "Rendered large, shipped as webp with -strip at quality 78 (276 kB for the set). Keep the webp as the only committed artifact.",
+    "composition": "Frames leave an empty dark side for type: hero and the first band are copy-left, the closing band is copy-right. The veil gradient is part of the component, not the render."
   },
   "motion": {
     "library": "anime.js 4.x (dependencies: animejs ^4.5.0)",
@@ -139,7 +156,7 @@
     }
   },
   "page_specific_rules": {
-    "landing": "Light scope. Hero states the gate rule and prints two gate traces; pillars (Rate/Clear/Insure); the 3D corridor scrubbed by scroll; the nine GateReason refusals; measured evidence; the score weights and ladder; the penalty state machine; the four fee streams; one-line integration with the SDK snippet and the standards it uses; three tiers; FAQ; multi-column footer.",
+    "landing": "Light scope inside an image scope. Full-bleed hero frame with the headline over its dark half; pillars as image tiles; the 3D corridor and the two gate traces; a decision band; the nine GateReason refusals; measured evidence; score weights and ladder; the penalty state machine; an underwriting band carrying the four fee streams; one-line integration with the SDK snippet and the standards it uses; FAQ; closing CTA; multi-column footer. No pricing block, no projections.",
     "login": "Light scope, single card, OAuth buttons at full width.",
     "dashboard": "Stat tiles on a 12-column grid, telemetry charts using CHART_COLORS, activity feed with status pills.",
     "execution_flow": "Vertical lifecycle rail with .timeline-line/.timeline-dot; blocked executions render in --danger.",

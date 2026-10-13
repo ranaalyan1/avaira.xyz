@@ -45,12 +45,7 @@
             "description": "Pre-execution control for autonomous agents. Checks every intent against a risk envelope, a policy file and a symbolic prover, then issues a single-use permit for the ones that clear.",
             "url": "https://avaira.xyz",
             "applicationCategory": "Blockchain",
-            "operatingSystem": "Web",
-            "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-            }
+            "operatingSystem": "Web"
         }
         </script>
 
@@ -113,6 +108,10 @@
             .avaira-static-table td{padding:13px 16px;border-bottom:1px solid var(--hairline);color:var(--muted)}
             .avaira-static-table td:first-child{color:var(--ink);font-weight:500}
             .avaira-static-table .right{text-align:right;font-family:'JetBrains Mono',monospace}
+            .avaira-static-hero-art{width:100%;max-width:1040px;height:auto;display:block;margin:44px auto 0;border-radius:18px;border:1px solid #22252E;box-shadow:0 40px 80px -40px rgba(8,24,84,0.55)}
+            .avaira-static-streams{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:32px}
+            .avaira-static-streams h3{font-weight:600;font-size:14px;letter-spacing:-0.01em;margin:0 0 6px;color:var(--ink)}
+            .avaira-static-streams p{font-size:13px;color:var(--muted);margin:0;line-height:1.6}
             .avaira-static-code{background:#0C0E12;border:1px solid #22252E;border-radius:14px;padding:22px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#A8B0BF;white-space:pre;overflow-x:auto;line-height:1.75;margin-top:32px}
             .avaira-static-cta{text-align:center;max-width:760px;margin:0 auto;padding:88px 24px}
             .avaira-static-cta h2 em{font-style:normal;color:var(--accent)}
@@ -169,6 +168,10 @@
                         <a class="avaira-static-btn secondary" href="/login">Sign in</a>
                     </div>
                     <p class="avaira-static-meta">Committed before execution · Single-use permits · Prover witnesses</p>
+
+                    <img class="avaira-static-hero-art" src="/art/hero-gate.webp"
+                         alt="A card of light passing through four glass planes in the dark"
+                         width="1376" height="768" decoding="async" />
 
                     <dl class="avaira-static-stats">
                         <div><dt>6</dt><dd>Core contracts</dd></div>
@@ -239,18 +242,13 @@
                 <section class="avaira-static-section" aria-labelledby="revenue-heading">
                     <p class="avaira-static-label">Revenue architecture</p>
                     <h2 id="revenue-heading">Four fee streams, all of them from settled activity.</h2>
-                    <table class="avaira-static-table">
-                        <thead>
-                            <tr><th>Stream</th><th>Description</th><th class="right">Year 1</th><th class="right">Year 5</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Registration</td><td>Free, Growth at $200/mo, Enterprise at $2,000/mo. Not metered by intent or agent.</td><td class="right">$1.2M</td><td class="right">$240M</td></tr>
-                            <tr><td>Underwriting spread</td><td>5% of every settled mission, split across the backers</td><td class="right">$2M</td><td class="right">$400M</td></tr>
-                            <tr><td>Slashing share</td><td>20% of slashed collateral reaches the treasury; the rest compensates the pool</td><td class="right">$500K</td><td class="right">$50M</td></tr>
-                            <tr><td>Data and scores</td><td>Per-query access to scores, refusal history and settlement records</td><td class="right">$300K</td><td class="right">$80M</td></tr>
-                            <tr><td>Total</td><td>Year five of the plan, not a forecast of demand</td><td class="right">$4M</td><td class="right">$770M</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="avaira-static-streams">
+                        <article><h3>Underwriting spread</h3><p>5% of every settled mission, split across the backers.</p></article>
+                        <article><h3>Slashing share</h3><p>20% of slashed collateral reaches the treasury; the rest compensates the pool.</p></article>
+                        <article><h3>Anchoring</h3><p>Merkle roots committed on chain, batched across each agent's intents.</p></article>
+                        <article><h3>Data and scores</h3><p>Per-query access to scores, refusal history and settlement records.</p></article>
+                    </div>
+                    <p class="avaira-static-sub" style="margin-left:0;text-align:left">The protocol earns when a mission settles or when collateral is slashed, never for sitting in the path. There are no tiers and no per-check charge.</p>
                 </section>
 
                 <!-- SDK -->

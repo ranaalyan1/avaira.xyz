@@ -88,7 +88,7 @@ describe("landing page", () => {
   });
 
   it("keeps the section anchors the nav links to", () => {
-    for (const anchor of ["#pillars", "#execution", "#moats", "#revenue", "#pricing", "#sdk", "#faq"]) {
+    for (const anchor of ["#pillars", "#execution", "#moats", "#revenue", "#sdk", "#faq"]) {
       expect(html).toContain(`href="${anchor}"`);
     }
   });
@@ -97,11 +97,39 @@ describe("landing page", () => {
     expect(html).toContain("theme-marketing");
   });
 
-  it("keeps the headline, the SDK snippet and the revenue table", () => {
-    expect(html).toContain("Nothing spends until the gate says yes.");
+  it("keeps the headline, the SDK snippet and the fee streams", () => {
+    expect(html).toContain("Nothing spends");
+    expect(html).toContain("until the gate says yes.");
     expect(html).toContain("AvairaClient");
     expect(html).toContain("Four fee streams, all of them from settled activity.");
-    expect(html).toContain("$770M");
+    expect(html).toContain("85, 10 and 5 split");
+  });
+
+  // The page carries no pricing surface and no revenue projections: a figure a
+  // reader cannot check against the repository is a claim, not a fact, and the
+  // marketing surface only makes the second kind.
+  it("has no pricing surface, no anchor to one and no money figures", () => {
+    expect(html).not.toContain('href="#pricing"');
+    expect(html).not.toMatch(/\$[0-9]/);
+    expect(html.toLowerCase()).not.toContain("pricing");
+    expect(html.toLowerCase()).not.toContain("per month");
+  });
+
+  // The art direction: every band and tile that carries a rendered frame loads
+  // it from /art, and the frames are described for anyone who cannot see them.
+  it("carries the rendered art for every image slot", () => {
+    for (const art of [
+      "/art/hero-gate.webp",
+      "/art/gate-3d.webp",
+      "/art/score-3d.webp",
+      "/art/underwrite-3d.webp",
+      "/art/decision-3d.webp",
+      "/art/underwriter-network.webp",
+    ]) {
+      expect(html).toContain(art);
+    }
+    expect(html).toContain('data-testid="decision-band"');
+    expect(html.match(/alt="/g).length).toBeGreaterThanOrEqual(8);
   });
 
   // The page is built from the protocol's own artefacts — corridors, traces,

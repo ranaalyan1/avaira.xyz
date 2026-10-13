@@ -65,7 +65,10 @@ fi
 # ── 2. repo self-consistency ───────────────────────────────────────────────────
 step "Doctor (claims vs checks)"
 if $PY tools/doctor.py >/tmp/avaira-doctor.log 2>&1; then
-  record PASS "doctor" "$(grep -cE '^\[ ok \]' /tmp/avaira-doctor.log) checks clean"
+  # Quote doctor's own summary rather than recounting by hand: the two disagree by exactly the
+  # warnings, which are clean-but-worth-knowing, and a gate that reinterprets its own tool is
+  # how a "10/11" and an "11/11" end up describing the same run.
+  record PASS "doctor" "$(grep -m1 -oE '[0-9]+/[0-9]+ checks clean(, [0-9]+ with warnings)?' /tmp/avaira-doctor.log || echo 'clean')"
 else
   record FAIL "doctor" "$(tail -1 /tmp/avaira-doctor.log)"
 fi

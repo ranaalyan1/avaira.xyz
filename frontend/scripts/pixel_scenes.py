@@ -281,11 +281,11 @@ def scene_gauge(W=256, H=256, frames=30, value=0.874):
             a = a0 + (a1 - a0) * i / steps
             frac = i / steps
             x, y = pt(a, r)
-            cv.put(x, y, IND_DIM)
-            x, y = pt(a, r - 3)
-            cv.put(x, y, IND_DIM if frac > p else (HI if frac > p - 0.04 else ACCENT))
-            x, y = pt(a, r - 4)
-            cv.put(x, y, IND_DIM if frac > p else ACCENT)
+            cv.put(x, y, IND_MID)                       # track: a hairline
+            if frac <= p:                               # fill: a band, with a
+                for off in (1, 2, 3):                   # lit leading edge
+                    fx, fy = pt(a, r - off)
+                    cv.put(fx, fy, HI if frac > p - 0.035 and off < 3 else ACCENT)
             if i % 40 == 0:               # a tick every 20 degrees, no more
                 tx, ty = pt(a, r + 5)
                 cv.line(x, y, tx, ty, IND_MID)
@@ -494,15 +494,24 @@ def scene_burn(W=192, H=288, frames=32):
         for row in range(int(H_plume)):
             y = top - row
             t = row / H_plume
-            half = (W * 0.20) * (1 - t) ** 0.75
-            sway_x = math.sin(u * 6.283 + t * 3.4) * (2 + t * 6)
-            for k in range(-int(half), int(half) + 1):
-                x = W * 0.5 + k + sway_x
+            # the envelope wanders on two frequencies and the edge is roughened
+            # per row, so the plume reads as tongues rather than a cone
+            waver = math.sin(u * 6.283 * 2 + t * 5.1) * (3 + t * 9)
+            waver += math.sin(t * 17.0 + u * 3.1) * (1.5 + t * 3.5)
+            half = (W * 0.17) * (1 - t) ** 0.62 * (1 + 0.22 * math.sin(t * 9.4 + u * 6.283))
+            half = max(0.0, half + math.sin(t * 23.0) * 1.6)
+            for k in range(-int(half) - 1, int(half) + 2):
+                if abs(k) > half + 0.6:
+                    continue
+                x = W * 0.5 + k + waver
                 inner = abs(k) / max(1.0, half)
-                dens = max(0.0, (1 - t) * (1 - inner * 0.85) * 0.95)
-                dens += math.sin((row * 0.7) + u * 12.56) * 0.08
-                col = HI if t < 0.12 and inner < 0.45 else (ACCENT if t < 0.45 else IND_MID)
-                if BAYER[int(y) % 4][int(x) % 4] < dens * 16:
+                core = 1 - inner * 0.95
+                dens = core * (1 - t * 0.85)
+                dens += math.sin((row * 0.9) + u * 12.56) * 0.10
+                if t > 0.55:                      # the top breaks into pieces
+                    dens -= (t - 0.55) * 0.9 * (0.5 + 0.5 * math.sin(row * 2.7))
+                col = HI if t < 0.10 and inner < 0.5 else (ACCENT if t < 0.40 else IND_MID)
+                if dens > 0 and BAYER[int(y) % 4][int(x) % 4] < dens * 16:
                     cv.put(x, y, col)
         # embers above the plume
         for i in range(16):

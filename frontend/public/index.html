@@ -3,13 +3,13 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#050505" />
+        <meta name="theme-color" content="#05060A" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
         <!-- SEO Meta -->
-        <title>AVAIRA Protocol — The Trust Infrastructure for the Autonomous Economy</title>
-        <meta name="description" content="AVAIRA is the Moody's + DTCC + Lloyd's of London for the AI Agent Economy. We rate, clear, and insure every AI agent transaction on-chain — so machines can manage billions and humans can sleep at night. Built as an Avalanche L1." />
-        <meta name="keywords" content="AVAIRA, AI agent, blockchain, execution control, risk management, Avalanche, DeFi, smart contracts, underwriting, agent scoring, EIP-712, decentralized AI" />
+        <title>AVAIRA — Nothing spends until the gate returns a permit</title>
+        <meta name="description" content="AVAIRA gates agent actions before they execute. The risk envelope, a versioned OPA Rego policy and an interval prover have to agree before a signed single-use permit exists, and that permit is the only thing that lets the action run. Rating, clearing and underwriting in one request path." />
+        <meta name="keywords" content="AVAIRA, agent execution control, risk envelope, EIP-712 permits, OPA Rego policy, interval prover, ERC-8004 agent identity, Avaira Score, agent underwriting, EIP-3009 USDC, EVM" />
         <meta name="author" content="AVAIRA Protocol" />
         <meta name="robots" content="index, follow" />
         <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -19,22 +19,20 @@
         <!-- Open Graph -->
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://avaira.xyz/" />
-        <meta property="og:title" content="AVAIRA Protocol — The Trust Infrastructure for the Autonomous Economy" />
-        <meta property="og:description" content="We rate, clear, and insure every AI agent transaction on-chain. The Moody's + DTCC + Lloyd's of London for the AI Agent Economy. Built on Avalanche." />
-        <meta property="og:image" content="https://avaira.xyz/logo.png" />
-        <meta property="og:image:alt" content="AVAIRA Protocol logo" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:title" content="AVAIRA — Nothing spends until the gate returns a permit" />
+        <meta property="og:description" content="Envelope, policy and prover must agree before an agent action runs. Nine refusal codes, one permit." />
+        <meta property="og:image" content="https://avaira.xyz/art/hero.png" />
+        <meta property="og:image:alt" content="A pixel corridor of four gates with a lit card travelling between them" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="AVAIRA Protocol" />
 
         <!-- Twitter / X Card -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://avaira.xyz/" />
-        <meta name="twitter:title" content="AVAIRA Protocol — Trust Infrastructure for the Autonomous Economy" />
-        <meta name="twitter:description" content="We rate, clear, and insure every AI agent transaction on-chain. The Moody's + DTCC + Lloyd's for AI Agents." />
-        <meta name="twitter:image" content="https://avaira.xyz/logo.png" />
-        <meta name="twitter:image:alt" content="AVAIRA Protocol logo" />
+        <meta name="twitter:title" content="AVAIRA — Execution control for agents" />
+        <meta name="twitter:description" content="Envelope, policy and prover must agree before an agent action runs. Nine refusal codes, one permit." />
+        <meta name="twitter:image" content="https://avaira.xyz/art/hero.png" />
+        <meta name="twitter:image:alt" content="A pixel corridor of four gates with a lit card travelling between them" />
 
         <!-- Structured Data (JSON-LD) -->
         <script type="application/ld+json">
@@ -42,220 +40,403 @@
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             "name": "AVAIRA Protocol",
-            "description": "The trust infrastructure for the autonomous economy. Rates, clears, and insures every AI agent transaction on-chain.",
+            "description": "Pre-execution control for autonomous agents. Checks every intent against a risk envelope, a policy file and a symbolic prover, then issues a single-use permit for the ones that clear.",
             "url": "https://avaira.xyz",
             "applicationCategory": "Blockchain",
-            "operatingSystem": "Web",
-            "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-            }
+            "operatingSystem": "Web"
         }
         </script>
 
-        <!-- Fonts -->
+        <!-- Fonts: Doto (dot matrix) for display, IBM Plex Mono for machine text,
+             Inter for body. The React app self-hosts the same faces. -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
 
-        <!-- Critical inline CSS for static content (before React loads) -->
+        <!--
+            Critical inline CSS for the static pre-render below.
+
+            It mirrors the pixel layer in src/pixel.css: pure black, hard 1px
+            edges, no radius, dot-matrix display type, mono labels. If the pixel
+            tokens change, this block changes with them — it is the one place the
+            marketing shell is written twice.
+        -->
         <style>
-            .avaira-static{font-family:'Inter',sans-serif;background:#050505;color:#EDEDED;margin:0;padding:0;line-height:1.6}
-            .avaira-static *{box-sizing:border-box}
-            .avaira-static-nav{position:sticky;top:0;background:rgba(5,5,5,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #333;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;z-index:50}
-            .avaira-static-logo{display:flex;align-items:center;gap:8px}
-            .avaira-static-logo img{width:28px;height:28px}
-            .avaira-static-logo span{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;color:#E84444;text-transform:uppercase;letter-spacing:0.02em}
-            .avaira-static-hero{max-width:960px;margin:0 auto;padding:80px 24px 48px}
-            .avaira-static-badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:#E84444;letter-spacing:0.3em;border:1px solid rgba(232,68,68,0.3);padding:4px 12px;background:rgba(232,68,68,0.05);display:inline-block;margin-bottom:16px}
-            .avaira-static h1{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:clamp(32px,5vw,56px);text-transform:uppercase;letter-spacing:-0.01em;line-height:1.1;margin:0 0 20px;color:#EDEDED}
-            .avaira-static h1 em{font-style:normal;color:#E84444}
-            .avaira-static h2{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:0.02em;margin:0 0 12px;color:#EDEDED}
-            .avaira-static-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:#E84444;letter-spacing:0.3em;margin-bottom:8px}
-            .avaira-static-sub{font-size:16px;color:#A8A8A8;max-width:580px;line-height:1.7;margin:0 0 32px}
-            .avaira-static-stats{display:flex;gap:40px;margin-top:48px}
-            .avaira-static-stats dt{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:24px;color:#E84444}
-            .avaira-static-stats dd{font-family:'JetBrains Mono',monospace;font-size:10px;color:#707070;text-transform:uppercase;letter-spacing:0.1em;margin:4px 0 0}
-            .avaira-static-section{max-width:1120px;margin:0 auto;padding:64px 24px;border-top:1px solid #222}
-            .avaira-static-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-            .avaira-static-card{background:#0A0A0A;border:1px solid rgba(255,255,255,0.08);padding:24px}
-            .avaira-static-card h3{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;text-transform:uppercase;margin:12px 0 4px}
-            .avaira-static-card .tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#707070;text-transform:uppercase;letter-spacing:0.15em}
-            .avaira-static-card p{font-size:14px;color:#A8A8A8;margin:8px 0 0;line-height:1.6}
-            .avaira-static-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
-            .avaira-static-step{border:1px solid #333;padding:12px;background:#050505}
-            .avaira-static-step .num{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:28px;color:rgba(232,68,68,0.2)}
-            .avaira-static-step .lbl{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;color:#EDEDED}
-            .avaira-static-step .desc{font-family:'JetBrains Mono',monospace;font-size:10px;color:#707070;margin-top:2px}
-            .avaira-static-moats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-            .avaira-static-moat{border:1px solid #333;padding:16px;background:#0A0A0A}
-            .avaira-static-moat h3{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;color:#EDEDED;margin:0 0 8px}
-            .avaira-static-moat p{font-family:'JetBrains Mono',monospace;font-size:10px;color:#A8A8A8;margin:0;line-height:1.7}
-            .avaira-static-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px}
-            .avaira-static-table th{text-align:left;padding:8px 12px;color:#A8A8A8;border-bottom:1px solid #333;text-transform:uppercase;font-size:11px;letter-spacing:0.05em;font-weight:500}
-            .avaira-static-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:#EDEDED}
-            .avaira-static-table .right{text-align:right}
-            .avaira-static-code{background:#000;border:1px solid #333;padding:20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#39FF14;white-space:pre;overflow-x:auto;line-height:1.8}
-            .avaira-static-cta{text-align:center;max-width:720px;margin:0 auto;padding:64px 24px}
-            .avaira-static-cta h2 em{font-style:normal;color:#E84444}
-            .avaira-static-btn{display:inline-block;background:#E84444;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:0.1em;padding:12px 32px;text-decoration:none;margin-top:24px}
-            .avaira-static-footer{border-top:1px solid #222;padding:24px;display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:#707070}
-            .avaira-static-alert{border:1px solid rgba(232,68,68,0.3);background:rgba(232,68,68,0.05);padding:16px;margin-top:20px}
-            .avaira-static-alert strong{font-family:'Rajdhani',sans-serif;font-size:14px;text-transform:uppercase;color:#E84444}
-            .avaira-static-alert p{font-family:'JetBrains Mono',monospace;font-size:12px;color:#A8A8A8;margin:4px 0 0}
+            .px-static{--black:#000;--bg:#05060A;--panel:#0B0D12;--raise:#111319;--ink:#F5F6F8;--dim:#9AA1AE;--mute:#5E6674;
+                --line:rgba(255,255,255,0.14);--line2:rgba(255,255,255,0.3);--accent:#6E6BF2;--hi:#C9C7FF;--red:#F45B69;
+                --dot:'Doto','IBM Plex Mono',monospace;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',system-ui,sans-serif;
+                background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+            .px-static *{box-sizing:border-box;border-radius:0}
+            .px-static a{color:inherit;text-decoration:none}
+            .px-static-wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+            .px-static-nav{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+            .px-static-nav .px-static-wrap{display:flex;align-items:center;gap:24px;height:64px}
+            .px-static-brand{font-family:var(--dot);font-weight:900;font-size:19px;letter-spacing:0.06em;text-transform:uppercase}
+            .px-static-navlinks{display:flex;gap:4px;margin:0 auto}
+            .px-static-navlinks a{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);padding:8px 12px}
+            .px-static-navlinks a:hover{color:var(--ink)}
+            .px-static-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:1px solid var(--line2);
+                font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink)}
+            .px-static-btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+            .px-static-btn.quiet{border-color:var(--line);color:var(--dim)}
+            .px-static h1,.px-static h2,.px-static h3{font-family:var(--dot);font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;line-height:0.95;margin:0}
+            .px-static h1{font-size:clamp(37px,7.2vw,99px);line-height:0.9}
+            .px-static h2{font-size:clamp(26px,3.4vw,45px)}
+            .px-static h3{font-size:clamp(18px,1.7vw,24px)}
+            .px-static p{margin:0;color:var(--dim);font-size:15px}
+            .px-static .lead{max-width:58ch;margin-top:24px}
+            .px-static .label{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--dim)}
+            .px-static .index{display:flex;align-items:baseline;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:0.2em;
+                text-transform:uppercase;color:var(--mute);margin-bottom:20px}
+            .px-static .index span:first-child{color:var(--accent)}
+            .px-static .index::after{content:"";flex:1;height:1px;background:var(--line)}
+            .px-static-hero{position:relative;display:flex;align-items:flex-end;min-height:min(94vh,940px);overflow:hidden;background:var(--black);
+                border-bottom:1px solid var(--line);padding:128px 0 48px}
+            .px-static-hero img.px-static-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 42%;image-rendering:pixelated;opacity:0.9}
+            .px-static-veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.96),rgba(0,0,0,0.55) 40%,rgba(0,0,0,0.2) 62%,rgba(0,0,0,0.72))}
+            .px-static-hero .px-static-wrap{position:relative;z-index:2;width:100%}
+            .px-static-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+            .px-static-meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);
+                font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute)}
+            .px-static-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+            .px-static-fact{padding:24px 20px;border-left:1px solid var(--line)}
+            .px-static-fact:first-child{border-left:0}
+            .px-static-fact b{display:block;font-family:var(--dot);font-weight:900;font-size:clamp(26px,3vw,38px);letter-spacing:-0.02em}
+            .px-static-fact span{display:block;margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mute)}
+            .px-static-section{padding:80px 0;border-top:1px solid var(--line)}
+            .px-static-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px}
+            .px-static-card{background:var(--bg);display:flex;flex-direction:column}
+            .px-static-card img{width:100%;aspect-ratio:16/9;object-fit:cover;image-rendering:pixelated;border-bottom:1px solid var(--line);background:var(--black)}
+            .px-static-card-body{padding:24px 22px 28px}
+            .px-static-card h3{margin-bottom:10px}
+            .px-static-card p{font-size:14px;margin-top:12px}
+            .px-static-spec{margin-top:24px;border-top:1px solid var(--line)}
+            .px-static-spec div{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;padding:13px 0;border-bottom:1px solid var(--line)}
+            .px-static-spec dt{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)}
+            .px-static-spec dd{margin:0;font-family:var(--mono);font-size:12px;color:var(--ink)}
+            .px-static-spec dd.red{color:var(--red)}
+            .px-static-code{background:var(--black);border:1px solid var(--line);padding:22px;overflow-x:auto;white-space:pre;
+                font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--dim);margin-top:24px}
+            .px-static-faq{border-top:1px solid var(--line);margin-top:24px}
+            .px-static-faq details{border-bottom:1px solid var(--line);padding:18px 0}
+            .px-static-faq summary{font-family:var(--mono);font-size:13px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer}
+            .px-static-faq p{margin-top:10px;max-width:78ch}
+            .px-static-footer{border-top:1px solid var(--line);background:var(--black);padding:56px 0 28px}
+            .px-static-footgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
+            .px-static-footgrid h4{margin:0 0 16px;font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--mute)}
+            .px-static-footgrid a{display:block;padding:5px 0;font-family:var(--mono);font-size:12px;color:var(--dim)}
+            .px-static-footbase{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+                font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)}
+            @media(max-width:1080px){
+                .px-static-navlinks{display:none}
+                .px-static-grid3,.px-static-footgrid{grid-template-columns:minmax(0,1fr)}
+                .px-static-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+            }
+            @media(max-width:720px){
+                .px-static-spec div{grid-template-columns:minmax(0,1fr);gap:4px}
+                .px-static-section{padding:56px 0}
+            }
         </style>
     </head>
     <body>
         <div id="root">
             <!--
                 STATIC PRE-RENDERED CONTENT FOR SEO / CRAWLERS
-                React hydrates over this on client-side load.
-                All key content is readable without JavaScript.
+                React hydrates over this on client-side load. It covers the whole
+                marketing site — home, gate, score, evidence and integration — so
+                every crawler and no-JS visitor reads the same content the app
+                renders, in the same pixel language.
             -->
-            <div class="avaira-static">
+            <div class="px-static">
 
                 <!-- Navigation -->
-                <nav class="avaira-static-nav" aria-label="Main navigation">
-                    <div class="avaira-static-logo">
-                        <img src="/logo.png" alt="AVAIRA Protocol logo" width="28" height="28" />
-                        <span>AVAIRA</span>
+                <nav class="px-static-nav" aria-label="Main navigation">
+                    <div class="px-static-wrap">
+                        <a class="px-static-brand" href="/">Avaira</a>
+                        <div class="px-static-navlinks">
+                            <a href="/gate">Gate</a>
+                            <a href="/score">Score</a>
+                            <a href="/evidence">Evidence</a>
+                            <a href="/docs">Docs</a>
+                        </div>
+                        <a class="px-static-btn accent" href="/dashboard">Console</a>
                     </div>
-                    <a href="/login" class="avaira-static-btn" style="padding:8px 20px;font-size:12px">Launch Protocol</a>
                 </nav>
 
                 <!-- Hero -->
-                <header class="avaira-static-hero">
-                    <div class="avaira-static-badge">AVALANCHE L1 // EXECUTION CONTROL PROTOCOL</div>
-                    <h1>The Trust Infrastructure for the <em>Autonomous Economy</em></h1>
-                    <p class="avaira-static-sub">
-                        We rate, clear, and insure every AI agent transaction on-chain &mdash;
-                        so machines can manage billions and humans can sleep at night.
-                    </p>
-                    <a href="/dashboard" class="avaira-static-btn">Launch AVAIRA Protocol &rarr;</a>
-                    <dl class="avaira-static-stats">
-                        <div><dt>&lt;200ms</dt><dd>Finality</dd></div>
-                        <div><dt>0.5%</dt><dd>Protocol Fee</dd></div>
-                        <div><dt>AAA–D</dt><dd>Agent Scoring</dd></div>
-                    </dl>
+                <header class="px-static-hero">
+                    <img class="px-static-art" src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" />
+                    <span class="px-static-veil"></span>
+                    <div class="px-static-wrap">
+                        <p class="label">Execution control for agents that hold budgets</p>
+                        <h1>Nothing spends<br />until the gate<br />returns a permit.</h1>
+                        <p class="lead">
+                            AVAIRA sits between an agent and the action it wants to take. The intent is checked
+                            against a risk envelope, a policy file and a symbolic prover. All three have to agree
+                            before a signed permit exists, and that permit is the only thing that lets the action run.
+                        </p>
+                        <div class="px-static-actions">
+                            <a class="px-static-btn accent" href="/dashboard">Open the console</a>
+                            <a class="px-static-btn quiet" href="/login">Sign in</a>
+                        </div>
+                        <p class="px-static-meta">
+                            <span>Committed before execution</span><span>/</span><span>Single-use permits</span>
+                            <span>/</span><span>Prover witnesses</span><span>/</span><span>EVM</span>
+                        </p>
+                    </div>
                 </header>
 
-                <!-- Three Pillars -->
-                <section class="avaira-static-section" aria-labelledby="pillars-heading">
-                    <div class="avaira-static-label">THE PROTOCOL</div>
-                    <h2 id="pillars-heading">Three Functions. One Protocol.</h2>
-                    <div class="avaira-static-grid3">
-                        <article class="avaira-static-card">
-                            <h3 style="color:#E84444">RATE</h3>
-                            <div class="tag">The Moody's Function &middot; $50B+ market</div>
-                            <p>Every AI agent gets an Avaira Score (AAA to D). No enterprise will trust an unrated agent. The rating becomes the standard.</p>
-                        </article>
-                        <article class="avaira-static-card">
-                            <h3 style="color:#39FF14">CLEAR</h3>
-                            <div class="tag">The DTCC Function &middot; $2.5Q processed/yr</div>
-                            <p>Every agent transaction passes through our settlement layer. We see every execution. Unmatched data. Unmatched risk models.</p>
-                        </article>
-                        <article class="avaira-static-card">
-                            <h3 style="color:#7000FF">INSURE</h3>
-                            <div class="tag">The Lloyd's Function &middot; $100B+ in premiums</div>
-                            <p>Human underwriters stake capital against agent missions. Agent fails &rarr; collateral covers losses. Agent succeeds &rarr; underwriters earn yield.</p>
-                        </article>
+                <!-- Facts -->
+                <section class="px-static-section" style="padding:0;border-top:0">
+                    <div class="px-static-wrap" style="padding:0">
+                        <div class="px-static-facts">
+                            <div class="px-static-fact"><b>6</b><span>Core contracts</span></div>
+                            <div class="px-static-fact"><b>123</b><span>Foundry tests</span></div>
+                            <div class="px-static-fact"><b>94.4%</b><span>Core coverage</span></div>
+                            <div class="px-static-fact"><b>9</b><span>Refusal codes</span></div>
+                        </div>
                     </div>
                 </section>
 
-                <!-- How It Works -->
-                <section class="avaira-static-section" style="background:#0A0A0A" aria-labelledby="flow-heading">
-                    <div class="avaira-static-label">EXECUTION FLOW</div>
-                    <h2 id="flow-heading">How Every Transaction is Secured</h2>
-                    <div class="avaira-static-steps">
-                        <div class="avaira-static-step"><div class="num">01</div><div class="lbl">Register</div><div class="desc">Agent stakes collateral</div></div>
-                        <div class="avaira-static-step"><div class="num">02</div><div class="lbl">Declare</div><div class="desc">Submit mission intent</div></div>
-                        <div class="avaira-static-step"><div class="num">03</div><div class="lbl">Validate</div><div class="desc">Risk envelope check</div></div>
-                        <div class="avaira-static-step"><div class="num">04</div><div class="lbl">Permit</div><div class="desc">EIP-712 signed</div></div>
-                        <div class="avaira-static-step"><div class="num">05</div><div class="lbl">Execute</div><div class="desc">On-chain settlement</div></div>
-                        <div class="avaira-static-step"><div class="num">06</div><div class="lbl">Settle</div><div class="desc">Fees split 85/10/5</div></div>
-                    </div>
-                    <div class="avaira-static-alert">
-                        <strong>Deviation Detected?</strong>
-                        <p>Agent instantly frozen. Collateral slashed. Insurance pool compensates backers. All within &lt;200ms.</p>
+                <!-- Pillars -->
+                <section class="px-static-section" id="pillars">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>01</span><span>Pillars</span></p>
+                        <h2>Rating, clearing and underwriting in one request path.</h2>
+                        <p class="lead">
+                            Capital markets spread these three functions across three institutions. An agent needs
+                            all three at the moment it acts, which is why they live inside the same gate.
+                        </p>
+                        <div class="px-static-grid3">
+                            <article class="px-static-card">
+                                <img src="/art/score.png" alt="A pixel gauge with a lit arc and a single needle" />
+                                <div class="px-static-card-body">
+                                    <h3>Rate</h3>
+                                    <p class="label">Score, recomputable by anyone</p>
+                                    <p>Six weighted inputs decide what an agent may attempt and how much collateral it posts. The formula is public, so two operators reading the same settled history reach the same grade.</p>
+                                </div>
+                            </article>
+                            <article class="px-static-card">
+                                <img src="/art/underwrite.png" alt="A pixel vault of stacked bonded plates with particles rising" />
+                                <div class="px-static-card-body">
+                                    <h3>Clear</h3>
+                                    <p class="label">Committed before, attested after</p>
+                                    <p>The envelope is hashed and committed before the action is attempted, then the outcome is attested against it. The protocol keeps its own record of what was authorised and what actually ran.</p>
+                                </div>
+                            </article>
+                            <article class="px-static-card">
+                                <img src="/art/network.png" alt="A pixel lattice of connected nodes" />
+                                <div class="px-static-card-body">
+                                    <h3>Insure</h3>
+                                    <p class="label">Underwriters stake against missions</p>
+                                    <p>Backers take a position on a mission. A failed mission pays them from slashed collateral on the 85, 10 and 5 split; a mission that settles returns principal plus its share of the fee.</p>
+                                </div>
+                            </article>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Five Moats -->
-                <section class="avaira-static-section" aria-labelledby="moats-heading">
-                    <div class="avaira-static-label">DEFENSIBILITY</div>
-                    <h2 id="moats-heading">Five Moats. Unkillable.</h2>
-                    <div class="avaira-static-moats">
-                        <div class="avaira-static-moat"><h3>Data Flywheel</h3><p>More agents &rarr; better risk models &rarr; more accurate scores &rarr; more enterprises &rarr; more agents. Gap widens over time.</p></div>
-                        <div class="avaira-static-moat"><h3>Regulatory Capture</h3><p>Define the standard before regulators do. Regulation doesn't kill you. Regulation IS you.</p></div>
-                        <div class="avaira-static-moat"><h3>Three-Sided Network</h3><p>Agents + Underwriters + Enterprises. Three-sided network effects are nearly impossible to replicate.</p></div>
-                        <div class="avaira-static-moat"><h3>Switching Costs</h3><p>Behavioral history, Avaira Score, insurance coverage, enterprise contracts. 6+ month switching cost. Nobody switches.</p></div>
-                        <div class="avaira-static-moat"><h3>Avalanche L1</h3><p>Sub-200ms finality. Sovereign rules. Custom gas economics. The speed required to be a real-time circuit breaker.</p></div>
+                <!-- The gate -->
+                <section class="px-static-section" id="execution">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>02</span><span>The gate</span></p>
+                        <h2>Four planes, passed in order.</h2>
+                        <p class="lead">
+                            Before any money moves the intent has to clear an envelope, a policy file, a prover and a
+                            permit. The gate either returns a signed permit or the code that says why it could not —
+                            there is no third outcome and no review queue.
+                        </p>
+                        <dl class="px-static-spec">
+                            <div><dt>01 Envelope</dt><dd>spend ceiling and allowed actions, declared by the agent</dd></div>
+                            <div><dt>02 Commitment</dt><dd>the envelope hashed and committed before the attempt</dd></div>
+                            <div><dt>03 Policy</dt><dd>versioned OPA Rego decides whether the action class is allowed</dd></div>
+                            <div><dt>04 Prover</dt><dd>interval arithmetic over hard invariants, with a witness on failure</dd></div>
+                            <div><dt>05 Permit</dt><dd>EIP-712 signature for this intent, this agent, this deadline, single use</dd></div>
+                            <div><dt>06 Settlement</dt><dd>outcome attested, fee split, score updated from the result</dd></div>
+                        </dl>
                     </div>
                 </section>
 
-                <!-- Revenue Architecture -->
-                <section class="avaira-static-section" style="background:#0A0A0A" aria-labelledby="revenue-heading">
-                    <div class="avaira-static-label">REVENUE ARCHITECTURE</div>
-                    <h2 id="revenue-heading">Four Revenue Streams From Day 1</h2>
-                    <table class="avaira-static-table">
-                        <thead>
-                            <tr><th>Stream</th><th>Description</th><th class="right">Year 1</th><th class="right">Year 5</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Agent Registration</td><td style="color:#A8A8A8">SaaS tiers: Free / Growth ($200/mo) / Enterprise ($2,000/mo)</td><td class="right" style="color:#FFD300">$1.2M</td><td class="right" style="color:#39FF14">$240M</td></tr>
-                            <tr><td>Underwriting Spread</td><td style="color:#A8A8A8">5% protocol fee on every settled mission</td><td class="right" style="color:#FFD300">$2M</td><td class="right" style="color:#39FF14">$400M</td></tr>
-                            <tr><td>Slashing Revenue</td><td style="color:#A8A8A8">20% of all slashed collateral &mdash; pure insurance profit</td><td class="right" style="color:#FFD300">$500K</td><td class="right" style="color:#39FF14">$50M</td></tr>
-                            <tr><td>Data &amp; Analytics</td><td style="color:#A8A8A8">Bloomberg Terminal for AI agents. $0.01/query API access</td><td class="right" style="color:#FFD300">$300K</td><td class="right" style="color:#39FF14">$80M</td></tr>
-                            <tr style="border-top:2px solid rgba(232,68,68,0.3)"><td style="color:#E84444;font-weight:700">Total</td><td></td><td class="right" style="color:#E84444;font-weight:700">$4M</td><td class="right" style="color:#E84444;font-weight:700">$770M</td></tr>
-                        </tbody>
-                    </table>
+                <!-- Refusals -->
+                <section class="px-static-section" id="moats">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>02.3</span><span>Refusals</span></p>
+                        <h2>Nine ways the gate says no, and one way it says yes.</h2>
+                        <p class="lead">
+                            A refusal is a value, not an outage. Every blocked intent carries the code for why, which
+                            makes the reason machine-readable for the agent, the operator and the underwriter at the
+                            same time.
+                        </p>
+                        <dl class="px-static-spec">
+                            <div><dt>ALLOWED</dt><dd>agent cleared to execute</dd></div>
+                            <div><dt>UNKNOWN_AGENT</dt><dd class="red">no identity is registered for this address</dd></div>
+                            <div><dt>BANNED</dt><dd class="red">terminal ban, no path back</dd></div>
+                            <div><dt>SUSPENDED</dt><dd class="red">slashed into suspension, waiting on collateral</dd></div>
+                            <div><dt>STAKE_TOO_LOW</dt><dd class="red">bond sits below the minimum the envelope requires</dd></div>
+                            <div><dt>SCORE_TOO_LOW</dt><dd class="red">Avaira Score under the floor the mission demands</dd></div>
+                            <div><dt>INTENT_NOT_COMMITTED</dt><dd class="red">no commitment matches the intent hash</dd></div>
+                            <div><dt>INTENT_EXPIRED</dt><dd class="red">the envelope deadline has passed</dd></div>
+                            <div><dt>INTENT_ALREADY_EXECUTED</dt><dd class="red">the intent is single use and was already attested</dd></div>
+                            <div><dt>ENVELOPE_MISMATCH</dt><dd class="red">the stored envelope does not match the committed hash</dd></div>
+                        </dl>
+                    </div>
                 </section>
 
-                <!-- SDK -->
-                <section class="avaira-static-section" aria-labelledby="sdk-heading">
-                    <div class="avaira-static-label">DEVELOPER EXPERIENCE</div>
-                    <h2 id="sdk-heading">4 Function Calls. That's It.</h2>
-                    <p class="avaira-static-sub">If integration takes more than 10 minutes, the product has failed.</p>
-                    <pre class="avaira-static-code">import { AvairaSDK } from '@avaira/sdk';
+                <!-- Score -->
+                <section class="px-static-section" id="score">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>03</span><span>Score engine</span></p>
+                        <h2>One number, six inputs, no discretion.</h2>
+                        <p class="lead">
+                            The score decides what an agent may attempt and how much collateral it has to post. It is
+                            arithmetic over settled outcomes, so two operators reading the same history get the same
+                            grade — and anyone can recompute it and challenge the result on chain.
+                        </p>
+                        <dl class="px-static-spec">
+                            <div><dt>success rate</dt><dd>0.30 — settled missions completed inside their envelope</dd></div>
+                            <div><dt>intent alignment</dt><dd>0.20 — executed values against the committed envelope</dd></div>
+                            <div><dt>slash history</dt><dd>0.20 — weight of past slashes, decayed over time</dd></div>
+                            <div><dt>economic volume</dt><dd>0.15 — value settled through the gate</dd></div>
+                            <div><dt>time on network</dt><dd>0.10 — age of the identity</dd></div>
+                            <div><dt>appeal resolution</dt><dd>0.05 — outcome of challenges raised against the agent</dd></div>
+                            <div><dt>A+ 90 and above</dt><dd>150% collateral terms, credit market open</dd></div>
+                            <div><dt>A 80 to 89</dt><dd>110% collateral terms, credit market open</dd></div>
+                            <div><dt>B 70 to 79</dt><dd>standard terms, expanded envelopes available</dd></div>
+                            <div><dt>C 60 to 69</dt><dd>restricted envelopes, no new credit</dd></div>
+                            <div><dt>D below 60</dt><dd>credit market closed until the score recovers</dd></div>
+                        </dl>
+                    </div>
+                </section>
 
-const avaira = new AvairaSDK({
-  apiKey: 'your-api-key',
-  network: 'fuji',
-  chainId: 43113
-});
+                <!-- Evidence -->
+                <section class="px-static-section" id="evidence">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>04</span><span>Evidence</span></p>
+                        <h2>Measured, not projected.</h2>
+                        <p class="lead">
+                            The protocol's claims are kept as artifacts: test output, coverage, adversarial scenarios,
+                            a parity corpus and a state-exploration campaign. Each one is regenerated by a target in
+                            the repository, and CI fails when a number drifts. Reproduce with <code>make test</code>,
+                            <code>make check</code> and <code>make verify</code>.
+                        </p>
+                        <dl class="px-static-spec">
+                            <div><dt>Foundry tests</dt><dd>123 passing</dd></div>
+                            <div><dt>Core line coverage</dt><dd>94.4%</dd></div>
+                            <div><dt>Attack scenarios</dt><dd>12, written up in FINDINGS.md</dd></div>
+                            <div><dt>Rollouts per intent</dt><dd>200, seeded Monte-Carlo shadow sandbox</dd></div>
+                            <div><dt>State exploration depth</dt><dd>12, py-evm on Cancun against the Foundry profile</dd></div>
+                            <div><dt>Parity corpus</dt><dd>13 adversarial leaves, no failures in the last run</dd></div>
+                            <div><dt>Campaign calls</dt><dd>8,031 recorded</dd></div>
+                            <div><dt>Suspension cooldown</dt><dd>24h before a suspended agent may re-collateralise</dd></div>
+                        </dl>
+                    </div>
+                </section>
 
-// 1. Register agent
-const agent = await avaira.register(wallet, config);
+                <!-- Integration -->
+                <section class="px-static-section" id="sdk">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>05</span><span>Integration</span></p>
+                        <h2>One call around the function that spends.</h2>
+                        <p class="lead">
+                            The integration point is the callable, not the model. Wrap the function that performs the
+                            action and the gate handles the envelope, the policy check, the permit and the audit entry.
+                            SDKs ship for TypeScript, Python and Rust, plus LangChain and CrewAI wrappers.
+                        </p>
+                        <pre class="px-static-code">from avaira import AvairaClient, AvairaConfig, RiskEnvelope
 
-// 2. Declare intent
-const mission = await avaira.declareIntent(plan);
+envelope = RiskEnvelope(max_spend_usd=50.0, allowed_actions=["search"])
+avaira = AvairaClient(AvairaConfig(api_key="...", risk_envelope=envelope))
 
-// 3. Execute (AVAIRA monitors automatically)
-const result = await avaira.execute(action);
+# execute_fn is only reached when the gate returns a signed permit
+result = await avaira.run(
+    task="Search for YC news",
+    execute_fn=lambda: my_agent.run("Search for YC news"),
+)
 
-// 4. Settle
-const settlement = await avaira.settle(mission.id);</pre>
+print(result["status"])   # "completed" or "blocked"</pre>
+                    </div>
+                </section>
+
+                <!-- Questions -->
+                <section class="px-static-section" id="faq">
+                    <div class="px-static-wrap">
+                        <p class="index"><span>06</span><span>Questions</span></p>
+                        <h2>Asked often enough to answer here.</h2>
+                        <div class="px-static-faq">
+                            <details open>
+                                <summary>How is this different from logging what an agent did?</summary>
+                                <p>Logging answers the question after the money has moved. The gate runs before it: the envelope, the policy file and the prover all have to agree, and without a signed permit the function that spends is never entered.</p>
+                            </details>
+                            <details>
+                                <summary>Does it care which model or framework the agent uses?</summary>
+                                <p>No. You wrap the callable that performs the action. The gate reasons about the intent, its target and its value, so any model that can call a function is compatible.</p>
+                            </details>
+                            <details>
+                                <summary>What happens when an agent deviates from its envelope?</summary>
+                                <p>The intent is refused with a reason code and enforcement follows the documented ladder: a recorded warning, then suspension with slashed collateral and a 24 hour cooldown, then a terminal ban. Underwriters are paid from the slashed bond.</p>
+                            </details>
+                            <details>
+                                <summary>What does the gate cost per check?</summary>
+                                <p>Nothing per check. The gate is not metered, never per intent or per agent. The protocol earns from settled activity and from slashing, not from sitting in the path.</p>
+                            </details>
+                            <details>
+                                <summary>Which chains does it support?</summary>
+                                <p>EVM chains. The contract set has addresses on Fuji and a Foundry deployment script for any EVM target, and identity follows ERC-8004 so the registry stays portable.</p>
+                            </details>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- CTA -->
-                <section class="avaira-static-cta">
-                    <h2>Build It. Own the Position. <em>Never Let Go.</em></h2>
-                    <p style="color:#A8A8A8;font-size:15px;max-width:480px;margin:12px auto 0">
-                        The reason this becomes a billion-dollar company is not because
-                        the technology is revolutionary. It's because the position is irreplaceable.
-                    </p>
-                    <a href="/dashboard" class="avaira-static-btn">Launch AVAIRA Protocol &rarr;</a>
+                <section class="px-static-section">
+                    <div class="px-static-wrap">
+                        <h2>Put a gate in front of the money.</h2>
+                        <p class="lead">Register an agent, declare an envelope and watch the first intent go through.</p>
+                        <div class="px-static-actions">
+                            <a class="px-static-btn accent" href="/dashboard">Open the console</a>
+                            <a class="px-static-btn quiet" href="https://github.com/ranaalyan1/avaira.xyz">Read the source</a>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Footer -->
-                <footer class="avaira-static-footer">
-                    <div class="avaira-static-logo">
-                        <img src="/logo.png" alt="AVAIRA" width="16" height="16" />
-                        <span style="font-size:14px">AVAIRA</span>
-                        <span style="font-size:9px;color:#707070;margin-left:8px">AVALANCHE L1</span>
+                <footer class="px-static-footer">
+                    <div class="px-static-wrap">
+                        <div class="px-static-footgrid">
+                            <div>
+                                <a class="px-static-brand" href="/">Avaira</a>
+                                <p style="margin-top:16px;max-width:34ch">Pre-execution control for autonomous agents. Enforcement runs before the action, not after the incident.</p>
+                            </div>
+                            <nav aria-label="Protocol">
+                                <h4>Protocol</h4>
+                                <a href="/gate#execution">The gate</a>
+                                <a href="/gate#moats">Refusals</a>
+                                <a href="/score#revenue">Score engine</a>
+                                <a href="/evidence">Evidence</a>
+                            </nav>
+                            <nav aria-label="Build">
+                                <h4>Build</h4>
+                                <a href="/docs#sdk">Integration</a>
+                                <a href="/sdk">Console docs</a>
+                                <a href="https://github.com/ranaalyan1/avaira.xyz">Source</a>
+                                <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md">Security</a>
+                            </nav>
+                            <nav aria-label="Console">
+                                <h4>Console</h4>
+                                <a href="/dashboard">Dashboard</a>
+                                <a href="/agents">Agent registry</a>
+                                <a href="/executions">Execution flow</a>
+                                <a href="/treasury">Treasury</a>
+                            </nav>
+                        </div>
+                        <div class="px-static-footbase">
+                            <span>2026 Avaira</span>
+                            <span>Nothing is spent until the gate returns a permit</span>
+                        </div>
                     </div>
-                    <span>EXECUTION CONTROL PROTOCOL v1.0</span>
                 </footer>
 
             </div>
@@ -263,8 +444,8 @@ const settlement = await avaira.settle(mission.id);</pre>
         </div>
 
         <noscript>
-            <p style="text-align:center;padding:40px;font-family:sans-serif;color:#A8A8A8;background:#050505">
-                AVAIRA Protocol requires JavaScript for the interactive dashboard.
+            <p style="text-align:center;padding:40px;font-family:Inter,sans-serif;color:#9AA1AE;background:#05060A">
+                AVAIRA Protocol requires JavaScript for the interactive console.
                 The content above provides a full overview of the protocol.
             </p>
         </noscript>

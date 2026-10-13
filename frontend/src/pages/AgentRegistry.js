@@ -7,7 +7,8 @@ import { useAuth } from "@/App";
 
 import { API } from "@/lib/api";
 
-const GRADE_COLORS = { AAA: '#39FF14', AA: '#00F0FF', A: '#00F0FF', BBB: '#FFD300', BB: '#FFD300', B: '#FF8C00', CCC: '#FF003C', D: '#FF003C' };
+
+import { DARK, gradeColor } from "@/lib/palette";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -49,13 +50,13 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
             <div className={`agent-avatar-hologram animate-hologram ${isFrozen ? 'bg-avaira-red' : 'bg-avaira-primary'}`} />
           </div>
           <div>
-            <h3 className={`font-heading font-bold text-base text-foreground uppercase tracking-tight ${isFrozen ? 'glitch-text text-avaira-red' : ''}`}>{agent.name}</h3>
+            <h3 className={`text-[15px] font-semibold tracking-tight text-foreground ${isFrozen ? 'text-avaira-red' : ''}`}>{agent.name}</h3>
             <p className="font-mono text-[10px] text-avaira-dim">ID: {agent.id.slice(0, 8)}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
           {score && (
-            <span className="font-heading font-bold text-sm px-2 py-0.5 border" style={{ borderColor: (GRADE_COLORS[score.grade] || '#858585') + '50', color: GRADE_COLORS[score.grade] || '#858585' }} data-testid={`grade-${agent.id}`}>
+            <span className="rounded border px-2 py-0.5 font-mono text-xs font-medium" style={{ borderColor: (gradeColor(score.grade)) + '50', color: gradeColor(score.grade) }} data-testid={`grade-${agent.id}`}>
               {score.grade}
             </span>
           )}
@@ -69,7 +70,7 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
         </div>
         <div className="flex justify-between">
           <span className="text-avaira-muted">REPUTATION</span>
-          <span style={{ color: agent.reputation >= 80 ? '#39FF14' : agent.reputation >= 50 ? '#FFD300' : '#FF003C' }}>
+          <span style={{ color: agent.reputation >= 80 ? DARK.success : agent.reputation >= 50 ? DARK.warning : DARK.danger }}>
             {agent.reputation.toFixed(0)}
           </span>
         </div>
@@ -179,8 +180,8 @@ export default function AgentRegistry() {
     <div className="page-shell animate-slide-in" data-testid="agent-registry-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Agent Registry</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">{agents.length} AGENTS REGISTERED</p>
+          <h1 className="page-title">Agent Registry</h1>
+          <p className="page-subtitle">{agents.length} agents registered</p>
         </div>
         <div className="flex items-center gap-2">
           <button data-testid="refresh-agents-btn" onClick={fetchAgents} className="p-2 border border-avaira-border text-avaira-muted hover:text-avaira-primary hover:border-avaira-primary transition-colors">
@@ -188,20 +189,20 @@ export default function AgentRegistry() {
           </button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <button data-testid="register-agent-btn" className="cyber-btn bg-avaira-primary text-white px-4 py-2 font-heading text-sm flex items-center gap-2">
-                <UserPlus size={14} /> REGISTER AGENT
+              <button data-testid="register-agent-btn" className="cyber-btn flex items-center gap-2 px-3.5 py-2 text-[13px]">
+                <UserPlus size={14} /> Register agent
               </button>
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
               <DialogHeader>
-                <DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Register New Agent</DialogTitle>
+                <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Register New Agent</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleRegister} className="space-y-3 mt-2" data-testid="register-agent-form">
                 {renderInput("Agent Name", "name", "text", "ResearchBot")}
                 {renderInput("Primary Goal", "goal", "text", "Help with market research")}
                 {renderInput("Webhook URL (optional)", "webhook_url", "text", "https://yourapp.com/webhooks")}
                 <div className="border-t border-avaira-border pt-3">
-                  <p className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-primary mb-2">Risk Envelope</p>
+                  <p className="text-[11px] font-semibold tracking-tight text-avaira-primary mb-2">Risk envelope</p>
                   <div className="grid grid-cols-2 gap-3">
                     {renderInput("Max Spend (USD)", "max_spend_usd", "number", "", "0")}
                     {renderInput("Human Approval >", "require_human_approval_above_usd", "number", "", "0")}
@@ -222,7 +223,7 @@ export default function AgentRegistry() {
       <Dialog open={!!newKey} onOpenChange={() => setNewKey(null)}>
         <DialogContent className="bg-avaira-card border-avaira-primary border-2 rounded-none max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading font-bold text-lg text-avaira-primary uppercase tracking-tight flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight text-avaira-primary">
               <Shield size={18} /> API KEY GENERATED
             </DialogTitle>
           </DialogHeader>
@@ -238,7 +239,7 @@ export default function AgentRegistry() {
             </div>
             <button
               onClick={() => setNewKey(null)}
-              className="w-full cyber-btn bg-avaira-primary text-white py-2 font-heading text-sm mt-2 uppercase"
+              className="cyber-btn mt-2 w-full py-2 text-sm"
             >
               I HAVE SAVED THE KEY
             </button>
@@ -249,13 +250,13 @@ export default function AgentRegistry() {
       {loading ? (
         <div className="cyber-card p-12 text-center">
           <Zap size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="font-heading text-lg text-avaira-muted uppercase">Loading Agents</p>
+          <p className="text-[15px] font-medium text-avaira-muted">Loading agents</p>
           <p className="font-mono text-xs text-avaira-dim mt-1">Pulling registry and score data from the protocol</p>
         </div>
       ) : agents.length === 0 ? (
         <div className="cyber-card p-12 text-center">
           <Shield size={40} className="text-avaira-dim mx-auto mb-3" strokeWidth={1} />
-          <p className="font-heading text-lg text-avaira-muted uppercase">No Agents Registered</p>
+          <p className="text-[15px] font-medium text-avaira-muted">No agents registered</p>
           <p className="font-mono text-xs text-avaira-dim mt-1">Register an agent or run a simulation from the dashboard</p>
         </div>
       ) : (

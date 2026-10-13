@@ -3267,6 +3267,11 @@ ajv@^8.0.0, ajv@^8.18.0, ajv@^8.6.0, ajv@^8.9.0:
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
 
+animejs@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.npmjs.org/animejs/-/animejs-4.5.0.tgz"
+  integrity sha512-NQimYX+lz8WaXonGS9zVVoviCIAjONeJayxacUditaivYLqyXgGjFKjuyl0aUUhFKm5MriX9ty1TGovNzoJQWA==
+
 ansi-escapes@^4.2.1, ansi-escapes@^4.3.1:
   version "4.3.2"
   resolved "https://registry.npmjs.org/ansi-escapes/-/ansi-escapes-4.3.2.tgz"

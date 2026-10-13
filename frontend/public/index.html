@@ -7,9 +7,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
         <!-- SEO Meta -->
-        <title>AVAIRA Protocol — The Trust Infrastructure for the Autonomous Economy</title>
-        <meta name="description" content="AVAIRA is the Moody's + DTCC + Lloyd's of London for the AI Agent Economy. We rate, clear, and insure every AI agent transaction on-chain — so machines can manage billions and humans can sleep at night. Built as an Avalanche L1." />
-        <meta name="keywords" content="AVAIRA, AI agent, blockchain, execution control, risk management, Avalanche, DeFi, smart contracts, underwriting, agent scoring, EIP-712, decentralized AI" />
+        <title>AVAIRA — Execution control for agents that hold budgets</title>
+        <meta name="description" content="AVAIRA gates agent actions before they execute. The risk envelope, a versioned OPA Rego policy and an interval prover have to agree before a signed single-use permit exists, and that permit is the only thing that lets the action run. Rating, clearing and underwriting in one request path." />
+        <meta name="keywords" content="AVAIRA, agent execution control, risk envelope, EIP-712 permits, OPA Rego policy, interval prover, ERC-8004 agent identity, Avaira Score, agent underwriting, EIP-3009 USDC, EVM" />
         <meta name="author" content="AVAIRA Protocol" />
         <meta name="robots" content="index, follow" />
         <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -19,8 +19,8 @@
         <!-- Open Graph -->
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://avaira.xyz/" />
-        <meta property="og:title" content="AVAIRA Protocol — The Trust Infrastructure for the Autonomous Economy" />
-        <meta property="og:description" content="We rate, clear, and insure every AI agent transaction on-chain. The Moody's + DTCC + Lloyd's of London for the AI Agent Economy. Built on Avalanche." />
+        <meta property="og:title" content="AVAIRA — Execution control for agents that hold budgets" />
+        <meta property="og:description" content="Nothing spends until the gate says yes. Envelope, policy and prover agree, a single-use permit is signed, and then the action runs." />
         <meta property="og:image" content="https://avaira.xyz/logo.png" />
         <meta property="og:image:alt" content="AVAIRA Protocol logo" />
         <meta property="og:image:width" content="1200" />
@@ -31,8 +31,8 @@
         <!-- Twitter / X Card -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://avaira.xyz/" />
-        <meta name="twitter:title" content="AVAIRA Protocol — Trust Infrastructure for the Autonomous Economy" />
-        <meta name="twitter:description" content="We rate, clear, and insure every AI agent transaction on-chain. The Moody's + DTCC + Lloyd's for AI Agents." />
+        <meta name="twitter:title" content="AVAIRA — Execution control for agents" />
+        <meta name="twitter:description" content="Envelope, policy and prover must agree before an agent action runs. Nine refusal codes, one permit." />
         <meta name="twitter:image" content="https://avaira.xyz/logo.png" />
         <meta name="twitter:image:alt" content="AVAIRA Protocol logo" />
 
@@ -42,7 +42,7 @@
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             "name": "AVAIRA Protocol",
-            "description": "The trust infrastructure for the autonomous economy. Rates, clears, and insures every AI agent transaction on-chain.",
+            "description": "Pre-execution control for autonomous agents. Checks every intent against a risk envelope, a policy file and a symbolic prover, then issues a single-use permit for the ones that clear.",
             "url": "https://avaira.xyz",
             "applicationCategory": "Blockchain",
             "operatingSystem": "Web",
@@ -146,58 +146,60 @@
                         <span>AVAIRA</span>
                     </a>
                     <div class="avaira-static-nav-links">
-                        <a href="#pillars">Protocol</a>
-                        <a href="#flow-heading">Execution</a>
-                        <a href="#moats-heading">Why it compounds</a>
-                        <a href="#sdk-heading">Docs</a>
+                        <a href="#pillars-heading">Pillars</a>
+                        <a href="#flow-heading">Gate</a>
+                        <a href="#moats-heading">Refusals</a>
+                        <a href="#revenue-heading">Revenue</a>
+                        <a href="#sdk-heading">Integration</a>
                     </div>
                     <a class="avaira-static-btn" href="/login">Sign in</a>
                 </nav>
 
                 <!-- Hero -->
                 <header class="avaira-static-hero">
-                    <span class="avaira-static-badge"><i></i> Open standards · ERC-8004 · x402 · EIP-712</span>
-                    <h1>The trust layer for <em>autonomous agents</em></h1>
+                    <span class="avaira-static-badge"><i></i> Gated before execution · EIP-712 permits · ERC-8004 identity</span>
+                    <h1>Nothing spends until the <em>gate says yes.</em></h1>
                     <p class="avaira-static-sub">
-                        Rate, clear and insure every agent action before it executes. AVAIRA gives your agents
-                        a public reputation score, a tamper-evident audit trail, and automatic consequences
-                        for bad behaviour — enforced, not audited.
+                        AVAIRA sits between an agent and the action it wants to take. The intent is checked
+                        against a risk envelope, a policy file and a symbolic prover. All three have to agree
+                        before a signed permit exists, and that permit is the only thing that lets the action run.
                     </p>
                     <div class="avaira-static-actions">
-                        <a class="avaira-static-btn" href="/dashboard">Launch the protocol</a>
+                        <a class="avaira-static-btn" href="/dashboard">Open the console</a>
                         <a class="avaira-static-btn secondary" href="/login">Sign in</a>
                     </div>
-                    <p class="avaira-static-meta">&lt;200ms finality · 0.5% protocol fee · AAA–D scoring</p>
+                    <p class="avaira-static-meta">Committed before execution · Single-use permits · Prover witnesses</p>
 
                     <dl class="avaira-static-stats">
-                        <div><dt>&lt;200ms</dt><dd>Finality</dd></div>
-                        <div><dt>0.5%</dt><dd>Protocol fee</dd></div>
-                        <div><dt>AAA–D</dt><dd>Agent scoring</dd></div>
+                        <div><dt>6</dt><dd>Core contracts</dd></div>
+                        <div><dt>123</dt><dd>Foundry tests</dd></div>
+                        <div><dt>94.4%</dt><dd>Core coverage</dd></div>
+                        <div><dt>9</dt><dd>Refusal codes</dd></div>
                     </dl>
                 </header>
 
                 <!-- Three Pillars -->
                 <section class="avaira-static-section" aria-labelledby="pillars-heading">
                     <p class="avaira-static-label">The protocol</p>
-                    <h2 id="pillars-heading">Three functions. One protocol.</h2>
+                    <h2 id="pillars-heading">Rating, clearing and underwriting in one request path.</h2>
                     <div class="avaira-static-grid3">
                         <article class="avaira-static-card">
-                            <h3>RATE</h3>
-                            <div class="tag">The Moody's function</div>
-                            <p>Every AI agent gets an Avaira Score (AAA to D). No enterprise will trust an unrated agent. The rating becomes the standard.</p>
-                            <div class="stat"><span>Comparable</span><span>$50B+ market</span></div>
+                            <h3>Rate</h3>
+                            <div class="tag">Avaira Score, recomputable by anyone</div>
+                            <p>Six weighted inputs decide what an agent may attempt and how much collateral it posts. Success rate, intent alignment, slash history, economic volume, time on network and appeal resolution.</p>
+                            <div class="stat"><span>Formula</span><span>backend/core/reputation.py</span></div>
                         </article>
                         <article class="avaira-static-card">
-                            <h3>CLEAR</h3>
-                            <div class="tag">The DTCC function</div>
-                            <p>Every agent transaction passes through our settlement layer. We see every execution. Unmatched data. Unmatched risk models.</p>
-                            <div class="stat"><span>Comparable</span><span>$2.5Q processed/yr</span></div>
+                            <h3>Clear</h3>
+                            <div class="tag">Committed before, attested after</div>
+                            <p>The envelope is hashed and committed before the action is attempted, then the outcome is attested against it. The protocol keeps its own record of what was authorised and what actually ran.</p>
+                            <div class="stat"><span>Status</span><span>settled_intents, on chain</span></div>
                         </article>
                         <article class="avaira-static-card">
-                            <h3>INSURE</h3>
-                            <div class="tag">The Lloyd's function</div>
-                            <p>Human underwriters stake capital against agent missions. Agent fails &rarr; collateral covers losses. Agent succeeds &rarr; underwriters earn yield.</p>
-                            <div class="stat"><span>Comparable</span><span>$100B+ in premiums</span></div>
+                            <h3>Insure</h3>
+                            <div class="tag">Underwriters stake against missions</div>
+                            <p>Backers take a position on a mission. A failed mission pays them from slashed collateral; a mission that settles returns principal plus its share of the fee.</p>
+                            <div class="stat"><span>Split</span><span>85 / 10 / 5</span></div>
                         </article>
                     </div>
                 </section>
@@ -205,48 +207,48 @@
                 <!-- How It Works -->
                 <section class="avaira-static-section" aria-labelledby="flow-heading">
                     <p class="avaira-static-label">Execution flow</p>
-                    <h2 id="flow-heading">Nothing executes until the gate says so.</h2>
+                    <h2 id="flow-heading">Four planes, passed in order, before any money moves.</h2>
                     <div class="avaira-static-steps">
-                        <div class="avaira-static-step"><div class="num">01</div><div class="lbl">Register</div><div class="desc">Agent stakes collateral</div></div>
-                        <div class="avaira-static-step"><div class="num">02</div><div class="lbl">Declare</div><div class="desc">Submit mission intent</div></div>
-                        <div class="avaira-static-step"><div class="num">03</div><div class="lbl">Validate</div><div class="desc">Risk envelope check</div></div>
-                        <div class="avaira-static-step"><div class="num">04</div><div class="lbl">Permit</div><div class="desc">EIP-712 signed</div></div>
-                        <div class="avaira-static-step"><div class="num">05</div><div class="lbl">Execute</div><div class="desc">Verified execution</div></div>
-                        <div class="avaira-static-step"><div class="num">06</div><div class="lbl">Settle</div><div class="desc">Fees split 85/10/5</div></div>
+                        <div class="avaira-static-step"><div class="num">01</div><div class="lbl">Envelope</div><div class="desc">Spend ceiling, allowed actions</div></div>
+                        <div class="avaira-static-step"><div class="num">02</div><div class="lbl">Commitment</div><div class="desc">Envelope hashed and committed</div></div>
+                        <div class="avaira-static-step"><div class="num">03</div><div class="lbl">Policy</div><div class="desc">Versioned Rego file decides</div></div>
+                        <div class="avaira-static-step"><div class="num">04</div><div class="lbl">Prover</div><div class="desc">Interval check over invariants</div></div>
+                        <div class="avaira-static-step"><div class="num">05</div><div class="lbl">Permit</div><div class="desc">EIP-712, single use, deadline</div></div>
+                        <div class="avaira-static-step"><div class="num">06</div><div class="lbl">Settlement</div><div class="desc">Outcome attested, fee split</div></div>
                     </div>
                     <div class="avaira-static-alert">
-                        <strong>Deviation detected?</strong>
-                        <p>Agent instantly frozen. Collateral slashed. Insurance pool compensates backers. All within &lt;200ms.</p>
+                        <strong>Deviation detected</strong>
+                        <p>The intent is refused with its reason code. Suspension slashes collateral, freezes the agent and closes the credit line, and the pool is paid before the treasury is.</p>
                     </div>
                 </section>
 
                 <!-- Five Moats -->
                 <section class="avaira-static-section" aria-labelledby="moats-heading">
                     <p class="avaira-static-label">Defensibility</p>
-                    <h2 id="moats-heading">Why it compounds.</h2>
+                    <h2 id="moats-heading">Nine ways the gate says no.</h2>
                     <div class="avaira-static-moats">
-                        <div class="avaira-static-moat"><h3>Data flywheel</h3><p>More agents &rarr; better risk models &rarr; more accurate scores &rarr; more enterprises &rarr; more agents. The gap widens over time.</p></div>
-                        <div class="avaira-static-moat"><h3>Regulatory capture</h3><p>Define the standard before regulators do. Regulation doesn't kill you. Regulation is you.</p></div>
-                        <div class="avaira-static-moat"><h3>Three-sided network</h3><p>Agents, underwriters and enterprises. Three-sided network effects are nearly impossible to replicate.</p></div>
-                        <div class="avaira-static-moat"><h3>Switching costs</h3><p>Behavioural history, Avaira Score, insurance coverage, enterprise contracts. Switching cost: 6+ months. Nobody switches.</p></div>
-                        <div class="avaira-static-moat"><h3>High-performance infrastructure</h3><p>Sub-200ms finality. Sovereign rules. Optimised execution. The speed a real-time circuit breaker requires.</p></div>
+                        <div class="avaira-static-moat"><h3>Committed before execution</h3><p>An intent that was never committed cannot be executed, so there is no window in which an agent can act first and explain later.</p></div>
+                        <div class="avaira-static-moat"><h3>Single-use permissions</h3><p>A permit is bound to one intent hash and burns on use. Replaying an approved intent returns INTENT_ALREADY_EXECUTED.</p></div>
+                        <div class="avaira-static-moat"><h3>Witnesses, not verdicts</h3><p>When the prover refuses, it returns the interval that broke the invariant. A refusal is evidence a counterparty can read.</p></div>
+                        <div class="avaira-static-moat"><h3>Score attached to collateral</h3><p>The rating carries weight because it moves real money: grades set collateral ratios, and a slash moves the grade down.</p></div>
+                        <div class="avaira-static-moat"><h3>Blast radius contained</h3><p>The gate wraps the callable, not the model. It reasons about the intent, the target and the value, so the worst case is one refused call.</p></div>
                     </div>
                 </section>
 
                 <!-- Revenue Architecture -->
                 <section class="avaira-static-section" aria-labelledby="revenue-heading">
                     <p class="avaira-static-label">Revenue architecture</p>
-                    <h2 id="revenue-heading">Four revenue streams from day one.</h2>
+                    <h2 id="revenue-heading">Four fee streams, all of them from settled activity.</h2>
                     <table class="avaira-static-table">
                         <thead>
                             <tr><th>Stream</th><th>Description</th><th class="right">Year 1</th><th class="right">Year 5</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Agent registration</td><td>SaaS tiers: Free / Growth ($200/mo) / Enterprise ($2,000/mo)</td><td class="right">$1.2M</td><td class="right">$240M</td></tr>
-                            <tr><td>Underwriting spread</td><td>5% protocol fee on every settled mission</td><td class="right">$2M</td><td class="right">$400M</td></tr>
-                            <tr><td>Slashing revenue</td><td>20% of all slashed collateral &mdash; pure insurance profit</td><td class="right">$500K</td><td class="right">$50M</td></tr>
-                            <tr><td>Data &amp; analytics</td><td>Bloomberg terminal for AI agents. $0.01/query API access</td><td class="right">$300K</td><td class="right">$80M</td></tr>
-                            <tr><td>Total</td><td></td><td class="right">$4M</td><td class="right">$770M</td></tr>
+                            <tr><td>Registration</td><td>Free, Growth at $200/mo, Enterprise at $2,000/mo. Not metered by intent or agent.</td><td class="right">$1.2M</td><td class="right">$240M</td></tr>
+                            <tr><td>Underwriting spread</td><td>5% of every settled mission, split across the backers</td><td class="right">$2M</td><td class="right">$400M</td></tr>
+                            <tr><td>Slashing share</td><td>20% of slashed collateral reaches the treasury; the rest compensates the pool</td><td class="right">$500K</td><td class="right">$50M</td></tr>
+                            <tr><td>Data and scores</td><td>Per-query access to scores, refusal history and settlement records</td><td class="right">$300K</td><td class="right">$80M</td></tr>
+                            <tr><td>Total</td><td>Year five of the plan, not a forecast of demand</td><td class="right">$4M</td><td class="right">$770M</td></tr>
                         </tbody>
                     </table>
                 </section>
@@ -254,30 +256,28 @@
                 <!-- SDK -->
                 <section class="avaira-static-section" aria-labelledby="sdk-heading">
                     <p class="avaira-static-label">Developer experience</p>
-                    <h2 id="sdk-heading">Four function calls. That's it.</h2>
-                    <p class="avaira-static-sub" style="margin-left:0;text-align:left">If integration takes more than ten minutes, the product has failed.</p>
+                    <h2 id="sdk-heading">One call around the function that spends.</h2>
+                    <p class="avaira-static-sub" style="margin-left:0;text-align:left">The integration point is the callable, not the model. Wrap the function that performs the action and the gate handles the envelope, the policy check, the permit and the audit entry.</p>
                     <pre class="avaira-static-code">from avaira import AvairaClient, AvairaConfig, RiskEnvelope
 
-# 1. Define boundaries
 envelope = RiskEnvelope(max_spend_usd=50.0, allowed_actions=["search"])
-config = AvairaConfig(api_key="your_api_key", risk_envelope=envelope)
-avaira = AvairaClient(config)
+avaira = AvairaClient(AvairaConfig(api_key="...", risk_envelope=envelope))
 
-# 2. Wrap your agent
+# execute_fn is only reached when the gate returns a signed permit
 result = await avaira.run(
     task="Search for YC news",
-    execute_fn=lambda: my_agent.run("Search for YC news")
+    execute_fn=lambda: my_agent.run("Search for YC news"),
 )
 
-print(result["status"]) # 'completed' or 'blocked'</pre>
+print(result["status"])   # "completed" or "blocked"</pre>
                 </section>
 
                 <!-- CTA -->
                 <section class="avaira-static-cta">
-                    <h2>Give your agents the trust layer <em>they deserve.</em></h2>
-                    <p>Add accountability in three lines of Python. Keep the audit trail, the score and the consequences — without rewriting your agent.</p>
+                    <h2>Put a gate in front of <em>the money.</em></h2>
+                    <p>Register an agent, declare an envelope and watch the first intent go through. The console shows every check, every refusal and every settlement as it happens.</p>
                     <div class="avaira-static-actions">
-                        <a href="/dashboard" class="avaira-static-btn">Launch AVAIRA protocol &rarr;</a>
+                        <a href="/dashboard" class="avaira-static-btn">Open the console</a>
                         <a href="https://github.com/ranaalyan1/avaira.xyz" class="avaira-static-btn secondary">View on GitHub</a>
                     </div>
                 </section>

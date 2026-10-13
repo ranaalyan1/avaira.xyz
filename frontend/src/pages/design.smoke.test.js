@@ -98,10 +98,50 @@ describe("landing page", () => {
   });
 
   it("keeps the headline, the SDK snippet and the revenue table", () => {
-    expect(html).toContain("The trust layer for");
+    expect(html).toContain("Nothing spends until the gate says yes.");
     expect(html).toContain("AvairaClient");
-    expect(html).toContain("Four revenue streams from day one.");
+    expect(html).toContain("Four fee streams, all of them from settled activity.");
     expect(html).toContain("$770M");
+  });
+
+  // The page is built from the protocol's own artefacts — corridors, traces,
+  // spec tables — instead of generic feature cards. Those hooks are part of the
+  // contract: losing them means the page went back to being a template.
+  it("renders the gate artefacts", () => {
+    for (const needle of [
+      'data-testid="gate-pipeline-permit"',
+      'data-testid="gate-pipeline-refuse"',
+      'data-gate="envelope"',
+      'data-gate="permit"',
+      'data-testid="trace-permitted"',
+      'data-testid="trace-refused"',
+      'ENVELOPE_MISMATCH',
+      'INTENT_ALREADY_EXECUTED',
+      'data-testid="refusal-table"',
+      'data-testid="evidence-table"',
+      'data-testid="score-weights"',
+      'data-testid="score-ladder"',
+      'data-testid="penalty-ladder"',
+    ]) {
+      expect(html).toContain(needle);
+    }
+  });
+
+  // Motion is a layer, not the content: the markup alone has to carry the
+  // figures and the resolved geometry, and no copy may rely on a glyph standing
+  // in for an icon or a sentence.
+  it("carries no emoji or symbol glyphs", () => {
+    expect(html).not.toMatch(/[\u2190-\u21FF\u2300-\u27BF\u2B00-\u2BFF\uFE0F\u{1F000}-\u{1FAFF}]/u);
+  });
+
+  it("prints the resolved state of every animated figure", () => {
+    // Count-ups, corridor stages and the prover marker all render their final
+    // value in static markup, so a crawler or a reduced-motion visitor reads
+    // the real numbers.
+    expect(html).toContain("94.4%");
+    expect(html).toContain("8,031");
+    expect(html).toContain("orion-11 87.4");
+    expect(html).toContain("ENVELOPE_MISMATCH");
   });
 });
 

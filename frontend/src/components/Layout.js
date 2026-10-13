@@ -88,7 +88,7 @@ export default function Layout() {
           <button className="flex w-full items-center gap-2 rounded-lg border border-avaira-border bg-avaira-inset px-2.5 py-1.5 text-left text-[12px] text-avaira-dim transition-colors hover:border-avaira-primary/40 hover:text-avaira-muted">
             <Search size={13} />
             <span className="flex-1">Search</span>
-            <span className="font-mono text-[10px] tracking-wider">⌘K</span>
+            <span className="font-mono text-[10px] tracking-wider text-avaira-dim">Cmd K</span>
           </button>
         </div>
 

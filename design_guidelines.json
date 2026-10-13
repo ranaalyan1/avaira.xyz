@@ -102,17 +102,44 @@
     "allowed": [
       "Pastel glow blobs (.mk-glow) behind hero and CTA content on the marketing surface",
       "Fine grid background (.mk-grid-bg) with a radial mask at the top of marketing pages",
-      "Product mockups as pure CSS in .mk-window frames — no bitmap screenshots",
-      "Subtle slide-in/rise-in entrance animation with the .stagger-N delays"
+      "Protocol artefacts as first-class visuals: gate traces (stage/ms/payload rows), the 3D corridor, the GateReason enum, the score ladder",
+      "Scroll-scrubbed motion (anime.js ScrollObserver) where the page position drives the animation, and it runs backwards on the way up",
+      "Pointer tilt on hero art (usePointerTilt) — fine pointers only, a few degrees, never on data tables",
+      "Count-ups and reveal-in on scroll, created only through hooks in src/lib/motion.js"
     ],
     "disallowed": [
-      "Neon glows, scanlines, glitch text, 3D card tilt (removed from the previous system)",
+      "Neon glows, scanlines, glitch text",
+      "Emoji or symbol glyphs (arrows, checkmarks, keyboard glyphs) standing in for an icon or a sentence — use lucide-react icons or words",
       "Gradients over text",
-      "Literal hex values in components — only lib/palette.js and the marketing mock frames carry hex"
+      "Literal hex values in components — only lib/palette.js and the marketing mock frames carry hex",
+      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js so reduced motion and static rendering stay correct"
     ]
   },
+  "motion": {
+    "library": "anime.js 4.x (dependencies: animejs ^4.5.0)",
+    "entry_point": "frontend/src/lib/motion.js — the only module that imports anime.js",
+    "primitives": {
+      "useReveal": "observes each [data-reveal] target and animates it once, staggering the ones that arrive together",
+      "useCountUp": "animates a number in a ref when it scrolls into view; returns [ref, formatted string]",
+      "usePointerTilt": "damped rotateX/rotateY follow via createAnimatable; fine pointers only",
+      "useScrubTimeline": "anime timeline linked to scroll with sync:true; onProgress(0..1) reports position",
+      "useEnterAnimation": "plays a scoped animation once the element is in view",
+      "re-exports": "animate, createTimeline, stagger, utils"
+    },
+    "rules": [
+      "No window access at module scope and no animation in render: effects only, refs guarded.",
+      "Under prefers-reduced-motion no animation is created at all, and the stylesheet's default state is the resolved state (visible, in place, final values).",
+      "Static markup must carry the finished composition, so crawlers and the smoke tests read real numbers — renderToStaticMarkup never runs effects.",
+      "Animate transforms and opacity, and keep the number of scrubbed sections small; the console keeps its motion elsewhere and stays still where data is dense."
+    ],
+    "landing_usage": {
+      "hero": "GateTrace prints two gate traces; the frame takes a pointer tilt",
+      "execution": "two GatePipeline corridors scrubbed by scroll — one clears all four planes, one stops at policy",
+      "kept_still": "refusal table, evidence, revenue table and pricing read as documents, not decoration"
+    }
+  },
   "page_specific_rules": {
-    "landing": "Light scope. Centered hero with one primary CTA, product window mock, hairline-separated feature sections, single pricing block, FAQ accordion, multi-column footer.",
+    "landing": "Light scope. Hero states the gate rule and prints two gate traces; pillars (Rate/Clear/Insure); the 3D corridor scrubbed by scroll; the nine GateReason refusals; measured evidence; the score weights and ladder; the penalty state machine; the four fee streams; one-line integration with the SDK snippet and the standards it uses; three tiers; FAQ; multi-column footer.",
     "login": "Light scope, single card, OAuth buttons at full width.",
     "dashboard": "Stat tiles on a 12-column grid, telemetry charts using CHART_COLORS, activity feed with status pills.",
     "execution_flow": "Vertical lifecycle rail with .timeline-line/.timeline-dot; blocked executions render in --danger.",
@@ -122,15 +149,18 @@
   "accessibility": {
     "contrast": "Body text is --text-secondary or stronger on its surface in both scopes.",
     "focus_states": "Visible 2px ring (--ring) on every focusable element via :focus-visible.",
-    "reduced_motion": "index.css disables animations and transitions under prefers-reduced-motion.",
+    "reduced_motion": "src/lib/motion.js creates no animation under prefers-reduced-motion, and CSS keeps the resolved state as the default, so every figure and every corridor stage is readable without motion.",
     "testids": "Every interactive element keeps a data-testid; src/pages/design.smoke.test.js fails the build if a documented hook disappears."
   },
   "instructions_to_main_agent": [
     "1. TOKENS: add or change colours in src/index.css only (both scopes), then mirror in tailwind.config.js if a new Tailwind name is needed.",
     "2. JS CONSUMERS: read colours from src/lib/palette.js for Recharts, SVG and inline styles.",
     "3. SCOPE: wrap marketing routes in `.theme-marketing`; console routes inherit the dark default.",
-    "4. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
-    "5. PRE-RENDER: keep the inline style block in public/index.html in sync with the light tokens.",
-    "6. SCREENSHOTS: re-run verify_frontend_v2.py after visual changes to refresh verification/*.png."
+    "4. MOTION: animate only through src/lib/motion.js. Never let an animation be the only place a value appears.",
+    "5. GLYPHS: no emoji or symbol glyphs in UI copy; `design.smoke.test.js` fails on emoji, arrows and checkmarks.",
+    "6. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
+    "7. PRE-RENDER: keep the inline style block and the copy in public/index.html in sync with the light tokens and the landing page.",
+    "8. LOCKFILES: CI installs with `yarn install --frozen-lockfile`, deployment with `npm ci` — update package.json, package-lock.json and yarn.lock together.",
+    "9. SCREENSHOTS: re-run verify_frontend_v2.py after visual changes to refresh verification/*.png."
   ]
 }

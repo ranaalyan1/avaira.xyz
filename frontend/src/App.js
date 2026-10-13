@@ -1,9 +1,14 @@
 import "@/App.css";
+import "@/pixel.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
 import axios from "axios";
 import Layout from "@/components/Layout";
 import Landing from "@/pages/Landing";
+import GatePage from "@/pages/GatePage";
+import ScorePage from "@/pages/ScorePage";
+import EvidencePage from "@/pages/EvidencePage";
+import DocsPage from "@/pages/DocsPage";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
@@ -37,6 +42,10 @@ function AppRoutes() {
     <>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/gate" element={<GatePage />} />
+        <Route path="/score" element={<ScorePage />} />
+        <Route path="/evidence" element={<EvidencePage />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="/login" element={<Login />} />
         <Route
           element={(

@@ -1,25 +1,35 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { Glyph } from "@/components/marketing/pixel";
 
 export default function NotFound() {
   return (
-    <div
-      className="theme-marketing relative flex min-h-screen items-center justify-center overflow-hidden bg-avaira-bg px-6"
-      data-testid="not-found-page"
-    >
-      <div className="mk-grid-bg absolute inset-0 -z-20" />
-      <div className="mk-glow -z-10 left-1/2 top-[-140px] h-[320px] w-[420px] -translate-x-1/2 mk-glow-violet" />
+    <div className="px-site px-login" data-testid="not-found-page">
+      <span className="px-login-veil" aria-hidden="true" />
 
-      <div className="mk-card w-full max-w-md p-8 text-center">
-        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-avaira-dim">Error 404</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Page not found</h1>
-        <p className="mt-3 text-[13px] text-avaira-muted">
-          The route you requested does not exist, or it moved while you were away.
+      <div className="px-login-inner" style={{ textAlign: "center" }}>
+        <span className="px-login-mark" aria-hidden="true">
+          <Glyph seed="404" size={40} solid />
+        </span>
+        <p className="px-label" style={{ marginTop: "1rem" }}>
+          Error 404
         </p>
-        <Link to="/" className="mk-btn mk-btn-primary mt-6">
-          <ArrowLeft size={15} />
-          Return home
-        </Link>
+        <h1 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>
+          No route here
+        </h1>
+        <p className="px-body" style={{ marginTop: "1rem", maxWidth: "44ch", marginInline: "auto" }}>
+          The path you asked for does not exist, or it moved while you were away. Nothing was executed.
+        </p>
+
+        <div className="px-hero-actions" style={{ justifyContent: "center", marginTop: "2rem" }}>
+          <Link className="px-btn px-btn-accent px-btn-lg" to="/">
+            <ArrowLeft size={15} strokeWidth={2} />
+            Return home
+          </Link>
+          <Link className="px-btn px-btn-quiet px-btn-lg" to="/gate">
+            Read the mechanism
+          </Link>
+        </div>
       </div>
     </div>
   );

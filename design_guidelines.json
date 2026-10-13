@@ -1,12 +1,13 @@
 {
   "identity": {
     "name": "AVAIRA",
-    "archetype": "The Vigilant Guardian — institutional trust infrastructure",
-    "mission": "Enforce absolute control over AI execution with cryptographic precision.",
+    "archetype": "The Vigilant Guardian — enforcement infrastructure, rendered at machine resolution",
+    "mission": "Nothing spends until the gate returns a permit.",
     "emotional_tone": "Composed, exact, credible. Institutional confidence without theatre.",
-    "two_surfaces": {
-      "marketing": "Light. White canvas, hairline dividers, generous whitespace, indigo calls to action, pastel glows. Sells the protocol.",
-      "console": "Dark. Blueprint-tinted neutrals, dense telemetry, mono data, same indigo accent. Runs the protocol."
+    "three_surfaces": {
+      "marketing": "Pixel. Pure black ground, dot-matrix display type, 11px tracked mono labels, 1px hard edges, one indigo accent. Five pages, one subject each.",
+      "console": "Dark. Blueprint-tinted neutrals, dense telemetry, mono data, same indigo accent. Runs the protocol.",
+      "auth": "Pixel, light-grounded panels for /login and 404 so the sign-in path belongs to the same system as the site."
     },
     "target_audience": "Blockchain architects, security engineers, DeFi operators, underwriters"
   },
@@ -14,13 +15,53 @@
     "Density is Information: don't hide data behind clicks. Show the pulse of the network.",
     "Visibility is Trust: visualise the invisible (signatures, hash validations).",
     "Enforcement over decoration: the UI states what the contracts will do, not what might happen.",
-    "One system, two surfaces: the same tokens serve the light site and the dark console — no per-component theming."
+    "One system, three surfaces: the pixel layer, the light auth pages and the dark console all resolve to the same tokens — no per-component theming.",
+    "A page per pillar, not a scroll: /, /gate, /score, /evidence and /docs each answer one question, and the nav exposes them as a map of the protocol.",
+    "The pixel is the measurement, not a costume: renders are chunky-grid and dithered, never upscaled photos or slick 3D."
   ],
+  "routes": {
+    "site": {
+      "/": "Home — hero frame, four measured facts, three pillars, closing CTA",
+      "/gate": "The gate — four planes, the six-step sequence, refusals, permit and refusal traces",
+      "/score": "The score engine — six weights, five bands, penalty ladder, four fee streams",
+      "/evidence": "Evidence — measured figures, make targets, stated limits",
+      "/docs": "Integration — the one-call wrapper, SDK snippets, the standards it uses",
+      "/login": "Sign-in — pixel chrome over the console's auth",
+      "*": "404 — pixel glyph seeded from the path"
+    },
+    "console": {
+      "/dashboard": "Stat tiles, telemetry charts, activity feed",
+      "/agents": "Agent registry — grade badges, freeze state",
+      "/executions": "Execution flow — lifecycle rail, blocked runs in --danger",
+      "/underwriters": "Underwriter positions",
+      "/freeze": "Freeze controls",
+      "/treasury": "Financial columns, mono and right-aligned",
+      "/reputation": "Score detail",
+      "/hardening-report": "Verification artifacts",
+      "/sdk": "Console-side SDK reference"
+    },
+    "section_ids": "Route changes never move the section ids the site has always exposed: home #pillars #faq, gate #execution #moats, score #revenue #penalty, evidence/docs #top, docs #sdk. The footer deep-links into all of them, so an old link still lands on the section that answers it."
+  },
   "tokens": {
     "storage": "Space-separated RGB channels in CSS variables so Tailwind opacity modifiers keep working: `rgb(var(--accent) / <alpha-value>)`.",
     "definition_site": "src/index.css — `:root` (dark console) and `.theme-marketing` (light)",
+    "pixel_definition_site": "src/pixel.css — the `.px-site` scope, plus the `.px-*` component layer and the console hardening rules",
     "tailwind_mapping": "frontend/tailwind.config.js (`avaira.*` namespace + shadcn/ui vars)",
     "js_mirror": "frontend/src/lib/palette.js (Recharts, SVG fills, imperative consumers)",
+    "pixel": {
+      "black": "#000000",
+      "bg": "#05060A",
+      "panel": "#0B0D12",
+      "raise": "#111319",
+      "ink": "#F5F6F8",
+      "dim": "#9AA1AE",
+      "mute": "#5E6674",
+      "accent": "#6E6BF2",
+      "hi": "#C9C7FF",
+      "red": "#F45B69",
+      "line": "rgba(255,255,255,0.14)",
+      "line_strong": "rgba(255,255,255,0.30)"
+    },
     "dark": {
       "surface_app": "#08090C",
       "surface_card": "#101218",
@@ -54,11 +95,10 @@
       "info": "#2563EB",
       "hairline": "#E8E9EC",
       "hairline_strong": "#D5D8DD"
-    },
-    "third_scope": "Image scope. `.hero` and `.band` on the landing page sit on photographs and re-declare the type tokens for a dark ground (--text-primary: 255 255 255, --text-secondary, --text-muted, a brighter --accent, --hairline-art). The same .mk- utilities stay readable there without any component knowing that it is standing on art."
+    }
   },
   "colors": {
-    "rule": "Red means danger only — frozen agents, slashed collateral, blocked intents, destructive actions. Everything else (navigation, primary buttons, links, focus rings, charts) uses the indigo accent.",
+    "rule": "Red means danger only — frozen agents, slashed collateral, blocked intents, destructive actions, refused intents. Everything else (navigation, primary buttons, links, focus rings, charts) uses the indigo accent.",
     "status_mapping": {
       "settled_completed_active_approved": "--success",
       "pending_review_paused_warning": "--warning",
@@ -75,62 +115,66 @@
     }
   },
   "typography": {
-    "family_all": "Inter, system-ui, sans-serif",
-    "family_mono": "JetBrains Mono (machine data only: addresses, hashes, amounts, numeric columns, uppercase micro-labels)",
-    "case": "Sentence case for headings, buttons and labels. Uppercase is reserved for small tracked-out mono micro-labels (nav group headings, table headers).",
-    "headings": {
-      "weight": "600",
-      "tracking": "-0.02em (console) to -0.035em (marketing display)"
-    },
-    "install_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    "display": "Doto (variable dot matrix), weight 900 for every display heading, uppercase, line-height 0.9-0.95. The dots are the design; never letter-space it apart.",
+    "machine": "IBM Plex Mono, 11px labels at 0.16-0.2em tracking, uppercase; 12-13px for data rows and code.",
+    "body": "Inter, 15-17px, only where prose has to be read at length. Headings are never Inter on the marketing surface.",
+    "case": "Display headings are uppercase; nav, labels, table headers and footer headings are uppercase mono; prose stays sentence case.",
+    "install": "Self-hosted via @fontsource/doto and @fontsource/ibm-plex-mono imported in src/index.js; Inter loads from Google Fonts in public/index.html."
   },
   "layout_strategy": {
-    "container": ".mk-container (1080px) / .mk-container-wide (1200px) for marketing; .app-main-container (1320px) for the console",
-    "rhythm": "Marketing sections use .mk-section with 1px hairline separators and 5.5rem vertical padding; console pages use .page-shell with a hairline .page-header.",
-    "border_radius": "One --radius token (0.625rem) for every card, button, input and table in both surfaces.",
-    "notes": "Containment is 1px hairlines, not heavy borders or glow. Whitespace carries hierarchy on the marketing surface; density and mono alignment carry it in the console."
+    "container": ".px-wrap (1280px) for the site; .mk-container (1080px) / .app-main-container (1320px) where the older layers still run",
+    "page_shape": "Every page opens on a PageHead — a black art plate with the corridor/section index, the display headline, the lede and a 1px-bordered meta strip. Then numbered sections, each with an .px-index rule (number, name, hairline to the edge).",
+    "border_radius": "Zero. `border-radius: 0 !important` inside `.px-site`; the console keeps its own --radius.",
+    "edges": "Containment is a single 1px hard line — no shadows, no glow, no blur on the site. Grid gaps are 1px lines showing through, never spacing.",
+    "notes": "Whitespace carries hierarchy on the marketing surface; density and mono alignment carry it in the console."
   },
   "component_styling": {
-    "card_console": ".cyber-card — surface-card at 72% opacity, 1px hairline, --shadow-panel, hover lifts to accent border",
-    "card_marketing": ".mk-card / .mk-card-flat / .mk-card-block — white surface, 1px hairline, 14px radius, soft shadow",
-    "button_console": ".cyber-btn — indigo fill, white text, --radius, translateY(-1px) on hover",
-    "button_marketing": ".mk-btn with .mk-btn-primary / .mk-btn-secondary / .mk-btn-lg",
-    "input": "surface-inset background, hairline-strong border, focus ring `0 0 0 3px rgb(var(--accent) / 0.18)`",
-    "badge": "mono, 10-11px, rounded, colour from the status mapping",
-    "table": ".data-table — sticky mono micro-label headers on surface-raised, hairline rows, right-aligned numbers"
+    "site_primitives": "src/components/marketing/pixel.jsx — PixelNav, PixelFooter, SectionIndex, PageHead, Glyph, PixelFrame, SpecRows, Marquee, ConsoleActions; buttons, cards, traces and tables are .px-* classes in src/pixel.css",
+    "page_head": "Black plate, eyebrow label, Doto headline, lede, action row, meta strip. Carries id=\"top\" and a real <img alt> for the art; the alt describes what was rendered, never the mood.",
+    "card_site": ".px-card — panel ground, 1px line, art plate on a black band, body in the display/mono pair",
+    "button_site": ".px-btn — 44px tall, 1px line, mono uppercase; .px-btn-accent fills indigo. Hover swaps the fill; nothing lifts, nothing glows.",
+    "trace": ".px-trace / .px-trace-row — permitted rows in --success text, refused rows in --red",
+    "input": "Console auth inputs on the light pages; 1px --line-strong, focus ring `0 0 0 3px rgb(var(--accent) / 0.18)`",
+    "badge": "mono, 10-11px, colour from the status mapping; no rounding",
+    "table": ".px-table — mono micro-label headers, 1px hairline rows, right-aligned numbers"
   },
   "visual_enhancers": {
     "allowed": [
-      "Full-bleed rendered frames in public/art (webp), each with a written alt text",
-      "Scroll-scrubbed art bands: perspective lift, scale settle and parallax on the frame, copy revealed on the same scroll position",
-      "Pastel glow blobs (.mk-glow) behind the closing CTA",
-      "Fine grid background (.mk-grid-bg) on the hero and the sign-in page",
-      "Protocol artefacts as first-class visuals: gate traces, the 3D corridor, the GateReason enum, the score ladder",
+      "Pixel art plates in public/art (png), each with a written alt text, rendered on black and set with image-rendering: pixelated",
+      "The corridor animation on /gate: a lit card crossing four planes, driven by scroll through src/lib/motion.js",
+      "GateTrace printing real permitted/refused request lines",
+      "Dither, 1px grids and hard slabs as the only texture on the site",
+      "Protocol artefacts as first-class visuals: gate traces, the six-step sequence, the GateReason enum, the score ladder",
       "Count-ups and reveal-in on scroll, created only through hooks in src/lib/motion.js"
     ],
     "disallowed": [
-      "Neon glows, scanlines, glitch text",
+      "Neon glows, scanlines, glitch text, CRT blooms",
+      "Slick 3D renders, glass, pastel gradients or stock imagery on the site — the pixel set replaces all of it",
       "Emoji or symbol glyphs standing in for an icon or a sentence — lucide-react or words",
-      "Pricing surfaces, tiers, per-check charges and revenue projections: the marketing page states mechanism and measured figures only",
+      "Pricing surfaces, tiers, per-check charges and revenue projections: the site states mechanism and measured figures only",
       "Gradients over text",
-      "Bitmap screenshots of the console as decoration — the frames are rendered objects, not UI captures",
-      "Literal hex values in components — only lib/palette.js and the marketing mock frames carry hex",
-      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js"
+      "Bitmap screenshots of the console as decoration",
+      "Literal hex values in components — only lib/palette.js and the pixel layer carry hex",
+      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js",
+      "A single long scroll page: the marketing site is five routes."
     ]
   },
   "art_direction": {
-    "rule": "One rendered object per claim, on black, with the protocol's colour. No stock, no screenshots, no illustration.",
-    "palette_lock": "Every frame is restricted to near-black #08090C, indigo #6E6BF2, violet #9A6BFF plus neutral metal and glass. A frame that introduces another hue is regenerated.",
+    "rule": "One pixel plate per claim, on black, in the protocol's two hues. No stock, no screenshots, no illustration, no 3D render.",
+    "palette_lock": "Every plate is restricted to black, indigo #6E6BF2 and pale violet #C9C7FF, with dithering for the in-between tones. A plate that introduces another hue is regenerated.",
+    "recipe": "Chunky pixel grid, hard edges, no anti-aliasing, no text, no logos, no UI chrome. Generated large, reduced to a small grid and upscaled with nearest-neighbour so the pixels are real.",
     "assets": {
-      "hero-gate": "/art/hero-gate.webp — a card of light passing through four glass planes (hero)",
-      "gate-3d": "/art/gate-3d.webp — a glass gate with wireframe threads (pillar: Clear)",
-      "score-3d": "/art/score-3d.webp — concentric machined rings (pillar: Rate)",
-      "underwrite-3d": "/art/underwrite-3d.webp — a bonded plate on a slab (pillar: Insure)",
-      "decision-3d": "/art/decision-3d.webp — one lit channel splitting from a sealed one (the fork)",
-      "underwriter-network": "/art/underwriter-network.webp — a lattice of lit spheres (underwriting)"
+      "hero": "/art/hero.png 480x268 — a corridor of four gates with a lit card between them",
+      "score": "/art/score.png 384x384 — a gauge with a lit arc and one needle",
+      "underwrite": "/art/underwrite.png 384x214 — a vault of stacked bonded plates with particles rising",
+      "network": "/art/network.png 480x268 — a lattice of connected nodes",
+      "permit": "/art/permit.png 384x209 — a signed permit card with a seal",
+      "refuse": "/art/refuse.png 384x214 — a barrier dropping across a corridor",
+      "burn": "/art/burn.png 384x572 — slashed collateral burning down",
+      "ledger": "/art/ledger.png 384x572 — a settled ledger stack"
     },
-    "processing": "Rendered large, shipped as webp with -strip at quality 78 (276 kB for the set). Keep the webp as the only committed artifact.",
-    "composition": "Frames leave an empty dark side for type: hero and the first band are copy-left, the closing band is copy-right. The veil gradient is part of the component, not the render."
+    "processing": "ImageMagick only (no Pillow in the sandbox): scale down to a pixel grid, upscale with -filter point, -strip. PNG is the only committed artifact; sources and webp intermediates are deleted.",
+    "composition": "Plates sit in dedicated black bands or as full-bleed PageHead grounds with a top-down veil; type never lands on a busy area of a plate."
   },
   "motion": {
     "library": "anime.js 4.x (dependencies: animejs ^4.5.0)",
@@ -147,37 +191,48 @@
       "No window access at module scope and no animation in render: effects only, refs guarded.",
       "Under prefers-reduced-motion no animation is created at all, and the stylesheet's default state is the resolved state (visible, in place, final values).",
       "Static markup must carry the finished composition, so crawlers and the smoke tests read real numbers — renderToStaticMarkup never runs effects.",
-      "Animate transforms and opacity, and keep the number of scrubbed sections small; the console keeps its motion elsewhere and stays still where data is dense."
+      "Animate transforms and opacity; keep scrubbed sections few. The console stays still where data is dense."
     ],
-    "landing_usage": {
-      "hero": "GateTrace prints two gate traces; the frame takes a pointer tilt",
-      "execution": "two GatePipeline corridors scrubbed by scroll — one clears all four planes, one stops at policy",
-      "kept_still": "refusal table, evidence, revenue table and pricing read as documents, not decoration"
+    "site_usage": {
+      "home": "Hero frame takes a pointer tilt; the fact strip counts up; pillars reveal in sequence",
+      "gate": "The four-plane corridor is scrubbed by scroll — the card stops at the plane that refuses in the second trace; the six-step sequence reveals in order",
+      "score": "Weights and bands reveal once; the penalty ladder stays a document",
+      "evidence": "Figures count up on entry; tables never animate",
+      "docs": "Static — code is read, not performed",
+      "kept_still": "Every table, every trace, the refusal list and the 404"
     }
   },
   "page_specific_rules": {
-    "landing": "Light scope inside an image scope. Full-bleed hero frame with the headline over its dark half; pillars as image tiles; the 3D corridor and the two gate traces; a decision band; the nine GateReason refusals; measured evidence; score weights and ladder; the penalty state machine; an underwriting band carrying the four fee streams; one-line integration with the SDK snippet and the standards it uses; FAQ; closing CTA; multi-column footer. No pricing block, no projections.",
-    "login": "Light scope, single card, OAuth buttons at full width.",
+    "home": "01. PageHead with the hero plate, then the four-fact strip (6 contracts / 123 tests / 94.4% coverage / 9 refusal codes), three pillar cards with plates, the corridor band, the refusal list, measured evidence, the closing CTA and the multi-column footer. No pricing block, no projections.",
+    "gate": "02. Corridor band, the six-step sequence (envelope, commitment, policy, prover, permit, settlement), the permit trace and the refusal trace, then the refusal table with its red codes.",
+    "score": "03. Six weighted inputs, five bands A+ through D, the penalty ladder ending in terminal ban, and the four fee streams. Numbers only — never a price.",
+    "evidence": "04. Measured figures against the make targets that regenerate them, plus a stated-limits block. Redteam, parity and campaign reports are named, not linked to dead paths.",
+    "docs": "05. The one-call wrapper, TypeScript and Python snippets, the standards used (ERC-8004, EIP-712, EIP-3009), and the console SDK link.",
+    "login": "Pixel scope, art plate over the panel, OAuth buttons at full width; auth behaviour unchanged.",
+    "not_found": "Pixel scope, the seed glyph is '404', links to / and /gate.",
     "dashboard": "Stat tiles on a 12-column grid, telemetry charts using CHART_COLORS, activity feed with status pills.",
     "execution_flow": "Vertical lifecycle rail with .timeline-line/.timeline-dot; blocked executions render in --danger.",
     "agent_registry": "Card grid; each agent card carries a grade badge coloured by gradeColor() and a freeze state that switches to --danger.",
     "treasury": "Data-heavy. Mono, right-aligned financial columns; stacks use --info and --violet."
   },
   "accessibility": {
-    "contrast": "Body text is --text-secondary or stronger on its surface in both scopes.",
+    "contrast": "Body text is --dim #9AA1AE or stronger on #05060A / black; display type is --ink.",
     "focus_states": "Visible 2px ring (--ring) on every focusable element via :focus-visible.",
     "reduced_motion": "src/lib/motion.js creates no animation under prefers-reduced-motion, and CSS keeps the resolved state as the default, so every figure and every corridor stage is readable without motion.",
+    "alt_text": "Every plate carries a written description of what was rendered; no decorative empty alts on the site.",
     "testids": "Every interactive element keeps a data-testid; src/pages/design.smoke.test.js fails the build if a documented hook disappears."
   },
   "instructions_to_main_agent": [
-    "1. TOKENS: add or change colours in src/index.css only (both scopes), then mirror in tailwind.config.js if a new Tailwind name is needed.",
+    "1. TOKENS: console colours live in src/index.css (both scopes) and are mirrored in tailwind.config.js. Site colours live in src/pixel.css under `.px-site` — never introduce a hex outside those two files and lib/palette.js.",
     "2. JS CONSUMERS: read colours from src/lib/palette.js for Recharts, SVG and inline styles.",
-    "3. SCOPE: wrap marketing routes in `.theme-marketing`; console routes inherit the dark default.",
-    "4. MOTION: animate only through src/lib/motion.js. Never let an animation be the only place a value appears.",
-    "5. GLYPHS: no emoji or symbol glyphs in UI copy; `design.smoke.test.js` fails on emoji, arrows and checkmarks.",
-    "6. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
-    "7. PRE-RENDER: keep the inline style block and the copy in public/index.html in sync with the light tokens and the landing page.",
-    "8. LOCKFILES: CI installs with `yarn install --frozen-lockfile`, deployment with `npm ci` — update package.json, package-lock.json and yarn.lock together.",
-    "9. SCREENSHOTS: re-run verify_frontend_v2.py after visual changes to refresh verification/*.png."
+    "3. SCOPE: marketing routes render inside `.px-site`; console routes inherit the dark default; /login and 404 keep the pixel scope with their light panels.",
+    "4. ROUTES: the marketing site is five routes. Add a page, don't append a section to home — and keep the section ids listed in `routes.section_ids` alive so old deep links resolve.",
+    "5. MOTION: animate only through src/lib/motion.js. Never let an animation be the only place a value appears.",
+    "6. GLYPHS: no emoji or symbol glyphs in UI copy; `design.smoke.test.js` fails on emoji, arrows, checkmarks and geometric-shape blocks.",
+    "7. NO PRICING: no $ figures, no tier table, no revenue projection. The smoke test fails on `$<digit>`, \"pricing\" and \"per month\".",
+    "8. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
+    "9. PRE-RENDER: keep the `.px-static` style block and the copy in public/index.html in sync with the pixel tokens and the site pages — it is the one place the shell is written twice.",
+    "10. ART: pixel plates only, in public/art/*.png, processed with ImageMagick (-filter point). Delete sources and intermediates; never commit a webp or a 3D render again.",
+    "11. LOCKFILES: CI installs with `yarn install --frozen-lockfile`, deployment with `npm ci` — update package.json, package-lock.json and yarn.lock together."
   ]
 }

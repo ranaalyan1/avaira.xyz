@@ -126,6 +126,29 @@ https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Franaalyan
 Vercel still asks you to pick the account/team and confirm the build settings —
 that is by design; the button cannot silently deploy someone else's code.
 
+### What a backend-less deploy does (and what it used to do)
+
+`vercel.json` rewrites **every** path to `/index.html` so deep links work — including
+`/api/*`. A request that should be a 404 from the API therefore comes back as the
+app's own HTML **with HTTP 200**, and axios resolves it. Measured on a local
+build with the same rewrite:
+
+| | Before | Now |
+| :--- | :--- | :--- |
+| `GET /api/auth/me` | resolves **200 `text/html`** → `res.data` is a truthy string → `setUser("<html>…")` → `ProtectedRoute` rendered **the console for an anonymous visitor** | the response interceptor in `src/lib/api.js` rejects HTML with code `AV_API_HTML_RESPONSE`, and `normalizeSessionUser()` accepts only a user *object* — so the visitor is sent to `/login` |
+| Console pages | received an HTML string where they expected JSON | take the `catch` path they already had (`toast.error`, empty state) |
+| `/login` sign-in buttons | navigated to `${API}/auth/google/login`, which the rewrite answered with the app, landing the visitor on the app's own 404 page | disabled, with an explicit note (`data-testid="login-backend-missing"`) saying no API is attached |
+
+The public pages are unaffected either way: `Landing`, `GatePage`, `ScorePage`,
+`EvidencePage` and `DocsPage` never import `@/lib/api`, so they are pure static
+renders. That is also why the site is worth deploying before the backend exists:
+five routes work fully, and the sixth now explains itself instead of
+impersonating a signed-in session.
+
+`frontend/src/lib/api.test.js` pins the regression (`isHtmlResponse`,
+`normalizeSessionUser`), and `src/pages/design.smoke.test.js` renders `/login`
+in both states.
+
 ### Verify the deployment, don't assume it
 
 A green Vercel build proves the bundle compiled, not that the URL serves it. The

@@ -257,6 +257,27 @@ describe("sign-in and 404", () => {
     }
   });
 
+  it("explains a deployment with no backend instead of dead-ending", () => {
+    // Without a backend, `${API}/auth/google/login` is answered by the SPA
+    // rewrite, so the visitor lands on the app's own 404 page with no clue why.
+    const html = render(<Login />, { ...ANON, backendMisconfigured: true });
+
+    has(html, 'data-testid="login-backend-missing"');
+    has(html, "REACT_APP_BACKEND_URL");
+    // The buttons stay where they are (a crawler and a reader both see them), but
+    // they cannot fire a redirect that can only 404.
+    has(html, 'data-testid="google-login-btn"');
+    has(html, 'data-testid="x-login-btn"');
+    expect(html).toContain("disabled");
+  });
+
+  it("says nothing about a missing backend when the API is reachable", () => {
+    const html = render(<Login />);
+
+    expect(html).not.toContain('data-testid="login-backend-missing"');
+    expect(html).not.toContain("disabled");
+  });
+
   it("not found", () => {
     const html = render(<NotFound />);
     has(html, 'data-testid="not-found-page"');

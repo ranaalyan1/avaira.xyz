@@ -1,11 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Unplug } from "lucide-react";
 import { API } from "@/lib/api";
+import { useAuth } from "@/App";
 import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
 import { Glyph } from "@/components/marketing/pixel";
 
 export default function Login() {
   const navigate = useNavigate();
+  // Set by App when /api/* comes back as the SPA's own HTML, which means this
+  // deployment has no backend: the OAuth buttons below would navigate to
+  // `${API}/auth/...`, be answered by the SPA rewrite, and dump the visitor on
+  // the app's 404 page. Say what is actually wrong instead.
+  const { backendMisconfigured } = useAuth();
   const cardTilt = usePointerTilt({ max: 3 });
   const entrance = useEnterAnimation((_scope, root) => {
     animate(root.querySelectorAll("[data-login-enter]"), {
@@ -18,11 +24,13 @@ export default function Login() {
   });
 
   const handleGoogleLogin = () => {
+    if (backendMisconfigured) return;
     const redirectUrl = window.location.origin + "/dashboard";
     window.location.href = `${API}/auth/google/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
   const handleXLogin = () => {
+    if (backendMisconfigured) return;
     const redirectUrl = window.location.origin + "/dashboard";
     window.location.href = `${API}/auth/x/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
@@ -55,6 +63,7 @@ export default function Login() {
             <button
               data-testid="google-login-btn"
               onClick={handleGoogleLogin}
+              disabled={backendMisconfigured}
               className="px-btn px-btn-lg"
               style={{ width: "100%" }}
             >
@@ -70,6 +79,7 @@ export default function Login() {
             <button
               data-testid="x-login-btn"
               onClick={handleXLogin}
+              disabled={backendMisconfigured}
               className="px-btn px-btn-lg"
               style={{ width: "100%" }}
             >
@@ -78,6 +88,16 @@ export default function Login() {
               </svg>
               Continue with X
             </button>
+
+            {backendMisconfigured && (
+              <div className="px-login-note" data-testid="login-backend-missing">
+                <Unplug size={13} strokeWidth={2} className="px-accent-text" />
+                <p className="px-mono px-mute">
+                  No API is attached to this deployment, so sign-in cannot complete. Point
+                  REACT_APP_BACKEND_URL at the Avaira backend and redeploy to enable it.
+                </p>
+              </div>
+            )}
 
             <div className="px-login-note">
               <ShieldCheck size={13} strokeWidth={2} className="px-accent-text" />

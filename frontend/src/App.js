@@ -21,9 +21,9 @@ import Underwriters from "@/pages/Underwriters";
 import SDKDocs from "@/pages/SDKDocs";
 import HardeningReport from "@/pages/HardeningReport";
 import { Toaster } from "sonner";
-import { API } from "@/lib/api";
+import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
 
-export const AuthContext = createContext({ user: null, authReady: false, setUser: () => {}, logout: () => {} });
+export const AuthContext = createContext({ user: null, authReady: false, setUser: () => {}, logout: () => {}, backendMisconfigured: false });
 export const useAuth = () => useContext(AuthContext);
 
 function ProtectedRoute({ children }) {
@@ -73,12 +73,24 @@ function AppRoutes() {
 function App() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  // True when /api/* is being answered by the SPA rewrite, i.e. this deployment
+  // has no backend attached. The sign-in page says so instead of sending the
+  // visitor into a redirect that can only land on the app's own 404.
+  const [backendMisconfigured, setBackendMisconfigured] = useState(false);
 
   const checkAuth = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/auth/me`, { withCredentials: true });
-      setUser(res.data);
-    } catch { /* not logged in */ }
+      // Only a user *object* counts as signed in. On a deployment where the SPA
+      // rewrite answers /api/* (no backend configured), this call resolves with
+      // the app's own HTML and the old `setUser(res.data)` marked an anonymous
+      // visitor as authenticated — which rendered the console instead of /login.
+      setUser(normalizeSessionUser(res.data));
+    } catch (e) {
+      // "Not logged in" (401) and "no backend at all" (HTML) both land here, and
+      // only the second one is worth telling the visitor about.
+      if (e && e.code === HTML_RESPONSE) setBackendMisconfigured(true);
+    }
     finally { setAuthReady(true); }
   }, []);
 
@@ -90,7 +102,7 @@ function App() {
   };
 
   return (
-    <AuthContext.Provider value={{ user, authReady, setUser, logout }}>
+    <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>
           <AppRoutes />

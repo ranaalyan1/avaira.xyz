@@ -6,12 +6,15 @@
 #   make setup-full      + contracts (Foundry) and frontend deps
 #   make console         browser Quickstart Console on http://localhost:8402
 #   make test            run every suite that is installed locally
-#   make demo            the 4 deterministic proof artifacts (Cognitive OS)
+#   make demo            deterministic end-to-end lifecycle trace (--check in CI)
+#   make demo-os         the 4 deterministic proof artifacts (Cognitive OS)
 #   make deploy-monad    deploy the 6-contract stack to Monad testnet (needs funds)
+#   make verify-deploy   assert the deployed site is serving AVAIRA (URL=…)
 #
 # `make setup` is the recommended entry point; it wraps ./setup.sh, which is
 # idempotent and safe to re-run. Everything chain-related reads contracts/.env
 # (see contracts/.env.example).
+
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
@@ -31,11 +34,11 @@ FUZZ_JOBS ?= 2
 REPORTS := verification/reports
 
 .PHONY: help install install-verification test test-contracts test-sdk test-scorer test-python \
-        setup setup-dev setup-full setup-check quickstart console gateway \
+        setup setup-dev setup-full setup-check quickstart console gateway demo-os \
         test-core \
         deploy-monad verify-monad benchmark gate-bench measure-monad \
         fmt clean legacy-dev \
-        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify
+        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
@@ -62,7 +65,8 @@ gateway: console
 console:
 	./setup.sh --serve --port $(PORT)
 
-demo:
+# The four deterministic proof artifacts; SETUP.md and CI call this module directly.
+demo-os:
 	$(PY) -m avaira_os.demos
 
 install:
@@ -172,6 +176,16 @@ demo-check: compile
 
 doctor:
 	$(PY) tools/doctor.py
+
+# ── Deployed site ───────────────────────────────────────────────────────────────
+
+# The last mile: a green CI build says the bundle compiles, not that the URL
+# serves it. Checks /, the SPA deep links, both bundles and the static files
+# against a live host (default https://avaira.vercel.app; override URL= for a
+# preview deployment).
+verify-deploy:
+	$(PY) tools/verify_deploy.py $(URL) --json $(REPORTS)/deployed.json
+
 
 verify: compile
 	@$(MAKE) --no-print-directory test-sdk test-scorer

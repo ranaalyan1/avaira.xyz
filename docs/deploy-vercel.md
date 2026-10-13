@@ -14,6 +14,23 @@ proxy it same-origin — both recipes live in
 
 ---
 
+## Where things stand (verified 2026-10-13)
+
+Measured, not assumed — so the next step is a decision rather than a diagnosis:
+
+| Check | Result |
+| :--- | :--- |
+| `https://avaira.vercel.app/` | Vercel `404: NOT_FOUND`. No project named `avaira` is serving that name. |
+| Vercel deployments on this repo | 27 total, **all created 2026-03-14/15**, all by `vercel[bot]`, belonging to project **`avaira-v2`** (team `ranaaliyan887-1407s-projects`). No deployment has been created since, although `main` has received many pushes — so the project's Git integration is no longer building this repository. |
+| `deploy.yml` → *Deploy to Vercel (production)* | Runs and reports **success**, but its `Check for Vercel credentials` step finds `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` unset and skips the deploy. That is the workflow behaving as designed, not a failure. |
+| Frontend build (Node 22, this commit) | **Green**: `cd frontend && npm ci && CI=false npm run build` → `290.9 kB` JS + `22.4 kB` CSS gzipped, `frontend/build` 6.8 MB. Deep links (`/gate`, `/score`, `/evidence`, `/docs`) all return the SPA shell. |
+
+In short: **the repository is deploy-ready; the Vercel side is not connected.** A
+deploy needs one action in a Vercel account — either [Path A](#path-a--import-the-project-in-the-vercel-dashboard-recommended)
+or [Path B](#path-b--deploy-from-github-actions) below.
+
+---
+
 ## What is already wired up in this repo
 
 | File | Purpose |
@@ -32,10 +49,18 @@ proxy it same-origin — both recipes live in
 ## Path A — Import the project in the Vercel dashboard (recommended)
 
 0. **To answer on `https://avaira.vercel.app`, the Vercel project has to be named
-   `avaira`** (the `*.vercel.app` subdomain follows the project name). That URL
-   currently returns Vercel's `404: NOT_FOUND`, so either create the project with
-   that name, or deploy to the existing project and add `avaira.vercel.app` under
-   *Settings → Domains*.
+   `avaira`** — the `*.vercel.app` subdomain follows the project name. Two ways,
+   both in the Vercel dashboard:
+   * **Rename the existing project** `avaira-v2` → *Settings → General → Project
+     Name* → `avaira`, then **Redeploy**. The rename moves the
+     `<name>.vercel.app` domain across with it, and the March deploys show this
+     project already built this repository successfully. Use this if the project
+     and its Git connection are still in the account.
+   * **Import it fresh** as below, giving the new project the name `avaira`.
+     Use this if `avaira-v2` was deleted.
+   `avaira` is currently unanswered on `*.vercel.app`, so the name is available;
+   if Vercel has to append a suffix, add `avaira.vercel.app` under
+   *Settings → Domains* afterwards.
 1. **Vercel → Add New → Project → Import** `ranaalyan1/avaira.xyz`.
 2. Set **Root Directory** to `frontend`.
    *Leave it empty only if you prefer deploying from the repository root — the
@@ -60,11 +85,90 @@ proxy it same-origin — both recipes live in
    | `REACT_APP_INSURANCE_POOL_ADDRESS` | `0xBF5B…2dF9` | " |
 
    The full variable list lives in `frontend/.env.example`.
+
+   > **Checked against the source (2026-10-13): `REACT_APP_BACKEND_URL` is the
+   > only variable the SPA actually reads** (`frontend/src/lib/api.js` is the
+   > single `process.env` read outside test files). The contract-address and
+   > chain variables are listed in `frontend/.env.example` for completeness but
+   > no component consumes them, so setting them changes nothing in the
+   > deployed UI. Because the default is `window.location.origin` + `/api`, a
+   > static Vercel deploy with no `REACT_APP_BACKEND_URL` renders every
+   > marketing, gate, score, evidence and docs page fine and only the
+   > authenticated dashboard data calls return 404 — which is the expected
+   > state until the backend in `deploy-backend.md` is running.
 5. **Deploy.** The production URL is `<project>.vercel.app`; add `avaira.xyz`
    under *Settings → Domains* when you are ready to cut over DNS.
 
+6. **Prove it, then update the two honesty markers.** Run `make verify-deploy`
+   (see below) and expect `✓ https://avaira.vercel.app is serving AVAIRA`. Only
+   after that:
+   * delete the "The site is **not live yet**" note under the deploy button in
+     `README.md`, and
+   * if you want the status badge, add it next to the other shields:
+     `[![Live](https://img.shields.io/badge/Protocol_Control_Center-avaira.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://avaira.vercel.app)`
+   Both are deliberately left out of the repo while the URL 404s: a badge that
+   links to a not-found page is an overclaim, and `tools/doctor.py` exists
+   precisely to keep the docs from drifting away from reality.
+
 Every push to `main` then deploys automatically (Vercel Git integration), and
 every branch/PR gets a preview URL.
+
+### One-click instead of steps 1–3
+
+The README carries a **Deploy with Vercel** button that opens the import flow with
+the repository and the project name `avaira` pre-filled:
+
+```
+https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Franaalyan1%2Favaira.xyz
+  &project-name=avaira&repository-name=avaira&root-directory=frontend
+```
+
+Vercel still asks you to pick the account/team and confirm the build settings —
+that is by design; the button cannot silently deploy someone else's code.
+
+### What a backend-less deploy does (and what it used to do)
+
+`vercel.json` rewrites **every** path to `/index.html` so deep links work — including
+`/api/*`. A request that should be a 404 from the API therefore comes back as the
+app's own HTML **with HTTP 200**, and axios resolves it. Measured on a local
+build with the same rewrite:
+
+| | Before | Now |
+| :--- | :--- | :--- |
+| `GET /api/auth/me` | resolves **200 `text/html`** → `res.data` is a truthy string → `setUser("<html>…")` → `ProtectedRoute` rendered **the console for an anonymous visitor** | the response interceptor in `src/lib/api.js` rejects HTML with code `AV_API_HTML_RESPONSE`, and `normalizeSessionUser()` accepts only a user *object* — so the visitor is sent to `/login` |
+| Console pages | received an HTML string where they expected JSON | take the `catch` path they already had (`toast.error`, empty state) |
+| `/login` sign-in buttons | navigated to `${API}/auth/google/login`, which the rewrite answered with the app, landing the visitor on the app's own 404 page | disabled, with an explicit note (`data-testid="login-backend-missing"`) saying no API is attached |
+
+The public pages are unaffected either way: `Landing`, `GatePage`, `ScorePage`,
+`EvidencePage` and `DocsPage` never import `@/lib/api`, so they are pure static
+renders. That is also why the site is worth deploying before the backend exists:
+five routes work fully, and the sixth now explains itself instead of
+impersonating a signed-in session.
+
+`frontend/src/lib/api.test.js` pins the regression (`isHtmlResponse`,
+`normalizeSessionUser`), and `src/pages/design.smoke.test.js` renders `/login`
+in both states.
+
+### Verify the deployment, don't assume it
+
+A green Vercel build proves the bundle compiled, not that the URL serves it. The
+repo ships the check for the live host:
+
+```bash
+make verify-deploy                                  # https://avaira.vercel.app
+make verify-deploy URL=https://avaira-git-main.vercel.app   # any preview URL
+python3 tools/verify_deploy.py --json verification/reports/deployed.json
+```
+
+It asserts that `/` returns HTML with the AVAIRA title, that the response is
+**not** Vercel's `NOT_FOUND` page, that every deep link (`/gate`, `/score`,
+`/evidence`, `/docs`) returns the same SPA shell bytes as `/` — the rewrite, not
+just the homepage — that both bundles download at full size, and that
+`robots.txt` / `sitemap.xml` are served. Exit code 1 on any failure, and each
+verdict (`not-deployed`, `unreachable`, `error`, `broken`) prints its own cause
+and fix instead of a generic stack trace. Run it from a machine with open egress:
+a sandbox without internet reports `unreachable`, which says nothing about the
+deployment.
 
 ### Verified build command
 

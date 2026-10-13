@@ -10,6 +10,9 @@
 #   make demo-os         the 4 deterministic proof artifacts (Cognitive OS)
 #   make deploy-monad    deploy the 6-contract stack to Monad testnet (needs funds)
 #   make verify-deploy   assert the deployed site is serving AVAIRA (URL=…)
+#   make verify-monad    assert the contracts are live on chain 10143
+#   make deploy-dry-run  prove the deploy wiring in-process, spend nothing
+#   make submission-check build + tests + both deploy gates + submit checklist
 #
 # `make setup` is the recommended entry point; it wraps ./setup.sh, which is
 # idempotent and safe to re-run. Everything chain-related reads contracts/.env
@@ -38,7 +41,9 @@ REPORTS := verification/reports
         test-core \
         deploy-monad verify-monad benchmark gate-bench measure-monad \
         fmt clean legacy-dev \
-        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy
+        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy \
+        deploy-dry-run verify-monad verify-monad-explorer verify-monad-sources merge-deploy-txs \
+        docs-deploy test-tools screenshots submission-check go-live
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
@@ -177,14 +182,56 @@ demo-check: compile
 doctor:
 	$(PY) tools/doctor.py
 
-# ── Deployed site ───────────────────────────────────────────────────────────────
+# ── Deployment gates (both of them) ─────────────────────────────────────────────
 
-# The last mile: a green CI build says the bundle compiles, not that the URL
-# serves it. Checks /, the SPA deep links, both bundles and the static files
-# against a live host (default https://avaira.vercel.app; override URL= for a
-# preview deployment).
+# Frontend: the last mile. A green CI build says the bundle compiles, not that
+# the URL serves it. Checks /, the SPA deep links, both bundles and the static
+# files against a live host. URL=… overrides the default https://avaira.vercel.app.
 verify-deploy:
 	$(PY) tools/verify_deploy.py $(URL) --json $(REPORTS)/deployed.json
+
+# Contracts: prove the six-constructor wiring is sound *before* spending MON.
+# Runs the same deployment as script/Deploy.s.sol in an in-process EVM.
+deploy-dry-run: compile
+	$(PY) tools/deploy_dry_run.py --json build/avaira/deploy-dry-run.json
+
+# Contracts: is it actually deployed, and correctly wired? Reads
+# deployments/$(CHAIN_ID).json and asks the RPC. Exit 1 while undeployed — on
+# purpose: a missing deployment must be loud, not inferred from a green build.
+verify-monad:
+	$(PY) tools/verify_monad.py --chain $(CHAIN_ID)
+
+# Source verification on the explorers (needs Foundry; separate from liveness,
+# which is what verify-monad answers).
+verify-monad-explorer:
+	cd contracts && make verify-monad CHAIN_ID=$(CHAIN_ID)
+
+# Fold forge's broadcast receipts (deploy tx hashes) into the manifest.
+merge-deploy-txs:
+	$(PY) tools/merge_deploy_txs.py --chain $(CHAIN_ID)
+
+# Regenerate the README's deployed-contracts section from the manifest. --check
+# fails if a hand-edited address has drifted from deployments/*.json.
+docs-deploy:
+	$(PY) tools/gen_deploy_section.py --chain $(CHAIN_ID)
+
+# Everything under tests/ runs on a bare checkout (stdlib + pytest only).
+test-tools:
+	$(PY) -m pytest tests/test_deploy_tools.py -q
+
+# Regenerate the README/dashboard screenshots (needs a chromium for Playwright).
+screenshots:
+	bash tools/screenshots.sh
+
+# After the Vercel deploy verifies: flip the README from "not live yet" to the
+# Live badge. Refuses to write anything unless tools/verify_deploy.py says ok.
+go-live:
+	$(PY) tools/go_live.py $(URL)
+
+# The last command before submitting: build + tests + both deployment gates +
+# doctor, then prints the checklist of what only a human can finish.
+submission-check:
+	bash tools/submission_check.sh
 
 
 verify: compile
@@ -202,8 +249,8 @@ verify: compile
 deploy-monad:
 	cd contracts && make deploy-monad
 
-verify-monad:
-	cd contracts && make verify-monad CHAIN_ID=$(CHAIN_ID)
+# (liveness lives in the deployment section above — this is the explorer path)
+verify-monad-sources: verify-monad-explorer
 
 # Real gas for every primitive (execution gas, identical on Monad).
 benchmark:

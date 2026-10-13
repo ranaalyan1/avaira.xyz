@@ -19,6 +19,9 @@ on:
         description: space-separated seeds
         default: "20261007 991 4242 777 31337 104729"
 
+permissions:
+  contents: read
+
 jobs:
   matrix:
     name: Campaign matrix

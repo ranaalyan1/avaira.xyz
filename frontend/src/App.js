@@ -1,9 +1,14 @@
 import "@/App.css";
+import "@/pixel.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
 import axios from "axios";
 import Layout from "@/components/Layout";
 import Landing from "@/pages/Landing";
+import GatePage from "@/pages/GatePage";
+import ScorePage from "@/pages/ScorePage";
+import EvidencePage from "@/pages/EvidencePage";
+import DocsPage from "@/pages/DocsPage";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
@@ -37,6 +42,10 @@ function AppRoutes() {
     <>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/gate" element={<GatePage />} />
+        <Route path="/score" element={<ScorePage />} />
+        <Route path="/evidence" element={<EvidencePage />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="/login" element={<Login />} />
         <Route
           element={(
@@ -83,14 +92,22 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, authReady, setUser, logout }}>
       <div className="min-h-screen bg-avaira-bg">
-        <div className="noise-overlay" />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
         <Toaster
           position="top-right"
           toastOptions={{
-            style: { background: '#0A0A0A', border: '1px solid #333', color: '#E0E0E0', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8125rem', borderRadius: '0' },
+            // Tokens resolve inside the console scope, where toasts are raised.
+            style: {
+              background: 'rgb(var(--surface-raised))',
+              border: '1px solid rgb(var(--hairline-strong))',
+              color: 'rgb(var(--text-primary))',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: '0.8125rem',
+              borderRadius: '10px',
+              boxShadow: '0 12px 32px -16px rgba(0,0,0,0.6)',
+            },
           }}
         />
       </div>

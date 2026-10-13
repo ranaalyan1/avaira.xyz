@@ -1,0 +1,196 @@
+{
+  "build": {
+    "compiler": {
+      "name": "solc-js",
+      "version": "0.8.37"
+    },
+    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "viaIR": true
+  },
+  "mismatches": [],
+  "scenarios": [
+    {
+      "evidence": {
+        "authorCanRevoke": true,
+        "costToGrieve": "minStake (100 USDC) + one feedback call",
+        "detailAfterRevoke": "ok",
+        "extremeRecordAccepted": true,
+        "getSummaryDetail": "ok",
+        "getSummaryOk": true,
+        "getSummaryOkAfterAuthorRevokes": true,
+        "wideDecimalsRecordAccepted": true
+      },
+      "expected": "BLOCKED",
+      "id": "AV-001",
+      "outcome": "BLOCKED",
+      "severity": "high",
+      "title": "Reputation read-path DoS: int256 overflow in getSummary",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "challengeOk": true,
+        "slashedTo": 0,
+        "stakeBeforeExit": 100000000,
+        "statusAfter": 3,
+        "unstakeDelaySeconds": 86400
+      },
+      "expected": "EXPLOIT-CONFIRMED",
+      "id": "AV-002",
+      "outcome": "EXPLOIT-CONFIRMED",
+      "severity": "high",
+      "title": "Slash escape: unstake inside the challenge window",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "agentStatusAfter": 3,
+        "challengeAccepted": true,
+        "committedMaxSpendUsd": 0,
+        "expected": "a zero cap must mean 'spend nothing', so the deviation is provable and slashes",
+        "leafSpendUsd": 1000000000000,
+        "revert": "",
+        "stakeAfter": 50000000
+      },
+      "expected": "BLOCKED",
+      "id": "AV-003",
+      "outcome": "BLOCKED",
+      "severity": "medium",
+      "title": "Envelope with maxSpendUsd == 0 disables overspend detection",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "attestedZeroRoot": "dead000000000000000000000000000000000000000000000000000000000000",
+        "challengeOk": true,
+        "challengerBondLost": 5000000,
+        "treasuryGained": 5000000
+      },
+      "expected": "EXPLOIT-CONFIRMED",
+      "id": "AV-004",
+      "outcome": "EXPLOIT-CONFIRMED",
+      "severity": "medium",
+      "title": "Attest a root that omits the deviation; challenger forfeits its bond",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "honestReward": 1000000000000,
+        "oneSlashPerIntent": true,
+        "secondChallengeError": "AlreadyChallenged(uint256,bytes32)(1, 0x111111111111111111\u2026)  [AvairaIntentVault] src/core/AvairaIntentVault.sol:51",
+        "secondChallengeReverted": true,
+        "sniperBounty": 1000025000000
+      },
+      "expected": "EXPLOIT-CONFIRMED",
+      "id": "AV-005",
+      "outcome": "EXPLOIT-CONFIRMED",
+      "severity": "medium",
+      "title": "Bounty race: copied challenge beats the original reporter",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "disagreementCount": 0,
+        "examples": [],
+        "probedValues": 11
+      },
+      "expected": "BLOCKED",
+      "id": "AV-006",
+      "outcome": "BLOCKED",
+      "severity": "low",
+      "title": "Credit market: borrowCapacity vs borrow rounding disagreement",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "attestOutcomeAfter": "ok",
+        "guard": "ChallengeWindowTooLarge(uint64,uint64)(18446744073709551615, 315360000)  [AvairaIntentVault] src/core/AvairaIntentVault.sol:58",
+        "hugeWindowAccepted": false
+      },
+      "expected": "BLOCKED",
+      "id": "AV-007",
+      "outcome": "BLOCKED",
+      "severity": "medium",
+      "title": "setChallengeWindow(uin64 max) bricks attestOutcome for everyone",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "firstOk": true,
+        "payeeReceived": 1000000,
+        "replayGuard": "AuthorizationNonceAlreadyUsed()()  [MockUSDC] src/tokens/MockUSDC.sol:24",
+        "replayOk": false
+      },
+      "expected": "BLOCKED",
+      "id": "AV-008",
+      "outcome": "BLOCKED",
+      "severity": "high",
+      "title": "Replay of a settled EIP-3009 authorisation",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "comparedScores": 101,
+        "examples": [],
+        "mismatchCount": 0,
+        "scorerSource": "services/scorer/src/formula.ts"
+      },
+      "expected": "BLOCKED",
+      "id": "AV-009",
+      "outcome": "BLOCKED",
+      "severity": "medium",
+      "title": "Grade bands disagree between the chain and the scorer service",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "deployTimeGuard": "require(enforcer == stakeRegistry) in script/Deploy.s.sol",
+        "harnessGuard": "AvairaChain.deploy_stack refuses to boot without the wiring",
+        "identityRegistryBanned": false,
+        "identityRegistryStillActive": true,
+        "identityStillOwnedBy": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+        "propagationFailureEmitted": true,
+        "residual": "a registry that refuses banAgent still cannot block the slash by design",
+        "slashOk": true,
+        "stakeRegistryStatus": 4
+      },
+      "expected": "BLOCKED",
+      "id": "AV-010",
+      "outcome": "BLOCKED",
+      "severity": "medium",
+      "title": "Slashed BAN can fail to propagate to identity, silently",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "junkCallReverted": true,
+        "nonceAfter": 0,
+        "nonceBefore": 0,
+        "nonceBurned": 0,
+        "why": "the ++ is rolled back with the rest of the reverted transaction"
+      },
+      "expected": "BLOCKED",
+      "id": "AV-011",
+      "outcome": "BLOCKED",
+      "severity": "info",
+      "title": "Failed setAgentWallet burns the nonce and voids an in-flight signature (refuted)",
+      "verdict": "MATCH"
+    },
+    {
+      "evidence": {
+        "cooldown": 86400,
+        "expected": "3 (SUSPENDED) until the cooldown elapses",
+        "reStakeOk": true,
+        "statusAfterReStake": 3,
+        "statusAfterSuspensionSlash": 3
+      },
+      "expected": "BLOCKED",
+      "id": "AV-012",
+      "outcome": "BLOCKED",
+      "severity": "high",
+      "title": "Suspension cooldown bypass through `stake`",
+      "verdict": "MATCH"
+    }
+  ],
+  "schema": "avaira.redteam/v1"
+}

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 import { API } from "@/lib/api";
 
+import { DARK } from "@/lib/palette";
+
 const STEP_ICONS = { request_submitted: Send, risk_validation: Shield, execution: Zap, fee_deducted: Clock };
 
 const TimelineStep = ({ step, isLast }) => {
@@ -17,12 +19,12 @@ const TimelineStep = ({ step, isLast }) => {
     <div className="flex gap-3 relative" data-testid={`timeline-step-${step.step}`}>
       <div className="flex flex-col items-center">
         <div className={`timeline-dot ${isComplete ? 'completed' : isFailed ? 'failed' : ''}`} />
-        {!isLast && <div className="w-[2px] flex-1 min-h-[24px]" style={{ background: isComplete ? '#00F0FF40' : '#33333380' }} />}
+        {!isLast && <div className="w-[2px] flex-1 min-h-[24px]" style={{ background: isComplete ? 'rgb(var(--accent) / 0.35)' : 'rgb(var(--hairline) / 0.6)' }} />}
       </div>
       <div className="pb-4 flex-1">
         <div className="flex items-center gap-2">
           <Icon size={12} strokeWidth={1.5} className={isComplete ? 'text-avaira-primary' : isFailed ? 'text-avaira-red' : 'text-avaira-muted'} />
-          <span className="font-mono text-xs uppercase tracking-wider" style={{ color: isComplete ? '#00F0FF' : isFailed ? '#FF003C' : '#858585' }}>
+          <span className="font-mono text-xs uppercase tracking-wider" style={{ color: isComplete ? DARK.accent : isFailed ? DARK.danger : DARK.textMuted }}>
             {step.step.replace(/_/g, ' ')}
           </span>
           <span className={`font-mono text-[10px] px-1.5 py-0.5 border ${isComplete ? 'border-green-500/30 text-green-400' : isFailed ? 'border-red-500/30 text-red-400' : 'border-white/10 text-avaira-muted'}`}>
@@ -77,17 +79,17 @@ export default function ExecutionFlow() {
   };
 
   const statusColor = (s) => {
-    if (s === 'completed') return '#39FF14';
-    if (s.includes('rejected') || s.includes('invalid')) return '#FF003C';
-    return '#FFD300';
+    if (s === 'completed') return DARK.success;
+    if (s.includes('rejected') || s.includes('invalid')) return DARK.danger;
+    return DARK.warning;
   };
 
   return (
     <div className="page-shell animate-slide-in" data-testid="execution-flow-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Execution Flow</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">{executions.length} EXECUTIONS RECORDED</p>
+          <h1 className="page-title">Execution Flow</h1>
+          <p className="page-subtitle">{executions.length} executions recorded</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="relative">
@@ -104,13 +106,13 @@ export default function ExecutionFlow() {
           </button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <button data-testid="new-execution-btn" className="cyber-btn bg-avaira-primary text-white px-4 py-2 font-heading text-sm flex items-center gap-2">
+              <button data-testid="new-execution-btn" className="cyber-btn flex items-center gap-2 px-3.5 py-2 text-[13px]">
                 <Send size={14} /> NEW EXECUTION
               </button>
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
               <DialogHeader>
-                <DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Submit Execution Request</DialogTitle>
+                <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Submit Execution Request</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-3 mt-2" data-testid="execution-request-form">
                 <div>
@@ -174,7 +176,7 @@ export default function ExecutionFlow() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Execution List */}
         <div className="lg:col-span-2 cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Execution History</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Execution history</h2>
           {executions.length === 0 ? (
             <div className="text-center py-8">
               <Zap size={32} className="text-avaira-dim mx-auto mb-2" strokeWidth={1} />
@@ -219,7 +221,7 @@ export default function ExecutionFlow() {
 
         {/* Timeline Detail */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Execution Lifecycle</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Execution lifecycle</h2>
           {selectedExec ? (
             <div data-testid="execution-timeline">
               <div className="mb-3 pb-3 border-b border-avaira-border">
@@ -241,7 +243,7 @@ export default function ExecutionFlow() {
 
               {selectedExec.status === "blocked" && (
                 <div className="mt-4 p-3 border border-red-500/50 bg-red-500/10 animate-pulse">
-                  <p className="font-heading font-bold text-xs text-red-400 uppercase flex items-center gap-2">
+                  <p className="text-[12px] font-semibold tracking-tight text-avaira-red flex items-center gap-2">
                     <Shield size={14} /> Execution Shield Intercept
                   </p>
                   <p className="font-mono text-[11px] text-red-200 mt-2">

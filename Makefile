@@ -21,10 +21,21 @@ CHAIN_ID ?= 10143
 # Absolute so recipes that `cd` into a subdirectory still find the venv.
 VENV_PY := $(shell test -x .venv/bin/python && echo $(CURDIR)/.venv/bin/python || echo python3)
 PY := $(VENV_PY)
+NODE ?= node
 
-.PHONY: help setup setup-dev setup-full setup-check console gateway demo test \
-        test-core test-contracts test-sdk test-scorer test-python \
-        deploy-monad verify-monad benchmark measure-monad fmt clean legacy-dev
+# The fuzz matrix: seeds are fixed, so `make fuzz` on any machine reproduces the same report.
+SEEDS ?= 20261007 991 4242 777
+FUZZ_SEQUENCES ?= 500
+FUZZ_DEPTH ?= 12
+FUZZ_JOBS ?= 2
+REPORTS := verification/reports
+
+.PHONY: help install install-verification test test-contracts test-sdk test-scorer test-python \
+        setup setup-dev setup-full setup-check quickstart console gateway \
+        test-core \
+        deploy-monad verify-monad benchmark gate-bench measure-monad \
+        fmt clean legacy-dev \
+        compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
@@ -53,6 +64,33 @@ console:
 
 demo:
 	$(PY) -m avaira_os.demos
+
+install:
+	@echo "→ verification toolchain (solc-js)"
+	@cd tools && (test -d node_modules || npm install --no-audit --no-fund)
+	@echo "→ contracts"
+	cd contracts && (test -d node_modules || npm install --no-audit --no-fund)
+	@echo "→ SDK (typescript)"
+	cd sdk/typescript && npm install --no-audit --no-fund
+	@echo "→ services"
+	cd services/scorer && npm install --no-audit --no-fund
+	@test -d services/gateway \
+		&& (cd services/gateway && npm install --no-audit --no-fund) \
+		|| echo "  ! services/gateway is not in this tree — 'make gateway' cannot work (STATE.md, SP-06)"
+	@echo "→ SDK (python)"
+	@$(PY) -m pip install -q -e sdk/python 2>/dev/null \
+		|| $(PY) -m pip install -q --break-system-packages -e sdk/python 2>/dev/null \
+		|| { echo "  ! could not install the Python SDK into this interpreter (PEP 668 managed env?)."; \
+		     echo "    Use a virtualenv: python3 -m venv .venv && . .venv/bin/activate && make install"; exit 1; }
+	@echo "→ verification harness"
+	@$(MAKE) --no-print-directory install-verification
+	@echo "✓ installed"
+
+# Only needed for the EVM-backed targets (redteam / fuzz / parity / demo).
+install-verification:
+	@$(PY) -c "import web3, eth_tester" 2>/dev/null && echo "  ✓ eth-tester + web3 already present" \
+		|| $(PY) -m pip install -q -r verification/requirements.txt --break-system-packages \
+		|| $(PY) -m pip install -q -r verification/requirements.txt
 
 # ── tests ───────────────────────────────────────────────────────────────────────
 
@@ -84,6 +122,66 @@ test-scorer:
 
 test-python:
 	cd sdk/python && $(PY) -m pytest -q
+
+# ── verification ─────────────────────────────────────────────────────────────────
+#
+# `tools/compile.mjs` runs solc-js directly, so the EVM harness works on a machine without
+# Foundry. It honours the Foundry profile (via_ir, Cancun, optimizer) and writes a manifest the
+# other tools read — see tools/README.md for why it exists.
+
+compile:
+	@$(NODE) tools/compile.mjs
+
+# Everything CI runs except the campaign matrix (which is minutes-scale, not seconds).
+check: test-sdk test-scorer compile redteam parity demo-check doctor
+	@echo "✓ check green (run `make fuzz` for the campaign matrix)"
+
+redteam: compile
+	@mkdir -p $(REPORTS)
+	$(PY) tools/avaira_evm/attacks.py --json $(REPORTS)/redteam.json
+
+# Deterministic campaign matrix, one shard per seed. Reports are merged only if every shard ran the
+# same bytecode — `aggregate_campaigns.py` refuses otherwise.
+fuzz: compile
+	@mkdir -p $(REPORTS)
+	@printf '%s\n' $(SEEDS) | xargs -P $(FUZZ_JOBS) -I{} $(PY) tools/avaira_evm/campaign.py \
+		--seed {} --sequences $(FUZZ_SEQUENCES) --depth $(FUZZ_DEPTH) --explain-reverts \
+		--out $(REPORTS)/campaign-shard-{}.json --quiet
+	$(PY) tools/aggregate_campaigns.py $(REPORTS)/campaign-shard-*.json \
+		--out $(REPORTS)/campaign.json --title "campaign matrix"
+
+# One seed, one minute: the pre-commit sanity run.
+fuzz-quick: compile
+	@mkdir -p $(REPORTS)
+	$(PY) tools/avaira_evm/campaign.py --seed 7 --sequences 40 --depth 8 --explain-reverts \
+		--out /tmp/avaira-campaign-quick.json
+
+parity: compile
+	@mkdir -p $(REPORTS)
+	$(PY) tools/parity/compare.py --json $(REPORTS)/parity.json
+
+specs: compile
+	$(PY) tools/gen_contract_specs.py
+
+demo: compile
+	$(PY) tools/demo.py
+
+# CI mode: the trace must match the committed golden file byte for byte.
+demo-check: compile
+	$(PY) tools/demo.py --check
+
+doctor:
+	$(PY) tools/doctor.py
+
+verify: compile
+	@$(MAKE) --no-print-directory test-sdk test-scorer
+	@$(MAKE) --no-print-directory redteam
+	@$(MAKE) --no-print-directory parity
+	@$(MAKE) --no-print-directory demo-check
+	@$(MAKE) --no-print-directory specs >/dev/null && git diff --quiet audit/specs || \
+		{ echo "audit/specs changed — commit the regenerated specs"; exit 1; }
+	@$(MAKE) --no-print-directory doctor
+	@echo "✓ verify green"
 
 # ── Monad ───────────────────────────────────────────────────────────────────────
 

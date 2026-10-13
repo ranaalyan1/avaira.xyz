@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+  # A production deploy can be re-run by hand (Actions → this workflow → Run
+  # workflow) instead of pushing an empty commit to main.
+  workflow_dispatch:
+
+# Never let two production deploys race each other.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -11,6 +19,7 @@ permissions:
 
 jobs:
   backend-tests:
+    name: Backend tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,18 +43,23 @@ jobs:
         run: |
           python -m pytest ../tests/test_backend_units.py -q
 
+      # The status name has to match the Vercel project for the dashboard to
+      # pick it up. Override it with a repository variable
+      # (Settings → Secrets and variables → Actions → Variables →
+      # VERCEL_CHECK_PREFIX, e.g. "Vercel - avaira-v2") instead of editing YAML.
       - name: Notify Vercel check - backend-tests
         if: ${{ always() }}
         continue-on-error: true
         uses: vercel/repository-dispatch/actions/status@v1
         with:
-          name: Vercel - avaira-v2: backend-tests
+          # Keep this quoted. An unquoted colon inside a plain scalar makes the
+          # whole workflow file invalid YAML and GitHub rejects it outright —
+          # which is what silently killed every push from March to October.
+          name: "${{ vars.VERCEL_CHECK_PREFIX || 'Vercel - avaira' }}: backend-tests"
 
-  deploy-frontend:
+  frontend-build:
+    name: Frontend build
     runs-on: ubuntu-latest
-    needs:
-      - backend-tests
-    if: ${{ always() && needs.backend-tests.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,31 +67,81 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci --legacy-peer-deps
+        # frontend/.npmrc pins legacy-peer-deps=true (React 19 against
+        # react-day-picker@8 / Radix / react-scripts@5 peers), so a plain
+        # `npm ci` resolves. Keep this identical to what Vercel runs.
+        run: npm ci
 
       - name: Build frontend
         working-directory: frontend
-        run: npm run build
+        # CI=true makes CRA promote lint warnings to build failures; the Vercel
+        # build uses the same CI=false escape hatch in vercel.json.
+        run: CI=false npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build
+          retention-days: 14
+
+      - name: Notify Vercel check - frontend-build
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: "${{ vars.VERCEL_CHECK_PREFIX || 'Vercel - avaira' }}: frontend-build"
+
+  deploy-frontend:
+    name: Deploy to Vercel (production)
+    runs-on: ubuntu-latest
+    needs:
+      - backend-tests
+      - frontend-build
+    if: ${{ always() && needs.backend-tests.result == 'success' && needs.frontend-build.result == 'success' }}
+    steps:
+      - name: Check for Vercel credentials
+        id: creds
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Vercel deploy skipped::VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID are not configured. The build above is still verified and uploaded as an artifact; see docs/deploy-vercel.md for both deploy paths."
+          fi
+
+      - name: Checkout
+        if: steps.creds.outputs.present == 'true'
+        uses: actions/checkout@v4
 
       - name: Deploy Full Stack To Vercel
-        uses: amondnet/vercel-action@v25
+        if: steps.creds.outputs.present == 'true'
+        uses: amondnet/vercel-action@v42
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: "--prod"
-          # Deploy repository root so Vercel uses root vercel.json routes for both /api and SPA paths.
+          # Deploy the repository root so Vercel picks up the root vercel.json
+          # (frontend install/build + SPA rewrites). The pre-flight build above
+          # runs the same commands, so the remote build is a replay.
           working-directory: ./
 
       - name: Notify Vercel check - deploy-frontend
-        if: ${{ always() }}
+        # Only report a status when a deploy actually ran; otherwise the check
+        # row would claim a deployment that was skipped.
+        if: ${{ always() && steps.creds.outputs.present == 'true' }}
         continue-on-error: true
         uses: vercel/repository-dispatch/actions/status@v1
         with:
-          name: Vercel - avaira-v2: deploy-frontend
+          name: "${{ vars.VERCEL_CHECK_PREFIX || 'Vercel - avaira' }}: deploy-frontend"

@@ -1,0 +1,67 @@
+{
+  "artifacts": {
+    "onchain": {
+      "negatives": {
+        "correctProofVerifies": true,
+        "swappedLeafFails": true,
+        "tamperedRootFails": true
+      },
+      "status": "compared"
+    },
+    "python": {
+      "status": "compared"
+    },
+    "rust": {
+      "detail": "cargo not available in this environment; see FINDINGS.md AV-014",
+      "status": "skipped"
+    },
+    "typescript": {
+      "detail": null,
+      "status": "compared"
+    }
+  },
+  "build": {
+    "compiler": {
+      "name": "solc-js",
+      "version": "0.8.37"
+    },
+    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "viaIR": true
+  },
+  "corpus": {
+    "path": "tools/parity/corpus.json",
+    "reproducibleFromGenerator": true,
+    "sha256": "0xa5923a0d4a932ca0024489b84f2c4e352565f34ed2d0a3d7c0084361613654c3",
+    "vectors": {
+      "adversarialLeaves": 13,
+      "envelopes": 10,
+      "intentHashes": 10,
+      "trees": 9
+    }
+  },
+  "failures": [],
+  "legacyDivergenceAV013": {
+    "canonicalIsOrderIndependent": true,
+    "examples": [
+      {
+        "canonical": "{\"a\":2,\"id\":\"t1\",\"z\":1}",
+        "legacy": "{\"id\":\"t1\",\"z\":1,\"a\":2}",
+        "why": "key order differs from the next vector"
+      },
+      {
+        "canonical": "{\"id\":\"t2\",\"nested\":{\"a\":\"x\",\"b\":[1,{\"c\":true,\"d\":null}]}}",
+        "legacy": "{\"id\":\"t2\",\"nested\":{\"b\":[1,{\"d\":null,\"c\":true}],\"a\":\"x\"}}",
+        "why": "nested object and array"
+      },
+      {
+        "canonical": "{\"id\":\"t3\",\"memo\":\"caf\\u00e9 \\u00e9 \\u2713 \\ud83d\\ude00\"}",
+        "legacy": "{\"id\":\"t3\",\"memo\":\"caf\u00e9 \u00e9 \u2713 \ud83d\ude00\"}",
+        "why": "non-ASCII and astral plane"
+      }
+    ],
+    "vectorsWhereLegacyDiffers": 7,
+    "why": "proves AV-013 was a real divergence: pre-fix `JSON.stringify(task)` vs Python's sorted encoding"
+  },
+  "schema": "avaira.parity/v1",
+  "verdict": "PASS"
+}

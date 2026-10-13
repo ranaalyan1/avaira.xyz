@@ -76,6 +76,13 @@ contract DeployAvaira is Script {
         // ---- cross-contract wiring -------------------------------------------------
         AvairaReputationRegistry(deployment.reputation).setScorerConfig(deployment.stake, usdc, minGroundedPayment);
         AvairaIdentityRegistry(payable(deployment.identity)).setEnforcer(deployment.stake);
+        // AV-010 guard: a BAN propagated from the stake registry is a best-effort cross-contract
+        // call. If `enforcer` is not the stake registry, every terminal slash silently fails to
+        // ban the identity, and the two registries disagree forever. Fail the deploy instead.
+        require(
+            AvairaIdentityRegistry(payable(deployment.identity)).enforcer() == deployment.stake,
+            "identity:enforcer != stake registry"
+        );
         AvairaIdentityRegistry(payable(deployment.identity)).setTreasury(treasury);
 
         AvairaStakeRegistry stake = AvairaStakeRegistry(deployment.stake);

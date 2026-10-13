@@ -1,17 +1,35 @@
 import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { Glyph } from "@/components/marketing/pixel";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 animate-slide-in" data-testid="not-found-page">
-      <div className="cyber-card p-8 max-w-md w-full text-center">
-        <p className="font-mono text-xs text-avaira-dim tracking-wider">ERROR 404</p>
-        <h1 className="font-heading font-bold text-3xl text-foreground uppercase mt-2">Page Not Found</h1>
-        <p className="font-mono text-xs text-avaira-muted mt-3">
-          The route you requested does not exist.
+    <div className="px-site px-login" data-testid="not-found-page">
+      <span className="px-login-veil" aria-hidden="true" />
+
+      <div className="px-login-inner" style={{ textAlign: "center" }}>
+        <span className="px-login-mark" aria-hidden="true">
+          <Glyph seed="404" size={40} solid />
+        </span>
+        <p className="px-label" style={{ marginTop: "1rem" }}>
+          Error 404
         </p>
-        <Link to="/" className="cyber-btn inline-block bg-avaira-primary text-white px-4 py-2 font-heading text-xs mt-6">
-          Return Home
-        </Link>
+        <h1 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>
+          No route here
+        </h1>
+        <p className="px-body" style={{ marginTop: "1rem", maxWidth: "44ch", marginInline: "auto" }}>
+          The path you asked for does not exist, or it moved while you were away. Nothing was executed.
+        </p>
+
+        <div className="px-hero-actions" style={{ justifyContent: "center", marginTop: "2rem" }}>
+          <Link className="px-btn px-btn-accent px-btn-lg" to="/">
+            <ArrowLeft size={15} strokeWidth={2} />
+            Return home
+          </Link>
+          <Link className="px-btn px-btn-quiet px-btn-lg" to="/gate">
+            Read the mechanism
+          </Link>
+        </div>
       </div>
     </div>
   );

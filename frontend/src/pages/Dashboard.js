@@ -8,22 +8,40 @@ import { API } from "@/lib/api";
 import AgentDashboard from "@/components/AgentDashboard";
 import TrustHeatmap from "@/components/TrustHeatmap";
 
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
-  <div className={`cyber-card p-4 animate-slide-in stagger-${delay} depth-mini-panel hover:glow-red transition-all`} data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}>
-    <div className="flex items-center gap-3">
-      <div className={`p-2 border`} style={{ borderColor: `${color}40`, background: `${color}10` }}>
-        <Icon size={16} strokeWidth={1.5} style={{ color }} />
-      </div>
-      <div>
-        <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">{label}</p>
-        <p className="font-heading font-bold text-xl text-foreground mt-0.5" style={{ color: value > 0 ? undefined : undefined }}>{value}</p>
+import { CHART_COLORS, DARK, STATUS_COLORS as PLOT_STATUS_COLORS } from "@/lib/palette";
+import { useCountUp } from "@/lib/motion";
+
+// The figure counts up when the tile enters the viewport. The markup already
+// carries the final value, so a static render, a crawler or a reduced-motion
+// visitor reads the real number instead of a zero.
+const StatCard = ({ icon: Icon, label, value, color, delay }) => {
+  const numeric = typeof value === "number" ? value : Number.parseFloat(value);
+  const hasNumber = Number.isFinite(numeric);
+  const decimals = typeof value === "string" && value.includes(".") ? value.split(".")[1].length : 0;
+  const [figureRef, figure] = useCountUp(hasNumber ? numeric : 0, { decimals });
+
+  return (
+    <div
+      className={`cyber-card p-4 animate-slide-in stagger-${delay} depth-mini-panel hover:glow-red transition-all`}
+      data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="p-2 border" style={{ borderColor: `${color}40`, background: `${color}10` }}>
+          <Icon size={16} strokeWidth={1.5} style={{ color }} />
+        </div>
+        <div>
+          <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">{label}</p>
+          <p className="font-heading font-bold text-xl text-foreground mt-0.5" ref={figureRef}>
+            {hasNumber ? figure : value}
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const COLORS = ['#00F0FF', '#39FF14', '#FFD300', '#FF003C', '#7000FF'];
-const STATUS_COLORS = { completed: '#39FF14', rejected_deviation: '#FF003C', permit_invalid: '#FFD300', pending_validation: '#00F0FF', freeze: '#FF003C', slash: '#FFD300', execution: '#00F0FF' };
+const COLORS = CHART_COLORS;
+const STATUS_COLORS = PLOT_STATUS_COLORS;
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -104,10 +122,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">
+          <h1 className="page-title">
             Protocol Overview
           </h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">REAL-TIME EXECUTION MONITORING</p>
+          <p className="page-subtitle">Real-time execution monitoring</p>
         </div>
         <button
           data-testid="simulate-lifecycle-btn"
@@ -123,12 +141,12 @@ export default function Dashboard() {
       {/* Stats Grid */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={Users} label="Total Agents" value={stats.total_agents} color="#00F0FF" delay={1} />
-          <StatCard icon={Activity} label="Active Agents" value={stats.active_agents} color="#39FF14" delay={2} />
-          <StatCard icon={Zap} label="Executions" value={stats.total_executions} color="#7000FF" delay={3} />
-          <StatCard icon={ShieldOff} label="Frozen" value={stats.frozen_agents} color="#FF003C" delay={4} />
-          <StatCard icon={Wallet} label="Total Fees (USD)" value={stats.total_fees_collected.toFixed(2)} color="#FFD300" delay={5} />
-          <StatCard icon={TrendingUp} label="Trust Pool (USD)" value={stats.trust_pool_balance.toFixed(2)} color="#00F0FF" delay={6} />
+          <StatCard icon={Users} label="Total Agents" value={stats.total_agents} color={DARK.info} delay={1} />
+          <StatCard icon={Activity} label="Active Agents" value={stats.active_agents} color={DARK.success} delay={2} />
+          <StatCard icon={Zap} label="Executions" value={stats.total_executions} color={DARK.violet} delay={3} />
+          <StatCard icon={ShieldOff} label="Frozen" value={stats.frozen_agents} color={DARK.danger} delay={4} />
+          <StatCard icon={Wallet} label="Total Fees (USD)" value={stats.total_fees_collected.toFixed(2)} color={DARK.warning} delay={5} />
+          <StatCard icon={TrendingUp} label="Trust Pool (USD)" value={stats.trust_pool_balance.toFixed(2)} color={DARK.info} delay={6} />
         </div>
       )}
 
@@ -136,8 +154,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Activity Feed */}
         <div className="lg:col-span-2 cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-4 flex items-center gap-2">
-            <Activity size={14} className="text-avaira-primary" /> Recent Activity
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-4 flex items-center gap-2">
+            <Activity size={14} className="text-avaira-primary" /> Recent activity
           </h2>
           {activity.length === 0 ? (
             <div className="text-center py-8">
@@ -153,7 +171,7 @@ export default function Dashboard() {
                     <p className="font-mono text-xs text-foreground truncate">{item.description}</p>
                     <p className="font-mono text-[10px] text-avaira-dim">{new Date(item.timestamp).toLocaleString()}</p>
                   </div>
-                  <span className="font-mono text-[10px] px-2 py-0.5 border" style={{ borderColor: (STATUS_COLORS[item.status] || '#333') + '50', color: STATUS_COLORS[item.status] || '#858585' }}>
+                  <span className="font-mono text-[10px] px-2 py-0.5 border" style={{ borderColor: (STATUS_COLORS[item.status] || DARK.hairlineStrong) + '50', color: STATUS_COLORS[item.status] || DARK.textMuted }}>
                     {item.type.toUpperCase()}
                   </span>
                 </div>
@@ -166,7 +184,7 @@ export default function Dashboard() {
         <div className="space-y-4">
           {/* Agent Distribution */}
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3 flex items-center gap-2">
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
               <Users size={14} className="text-avaira-primary" /> Distribution
             </h2>
             {pieData.length > 0 ? (
@@ -195,7 +213,7 @@ export default function Dashboard() {
 
           {/* Treasury Split */}
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3 flex items-center gap-2">
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
               <Wallet size={14} className="text-avaira-primary" /> Treasury Split
             </h2>
             {treasuryData.length > 0 ? (
@@ -209,7 +227,7 @@ export default function Dashboard() {
                     <div className="h-1.5 bg-avaira-surface">
                       <div className="h-full transition-all duration-500" style={{
                         width: `${((d.value / (stats?.total_fees_collected || 1)) * 100)}%`,
-                        background: i === 0 ? '#00F0FF' : '#7000FF'
+                        background: i === 0 ? DARK.info : DARK.violet
                       }} />
                     </div>
                   </div>

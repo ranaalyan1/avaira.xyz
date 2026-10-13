@@ -1,0 +1,83 @@
+{
+  "build": {
+    "compiler": {
+      "name": "solc-js",
+      "version": "0.8.37"
+    },
+    "matchesFoundryProfile": true,
+    "sourceDigest": "0x82c39979892b7894d072ee201c8cff9e4b1d24557c37e034cf00f70dd7ad2fdc",
+    "viaIR": true
+  },
+  "calls": 7942,
+  "depth": 12,
+  "elapsedSeconds": 383.3,
+  "engine": "py-evm (eth-tester) @ Cancun, solc-js build",
+  "gas": {
+    "totalUsed": 374101209
+  },
+  "invariantEvaluations": 10088,
+  "invariantEvaluationsById": {
+    "INV-AUTH-01": 360,
+    "INV-GATE-01": 2000,
+    "INV-GATE-02": 2000,
+    "INV-INTENT-01": 387,
+    "INV-INTENT-02": 214,
+    "INV-LEDGER-01": 2000,
+    "INV-LEDGER-02": 2000,
+    "INV-PANIC-01": 5677,
+    "INV-SLASH-01": 2000,
+    "INV-SLASH-02": 2000,
+    "INV-SLASH-03": 2000,
+    "INV-VIEW-01": 1664
+  },
+  "invariants": [
+    "INV-LEDGER-01",
+    "INV-LEDGER-02",
+    "INV-SLASH-01",
+    "INV-SLASH-02",
+    "INV-SLASH-03",
+    "INV-GATE-01",
+    "INV-GATE-02",
+    "INV-INTENT-01",
+    "INV-INTENT-02",
+    "INV-VIEW-01",
+    "INV-PANIC-01",
+    "INV-AUTH-01"
+  ],
+  "invariantsNeverEvaluated": [],
+  "revertKinds": {
+    "AccessControlUnauthorizedAccount(address,bytes32)(0x0e3957d7aca68b729d388baf6b26": 60,
+    "AccessControlUnauthorizedAccount(address,bytes32)(0x4cceba2d7d2b4fdce4304d3e09a1": 79,
+    "AccessControlUnauthorizedAccount(address,bytes32)(0x7766dede6b9f731f923351a3ab06": 49,
+    "AccessControlUnauthorizedAccount(address,bytes32)(0xd41c057fd1c78805aac12b0a94a4": 69,
+    "AccessControlUnauthorizedAccount(address,bytes32)(0xf1f6619b38a98d6de0800f1defc0": 67,
+    "AccessControlUnauthorizedAccount(address,bytes32)(0xf7edc8fa1ecc32967f827c9043fc": 72,
+    "AgentIsSuspended(uint256)(1)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 69,
+    "AgentIsSuspended(uint256)(2)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 92,
+    "AgentIsSuspended(uint256)(3)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 74,
+    "AgentIsSuspended(uint256)(4)  [AvairaStakeRegistry] src/core/AvairaStakeRegistry": 92,
+    "InsufficientCollateral(uint256,uint256)(1, 0)  [AvairaCreditMarket] src/core/Ava": 75,
+    "InsufficientCollateral(uint256,uint256)(1500000000, 0)  [AvairaCreditMarket] src": 59,
+    "InsufficientStake(uint256,uint256)(500000000, 1000000000)  [AvairaStakeRegistry]": 62,
+    "NotAuthorized(address)(0x0e3957d7aca68b729d388baf6b26655160a4b224)  [AvairaIdent": 44,
+    "NotAuthorized(address)(0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718)  [AvairaIdent": 46,
+    "NotAuthorized(address)(0xf7edc8fa1ecc32967f827c9043fcae6ba73afa5c)  [AvairaIdent": 45,
+    "NotLiquidatable(uint256,uint256,uint256)(1, 115792089237316195423570985008687907": 90,
+    "NotLiquidatable(uint256,uint256,uint256)(2, 115792089237316195423570985008687907": 96,
+    "NotLiquidatable(uint256,uint256,uint256)(3, 115792089237316195423570985008687907": 77,
+    "NotLiquidatable(uint256,uint256,uint256)(4, 115792089237316195423570985008687907": 94,
+    "RepayTooMuch(uint256,uint256)(0, 1)  [AvairaCreditMarket] src/core/AvairaCreditM": 79,
+    "RepayTooMuch(uint256,uint256)(0, 1000000000)  [AvairaCreditMarket] src/core/Avai": 61,
+    "UnsupportedTag(string)(notAStandardTag)  [AvairaReputationRegistry] src/core/Ava": 50,
+    "ValueDecimalsTooLarge(uint8)(19)  [AvairaReputationRegistry] src/core/AvairaRepu": 69,
+    "ZeroAmount()()  [AvairaStakeRegistry] src/core/AvairaStakeRegistry.sol:42": 236
+  },
+  "reverts": 3262,
+  "schema": "avaira.campaign-report/v1",
+  "seed": 991,
+  "sequences": 500,
+  "throughputCallsPerSecond": 20.7,
+  "transitions": 5782,
+  "verdict": "PASS",
+  "violations": []
+}

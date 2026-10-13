@@ -34,6 +34,7 @@
 export { Avaira, now, sleep, summariseActions } from "./avaira.js";
 export type { RunOptions } from "./avaira.js";
 export { AuditTrail, hashLeaf, hashPair, merkleProof, merkleRoot } from "./audit.js";
+export { canonicalJson } from "./canonical.js";
 export type { AuditEntry } from "./audit.js";
 export { MetricsReporter, percentile, stats } from "./metrics.js";
 export type { RunMetric } from "./metrics.js";

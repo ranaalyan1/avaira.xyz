@@ -1,9 +1,10 @@
 """Hash-chained audit trail + Merkle commitment, byte-compatible with `MerkleLib.sol`.
 
 A leaf produced here can be handed to `AvairaIntentVault.challengeDeviation` and verified
-against the root this SDK anchored. `tests/test_merkle_parity.py` asserts that against the
-same vectors the Foundry suite asserts, so TypeScript, Python and Solidity are pinned to one
-another — three independent implementations, one byte layout.
+against the root this SDK anchored. `tools/parity/compare.py` recomputes a fixed corpus
+(`tools/parity/corpus.json`) with this module, with `@avaira/sdk`, and against the compiled
+Solidity libraries in a local EVM, so Python, TypeScript and the chain are pinned to one
+another — three independent implementations, one byte layout. Run it with `make parity`.
 """
 
 from __future__ import annotations

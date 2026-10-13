@@ -1,0 +1,33 @@
+avaira proof-of-intent — one lifecycle, one local chain
+
+[join]
+  identity                 agent #1 minted (bond 0.05 MON), owner 0x6813Eb93…
+  stake                    100 USDC locked — the protocol minimum
+  reputation               score 82 → grade 'A' from the on-chain band table
+  gate                     allowed=True reason=0
+
+[commit]
+  canonical plan           91 bytes, keys sorted at every depth
+  envelopeHash             cap $25, 2 allowed actions, deadline 2000000000 (pinned)
+  intentHash               0xc2be73fab850c440d2cec3b43cd375bd…
+
+[execute → attest]
+  actions                  web.search $4, swap.execute $9 — inside the $25 cap
+  root anchored            0xf6284ff36c83c5f623fc2252ae7e0832…
+
+[deviation the anchor does not cover]
+  re-attest                accepted=False — OutcomeAlreadyAttested(uint256,bytes32)(1, 0xc2be73fab850c440d2…)  [AvairaIntentVault] src/core/AvairaIntentVault.sol:47
+  challenge                submitted (tx ok=True) — but the leaf is not in the anchored tree
+  cost                     reporter forfeits 5 USDC of bond for a claim it cannot prove
+
+[deviation the anchor does cover]
+  intent #2                same $25 cap; the agent anchors a tree containing a $90 swap
+  challenge                accepted=True
+  slash                    100 USDC → 50 USDC, status=3 (2 ACTIVE, 3 SUSPENDED)
+  bounty                   challenger +25, treasury +25
+
+[after]
+  gate                     allowed=False reason=3
+  window                   still open for challenges = False
+
+result: only an anchored deviation is slashable; when one was, half the stake moved, the reporter was paid, and the pre-execution gate now refuses this agent (gate=False).

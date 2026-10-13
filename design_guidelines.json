@@ -1,139 +1,241 @@
 {
   "identity": {
     "name": "AVAIRA",
-    "archetype": "The Vigilant Guardian (Cyberpunk/SecOps)",
-    "mission": "Enforce absolute control over AI execution with cryptographic precision.",
-    "emotional_tone": "Authoritative, High-Tech, Paranoid, Secure, 'Code is Law'",
-    "aesthetic": "Dark Cyberpunk, Terminal, High-Density Data, Neon-Noir",
-    "target_audience": "Blockchain Architects, Security Engineers, DeFi Operators"
+    "archetype": "The Vigilant Guardian — enforcement infrastructure, rendered at machine resolution",
+    "mission": "Nothing spends until the gate returns a permit.",
+    "emotional_tone": "Composed, exact, credible. Institutional confidence without theatre.",
+    "three_surfaces": {
+      "marketing": "Pixel. Pure black ground, dot-matrix display type, 11px tracked mono labels, 1px hard edges, one indigo accent. Five pages, one subject each.",
+      "console": "Dark. Blueprint-tinted neutrals, dense telemetry, mono data, same indigo accent. Runs the protocol.",
+      "auth": "Pixel, light-grounded panels for /login and 404 so the sign-in path belongs to the same system as the site."
+    },
+    "target_audience": "Blockchain architects, security engineers, DeFi operators, underwriters"
   },
   "design_principles": [
-    "Density is Information: Don't hide data behind clicks. Show the pulse of the network.",
-    "Visibility is Trust: Visualize the invisible (signatures, hash validations).",
-    "Function over Form: Aesthetically pleasing, but strictly functional. No decoration without purpose.",
-    "The Terminal Aesthetic: The user is an operator, not a consumer. Command lines and raw data are beautiful."
+    "Density is Information: don't hide data behind clicks. Show the pulse of the network.",
+    "Visibility is Trust: visualise the invisible (signatures, hash validations).",
+    "Enforcement over decoration: the UI states what the contracts will do, not what might happen.",
+    "One system, three surfaces: the pixel layer, the light auth pages and the dark console all resolve to the same tokens — no per-component theming.",
+    "A page per pillar, not a scroll: /, /gate, /score, /evidence and /docs each answer one question, and the nav exposes them as a map of the protocol.",
+    "The pixel is the measurement, not a costume: renders are chunky-grid and dithered, never upscaled photos or slick 3D."
   ],
-  "typography": {
-    "headings": {
-      "family": "Rajdhani, sans-serif",
-      "weights": ["600", "700"],
-      "tracking": "tracking-tight",
-      "case": "uppercase",
-      "install_url": "https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap"
+  "routes": {
+    "site": {
+      "/": "Home — hero frame, four measured facts, three pillars, closing CTA",
+      "/gate": "The gate — four planes, the six-step sequence, refusals, permit and refusal traces",
+      "/score": "The score engine — six weights, five bands, penalty ladder, four fee streams",
+      "/evidence": "Evidence — measured figures, make targets, stated limits",
+      "/docs": "Integration — the one-call wrapper, SDK snippets, the standards it uses",
+      "/login": "Sign-in — pixel chrome over the console's auth",
+      "*": "404 — pixel glyph seeded from the path"
     },
-    "body": {
-      "family": "Inter, sans-serif",
-      "weights": ["400", "500"],
-      "tracking": "tracking-normal"
+    "console": {
+      "/dashboard": "Stat tiles, telemetry charts, activity feed",
+      "/agents": "Agent registry — grade badges, freeze state",
+      "/executions": "Execution flow — lifecycle rail, blocked runs in --danger",
+      "/underwriters": "Underwriter positions",
+      "/freeze": "Freeze controls",
+      "/treasury": "Financial columns, mono and right-aligned",
+      "/reputation": "Score detail",
+      "/hardening-report": "Verification artifacts",
+      "/sdk": "Console-side SDK reference"
     },
-    "data_code": {
-      "family": "JetBrains Mono, monospace",
-      "weights": ["400"],
-      "install_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+    "section_ids": "Route changes never move the section ids the site has always exposed: home #pillars #faq, gate #execution #moats, score #revenue #penalty, evidence/docs #top, docs #sdk. The footer deep-links into all of them, so an old link still lands on the section that answers it."
+  },
+  "tokens": {
+    "storage": "Space-separated RGB channels in CSS variables so Tailwind opacity modifiers keep working: `rgb(var(--accent) / <alpha-value>)`.",
+    "definition_site": "src/index.css — `:root` (dark console) and `.theme-marketing` (light)",
+    "pixel_definition_site": "src/pixel.css — the `.px-site` scope, plus the `.px-*` component layer and the console hardening rules",
+    "tailwind_mapping": "frontend/tailwind.config.js (`avaira.*` namespace + shadcn/ui vars)",
+    "js_mirror": "frontend/src/lib/palette.js (Recharts, SVG fills, imperative consumers)",
+    "pixel": {
+      "black": "#000000",
+      "bg": "#05060A",
+      "panel": "#0B0D12",
+      "raise": "#111319",
+      "ink": "#F5F6F8",
+      "dim": "#9AA1AE",
+      "mute": "#5E6674",
+      "accent": "#6E6BF2",
+      "hi": "#C9C7FF",
+      "red": "#F45B69",
+      "line": "rgba(255,255,255,0.14)",
+      "line_strong": "rgba(255,255,255,0.30)"
+    },
+    "dark": {
+      "surface_app": "#08090C",
+      "surface_card": "#101218",
+      "surface_raised": "#161920",
+      "text_primary": "#ECEFF4",
+      "text_secondary": "#A8B0BF",
+      "text_muted": "#6F7987",
+      "accent": "#6E6BF2",
+      "accent_hover": "#827FFF",
+      "violet": "#9A6BFF",
+      "success": "#34D399",
+      "warning": "#F5B544",
+      "danger": "#F45B69",
+      "info": "#60A5FA",
+      "hairline": "#22252E",
+      "hairline_strong": "#343844"
+    },
+    "light": {
+      "surface_app": "#FFFFFF",
+      "surface_card": "#FFFFFF",
+      "surface_raised": "#FAFAFB",
+      "text_primary": "#16181D",
+      "text_secondary": "#5B6068",
+      "text_muted": "#858B94",
+      "accent": "#5B5BD6",
+      "accent_hover": "#4A4AC4",
+      "violet": "#7C5CF0",
+      "success": "#16A34A",
+      "warning": "#B47B04",
+      "danger": "#D62D3C",
+      "info": "#2563EB",
+      "hairline": "#E8E9EC",
+      "hairline_strong": "#D5D8DD"
     }
   },
   "colors": {
-    "theme": "dark",
-    "background": {
-      "app": "#050505",
-      "card": "#0A0A0A",
-      "surface": "#121212"
+    "rule": "Red means danger only — frozen agents, slashed collateral, blocked intents, destructive actions, refused intents. Everything else (navigation, primary buttons, links, focus rings, charts) uses the indigo accent.",
+    "status_mapping": {
+      "settled_completed_active_approved": "--success",
+      "pending_review_paused_warning": "--warning",
+      "frozen_banned_suspended_blocked": "--danger",
+      "telemetry_series": "--info / --accent / --violet"
     },
-    "primary": {
-      "default": "#00F0FF",
-      "glow": "0 0 10px #00F0FF, 0 0 20px #00F0FF"
-    },
-    "secondary": {
-      "default": "#7000FF",
-      "glow": "0 0 10px #7000FF"
-    },
-    "accent": {
-      "success": "#39FF14",
-      "warning": "#FFD300",
-      "danger": "#FF003C",
-      "neutral": "#333333"
-    },
-    "text": {
-      "primary": "#E0E0E0",
-      "secondary": "#858585",
-      "muted": "#404040",
-      "inverse": "#000000"
-    },
-    "border": {
-      "default": "#333333",
-      "active": "#00F0FF"
+    "grade_mapping": {
+      "note": "Both Avaira Score ladders are mapped in lib/palette.js: A+ … D (core/reputation.py) and AAA … CCC (registry UI).",
+      "A+": "--success",
+      "AAA": "--success",
+      "AA": "--accent",
+      "B+/BBB/BB": "--warning",
+      "C/D/CCC": "--danger"
     }
+  },
+  "typography": {
+    "display": "Doto (variable dot matrix), weight 900 for every display heading, uppercase, line-height 0.9-0.95. The dots are the design; never letter-space it apart.",
+    "machine": "IBM Plex Mono, 11px labels at 0.16-0.2em tracking, uppercase; 12-13px for data rows and code.",
+    "body": "Inter, 15-17px, only where prose has to be read at length. Headings are never Inter on the marketing surface.",
+    "case": "Display headings are uppercase; nav, labels, table headers and footer headings are uppercase mono; prose stays sentence case.",
+    "install": "Self-hosted via @fontsource/doto and @fontsource/ibm-plex-mono imported in src/index.js; Inter loads from Google Fonts in public/index.html."
   },
   "layout_strategy": {
-    "grid_system": "Bento Grid (Mode B - High Density)",
-    "container_padding": "p-6 md:p-8",
-    "gap": "gap-4 md:gap-6",
-    "border_radius": {
-      "outer": "rounded-none",
-      "inner": "rounded-sm"
-    },
-    "surfaces": "Retro-Futurism / Grid Borders",
-    "notes": "Use sharp edges. No soft roundness. 1px borders are mandatory for containment."
+    "container": ".px-wrap (1280px) for the site; .mk-container (1080px) / .app-main-container (1320px) where the older layers still run",
+    "page_shape": "Every page opens on a PageHead — a black art plate with the corridor/section index, the display headline, the lede and a 1px-bordered meta strip. Then numbered sections, each with an .px-index rule (number, name, hairline to the edge).",
+    "border_radius": "Zero. `border-radius: 0 !important` inside `.px-site`; the console keeps its own --radius.",
+    "edges": "Containment is a single 1px hard line — no shadows, no glow, no blur on the site. Grid gaps are 1px lines showing through, never spacing.",
+    "notes": "Whitespace carries hierarchy on the marketing surface; density and mono alignment carry it in the console."
   },
   "component_styling": {
-    "card": {
-      "base": "bg-black/40 backdrop-blur-md border border-white/10",
-      "hover": "hover:border-primary/50 transition-colors duration-300",
-      "notes": "Add a 'corner cut' visual using CSS clip-path or pseudo-elements if possible for the 'Tech' look."
-    },
-    "button": {
-      "primary": "bg-primary text-black font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all clip-path-slant",
-      "secondary": "border border-primary/50 text-primary hover:bg-primary/10 uppercase tracking-wider",
-      "destructive": "border border-destructive text-destructive hover:bg-destructive/10"
-    },
-    "input": {
-      "base": "bg-black border-white/20 focus:border-primary text-white font-mono rounded-none",
-      "placeholder": "text-white/30"
-    },
-    "badge": {
-      "base": "font-mono uppercase text-xs tracking-wider border rounded-none px-2 py-0.5",
-      "success": "border-green-500/50 text-green-400 bg-green-500/10",
-      "warning": "border-yellow-500/50 text-yellow-400 bg-yellow-500/10",
-      "error": "border-red-500/50 text-red-400 bg-red-500/10",
-      "outline": "border-white/20 text-white/60"
-    }
+    "site_primitives": "src/components/marketing/pixel.jsx — PixelNav, PixelFooter, SectionIndex, PageHead, Glyph, PixelFrame, SpecRows, Marquee, ConsoleActions; buttons, cards, traces and tables are .px-* classes in src/pixel.css",
+    "page_head": "Black plate, eyebrow label, Doto headline, lede, action row, meta strip. Carries id=\"top\" and a real <img alt> for the art; the alt describes what was rendered, never the mood.",
+    "card_site": ".px-card — panel ground, 1px line, art plate on a black band, body in the display/mono pair",
+    "button_site": ".px-btn — 44px tall, 1px line, mono uppercase; .px-btn-accent fills indigo. Hover swaps the fill; nothing lifts, nothing glows.",
+    "trace": ".px-trace / .px-trace-row — permitted rows in --success text, refused rows in --red",
+    "input": "Console auth inputs on the light pages; 1px --line-strong, focus ring `0 0 0 3px rgb(var(--accent) / 0.18)`",
+    "badge": "mono, 10-11px, colour from the status mapping; no rounding",
+    "table": ".px-table — mono micro-label headers, 1px hairline rows, right-aligned numbers"
   },
   "visual_enhancers": {
-    "scanlines": "Overlay a pointer-events-none fixed inset-0 z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay",
-    "glow_effects": "Use drop-shadow-[0_0_8px_rgba(0,240,255,0.3)] for active elements.",
-    "ascii_art": "Use ASCII representations for loaders or empty states.",
-    "tracing_beam": "Animate borders on active cards using framer-motion layoutId.",
-    "micro_interactions": "Text scramble effect on hover for key metrics."
+    "allowed": [
+      "Pixel art plates in public/art (png), each with a written alt text, rendered on black and set with image-rendering: pixelated",
+      "The corridor animation on /gate: a lit card crossing four planes, driven by scroll through src/lib/motion.js",
+      "GateTrace printing real permitted/refused request lines",
+      "Dither, 1px grids and hard slabs as the only texture on the site",
+      "Protocol artefacts as first-class visuals: gate traces, the six-step sequence, the GateReason enum, the score ladder",
+      "Count-ups and reveal-in on scroll, created only through hooks in src/lib/motion.js"
+    ],
+    "disallowed": [
+      "Neon glows, scanlines, glitch text, CRT blooms",
+      "Slick 3D renders, glass, pastel gradients or stock imagery on the site — the pixel set replaces all of it",
+      "Emoji or symbol glyphs standing in for an icon or a sentence — lucide-react or words",
+      "Pricing surfaces, tiers, per-check charges and revenue projections: the site states mechanism and measured figures only",
+      "Gradients over text",
+      "Bitmap screenshots of the console as decoration",
+      "Literal hex values in components — only lib/palette.js and the pixel layer carry hex",
+      "Anime.js called directly from a page or component: everything goes through src/lib/motion.js",
+      "A single long scroll page: the marketing site is five routes."
+    ]
   },
-  "assets": {
-    "icons": "Lucide React (Default) - Use sharp, thin stroke icons (stroke-width={1.5})",
-    "3d_library": "Use simple CSS 3D transforms or lightweight Canvas if needed. Avoid heavy R3F unless for Hero.",
-    "image_style": "If images are needed, apply a duotone filter (Black & Cyan) via CSS: grayscale(100%) sepia(100%) hue-rotate(130deg) saturate(300%)"
+  "art_direction": {
+    "rule": "One pixel plate per claim, on black, in the protocol's two hues. No stock, no screenshots, no illustration, no 3D render.",
+    "palette_lock": "Every plate is restricted to black, indigo #6E6BF2 and pale violet #C9C7FF, with dithering for the in-between tones. A plate that introduces another hue is regenerated.",
+    "recipe": "Chunky pixel grid, hard edges, no anti-aliasing, no text, no logos, no UI chrome. Generated large, reduced to a small grid and upscaled with nearest-neighbour so the pixels are real.",
+    "assets": {
+      "hero.png · hero.gif · 320x180": "a corridor of gates with a lit card walking them — home and the gate page head",
+      "score.png · score.gif · 256x256": "the score dial, the needle sweeping to 87.4 — the score page head and the Rate pillar",
+      "underwrite.png · underwrite.gif · 288x160": "bonded plates stacking with dust rising — the Clear pillar",
+      "network.png · network.gif · 288x160": "a lattice with pulses travelling the links — the Insure pillar",
+      "ledger.png · ledger.gif · 288x160": "a ledger writing its entries row by row — the evidence page head",
+      "burn.png · burn.gif · 192x288": "the bond burning down under a falling red slash mark — the penalty band on /score",
+      "permit.png · permit.gif · 288x160": "a permit signing itself and taking a seal — the permitted trace on /gate",
+      "refuse.png · refuse.gif · 288x160": "a red barrier lowered across the corridor — the refused trace on /gate"
+    },
+    "processing": "ImageMagick only (no Pillow in the sandbox): frames are mapped to an 8-colour palette with -map, layered with -layers optimize at a 6-8 hundredths frame delay, and stripped. The still keeps the png path, the sequence the gif path, and both are committed.",
+    "composition": "Plates sit in dedicated black bands or as full-bleed PageHead grounds with a top-down veil; type never lands on a busy area of a plate.",
+    "generator": "frontend/scripts/pixel_scenes.py paints every frame into a small RGB buffer and hands the sequence to ImageMagick, which maps it onto the locked palette and writes both the looping .gif and the .png poster. Deterministic (seeded), so re-running the script reproduces the committed art byte for byte. Editing art means editing the script, never the files.",
+    "delivery": "The markup carries the still; the sequence is fetched while the page is idle and swapped in by PixelArt (components/marketing/pixel.jsx) only when the visitor has not asked for reduced motion. Still and sequence are the same scene, so the swap is invisible — and the smoke test fails if a declared sequence is not on disk."
+  },
+  "motion": {
+    "library": "anime.js 4.x (dependencies: animejs ^4.5.0)",
+    "entry_point": "frontend/src/lib/motion.js — the only module that imports anime.js",
+    "primitives": {
+      "useReveal": "observes each [data-reveal] target and animates it once, staggering the ones that arrive together",
+      "useCountUp": "animates a number in a ref when it scrolls into view; returns [ref, formatted string]",
+      "usePointerTilt": "damped rotateX/rotateY follow via createAnimatable; fine pointers only",
+      "useScrubTimeline": "anime timeline linked to scroll with sync:true; onProgress(0..1) reports position",
+      "useEnterAnimation": "plays a scoped animation once the element is in view",
+      "re-exports": "animate, createTimeline, stagger, utils"
+    },
+    "rules": [
+      "No window access at module scope and no animation in render: effects only, refs guarded.",
+      "Under prefers-reduced-motion no animation is created at all, and the stylesheet's default state is the resolved state (visible, in place, final values).",
+      "Static markup must carry the finished composition, so crawlers and the smoke tests read real numbers — renderToStaticMarkup never runs effects.",
+      "Animate transforms and opacity; keep scrubbed sections few. The console stays still where data is dense."
+    ],
+    "site_usage": {
+      "home": "Hero frame takes a pointer tilt; the fact strip counts up; pillars reveal in sequence",
+      "gate": "The four-plane corridor is scrubbed by scroll — the card stops at the plane that refuses in the second trace; the six-step sequence reveals in order",
+      "score": "Weights and bands reveal once; the penalty ladder stays a document",
+      "evidence": "Figures count up on entry; tables never animate",
+      "docs": "Static — code is read, not performed",
+      "kept_still": "Every table, every trace, the refusal list and the 404",
+      "plates": "Every plate animates in place: the corridor walks its gates, the dial sweeps, the plates stack, the lattice pulses, the ledger writes, the bond burns, the permit seals and the barrier drops. The sequences are pictures, not scripts — the site's JS motion stays in src/lib/motion.js."
+    }
   },
   "page_specific_rules": {
-    "dashboard": "Use 'Grid Borders' style. Every cell has a right and bottom border. Remove border for last items.",
-    "execution_flow": "Use a timeline visualization with 'connecting lines' that light up.",
-    "agent_registry": "Card-based grid. Each card looks like a 'Character Sheet' or 'ID Card'.",
-    "treasury": "Data-heavy. Use tables with mono-spaced numbers. Right-align all financial data."
+    "home": "01. PageHead with the hero plate, then the four-fact strip (6 contracts / 123 tests / 94.4% coverage / 9 refusal codes), three pillar cards with plates, the corridor band, the refusal list, measured evidence, the closing CTA and the multi-column footer. No pricing block, no projections.",
+    "gate": "02. Corridor band, the six-step sequence (envelope, commitment, policy, prover, permit, settlement), the permit trace and the refusal trace, then the refusal table with its red codes.",
+    "score": "03. Six weighted inputs, five bands A+ through D, the penalty ladder ending in terminal ban, and the four fee streams. Numbers only — never a price.",
+    "evidence": "04. Measured figures against the make targets that regenerate them, plus a stated-limits block. Redteam, parity and campaign reports are named, not linked to dead paths.",
+    "docs": "05. The one-call wrapper, TypeScript and Python snippets, the standards used (ERC-8004, EIP-712, EIP-3009), and the console SDK link.",
+    "login": "Pixel scope, art plate over the panel, OAuth buttons at full width; auth behaviour unchanged.",
+    "not_found": "Pixel scope, the seed glyph is '404', links to / and /gate.",
+    "dashboard": "Stat tiles on a 12-column grid, telemetry charts using CHART_COLORS, activity feed with status pills.",
+    "execution_flow": "Vertical lifecycle rail with .timeline-line/.timeline-dot; blocked executions render in --danger.",
+    "agent_registry": "Card grid; each agent card carries a grade badge coloured by gradeColor() and a freeze state that switches to --danger.",
+    "treasury": "Data-heavy. Mono, right-aligned financial columns; stacks use --info and --violet."
   },
   "accessibility": {
-    "contrast": "Ensure text is #E0E0E0 or lighter on black backgrounds.",
-    "focus_states": "High contrast Cyan outline for keyboard focus.",
-    "reduced_motion": "Disable glitch effects and scanning lines if prefers-reduced-motion is true."
+    "contrast": "Body text is --dim #9AA1AE or stronger on #05060A / black; display type is --ink.",
+    "focus_states": "Visible 2px ring (--ring) on every focusable element via :focus-visible.",
+    "reduced_motion": "src/lib/motion.js creates no animation under prefers-reduced-motion, and CSS keeps the resolved state as the default, so every figure and every corridor stage is readable without motion.",
+    "alt_text": "Every plate carries a written description of what was rendered; no decorative empty alts on the site.",
+    "testids": "Every interactive element keeps a data-testid; src/pages/design.smoke.test.js fails the build if a documented hook disappears."
   },
-  "universal_guidelines": [
-    "Do not use gradients for backgrounds. Use solid black or very subtle noise.",
-    "Do not center text unless it's a massive hero headline. Left align is the standard for data.",
-    "Use 'data-testid' on all interactive elements.",
-    "Don't use rounded corners > 4px. Prefer 0px or 2px.",
-    "Always tint greys with a hint of blue (#0F1115) to avoid 'dead' grey."
-  ],
   "instructions_to_main_agent": [
-    "1. INSTALL FONTS: Add the Google Fonts links for Rajdhani and JetBrains Mono to public/index.html immediately.",
-    "2. CONFIGURE TAILWIND: Update tailwind.config.js to include the custom colors (primary: #00F0FF, etc) and fonts.",
-    "3. GLOBAL CSS: Add the 'scanline' overlay class to index.css.",
-    "4. COMPONENT OVERRIDES: When using Shadcn, immediately strip the 'radius' classes and replace with 'rounded-none' or 'rounded-sm'.",
-    "5. CHARTS: Use Recharts with custom tooltips (black bg, cyan border). Hide grid lines or make them very subtle (#333).",
-    "6. TABLES: Use dense padding. Font-mono for all values."
+    "1. TOKENS: console colours live in src/index.css (both scopes) and are mirrored in tailwind.config.js. Site colours live in src/pixel.css under `.px-site` — never introduce a hex outside those two files and lib/palette.js.",
+    "2. JS CONSUMERS: read colours from src/lib/palette.js for Recharts, SVG and inline styles.",
+    "3. SCOPE: marketing routes render inside `.px-site`; console routes inherit the dark default; /login and 404 keep the pixel scope with their light panels.",
+    "4. ROUTES: the marketing site is five routes. Add a page, don't append a section to home — and keep the section ids listed in `routes.section_ids` alive so old deep links resolve.",
+    "5. MOTION: animate only through src/lib/motion.js. Never let an animation be the only place a value appears.",
+    "6. GLYPHS: no emoji or symbol glyphs in UI copy; `design.smoke.test.js` fails on emoji, arrows, checkmarks and geometric-shape blocks.",
+    "7. NO PRICING: no $ figures, no tier table, no revenue projection. The smoke test fails on `$<digit>`, \"pricing\" and \"per month\".",
+    "8. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
+    "9. PRE-RENDER: keep the `.px-static` style block and the copy in public/index.html in sync with the pixel tokens and the site pages — it is the one place the shell is written twice.",
+    "10. ART: every plate is generated — edit frontend/scripts/pixel_scenes.py and re-run it (ImageMagick maps the frames onto the locked palette and writes both the .gif and the .png poster). Keep the still and the sequence the same scene, update the alt text on every page that shows the plate, and never commit a webp, a 3D render or a hand-edited plate.",
+    "11. LOCKFILES: CI installs with `yarn install --frozen-lockfile`, deployment with `npm ci` — update package.json, package-lock.json and yarn.lock together."
   ]
 }

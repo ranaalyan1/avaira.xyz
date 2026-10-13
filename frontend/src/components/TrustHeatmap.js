@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Activity, ShieldCheck, TrendingUp, AlertCircle, Terminal } from "lucide-react";
 
+import { DARK } from "@/lib/palette";
+
 export default function TrustHeatmap({ agentId }) {
   const [drift, setDrift] = useState({ score: 0.1, trend: "stable" });
   const [logs, setLogs] = useState([]);
@@ -40,7 +42,7 @@ export default function TrustHeatmap({ agentId }) {
               className="h-full bg-avaira-primary transition-all duration-500"
               style={{
                 width: `${drift.score * 100}%`,
-                background: drift.score > 0.6 ? '#FF003C' : drift.score > 0.3 ? '#FFD300' : '#00F0FF'
+                background: drift.score > 0.6 ? DARK.danger : drift.score > 0.3 ? DARK.warning : DARK.info
               }}
             />
           </div>

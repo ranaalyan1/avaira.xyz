@@ -9,7 +9,7 @@
  * Geometry is deterministic: a glyph is a pure function of its seed, so the
  * same page always draws the same matrix.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Github, LogIn } from "lucide-react";
 
@@ -219,9 +219,59 @@ export const SectionIndex = ({ n, label }) => (
   </p>
 );
 
-export const PixelFrame = ({ src, alt, ratio = "16 / 9", scan = true, caption, hint, className = "" }) => (
+/* Every plate ships as a still and as a sequence. The still is what the markup
+ * carries — crawlers, no-JS visitors and the smoke tests read it — and the
+ * sequence is swapped in once the page has painted, and only for visitors who
+ * have not asked for reduced motion. The pair is always the same scene, so the
+ * swap is invisible. */
+export const PixelArt = ({ png, gif, alt, className = "", loading = "lazy", ...rest }) => {
+  const [src, setSrc] = useState(png);
+
+  useEffect(() => {
+    if (!gif || typeof window === "undefined") return undefined;
+    const media = window.matchMedia;
+    if (media && media("(prefers-reduced-motion: reduce)").matches) return undefined;
+
+    let cancelled = false;
+    let preload;
+    // the sequence is fetched while the page is idle and only swapped in once
+    // it is decoded, so the plate never flickers between the two frames
+    const swap = () => {
+      preload = new window.Image();
+      preload.onload = () => {
+        if (!cancelled) setSrc(gif);
+      };
+      preload.src = gif;
+    };
+    const idle = window.requestIdleCallback;
+    const handle = idle ? idle(swap, { timeout: 1500 }) : window.setTimeout(swap, 300);
+    const cancel = window.cancelIdleCallback;
+    return () => {
+      cancelled = true;
+      if (preload) preload.onload = null;
+      if (idle && cancel) cancel(handle);
+      else window.clearTimeout(handle);
+    };
+  }, [gif]);
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading={loading}
+      decoding="async"
+      data-px-art=""
+      data-px-still={png}
+      data-px-motion={gif || undefined}
+      {...rest}
+    />
+  );
+};
+
+export const PixelFrame = ({ src, gif, alt, ratio = "16 / 9", scan = true, caption, hint, className = "" }) => (
   <figure className={`px-frame ${className}`} style={ratio ? { aspectRatio: ratio } : undefined}>
-    <img src={src} alt={alt} loading="lazy" decoding="async" />
+    <PixelArt png={src} gif={gif} alt={alt} />
     {scan ? <span className="px-frame-scan" aria-hidden="true" /> : null}
     <span className="px-frame-tick px-frame-tick-tl" aria-hidden="true" />
     <span className="px-frame-tick px-frame-tick-tr" aria-hidden="true" />
@@ -268,11 +318,11 @@ export const Marquee = ({ items }) => {
 };
 
 /** Page header: index, display title, lede, optional pixel-art backdrop. */
-export const PageHead = ({ n, section, title, lede, art, artAlt, meta, children }) => (
+export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, children }) => (
   <header className="px-page-head" id="top">
     {art ? (
       <div className="px-page-head-art">
-        <img src={art} alt={artAlt || ""} />
+        <PixelArt png={art} gif={artGif} alt={artAlt || ""} loading="eager" fetchPriority="high" />
       </div>
     ) : null}
     <span className="px-page-head-veil" aria-hidden="true" />

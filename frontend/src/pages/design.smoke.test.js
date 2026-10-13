@@ -10,6 +10,8 @@
  *
  * No testing-library dependency: react-dom/server is already part of the app.
  */
+import fs from "fs";
+import path from "path";
 import { createElement, Fragment } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -187,6 +189,45 @@ describe("marketing site", () => {
     for (const match of html.matchAll(/<img[^>]*alt="([^"]*)"/g)) {
       expect(match[1].length).toBeGreaterThan(0);
     }
+  });
+
+  /* The plates are animated: each one ships as a still for the markup and a
+   * looping sequence for the client. Both files have to exist on disk, the pair
+   * has to be the same scene, and the still is what a crawler reads — so a
+   * missing gif is a broken page, not a cosmetic problem. */
+  const ART_DIR = path.resolve(__dirname, "..", "..", "public", "art");
+  const stills = [];
+  const motions = [];
+
+  it.each(PAGES)("$name pairs every plate with an existing sequence", ({ element }) => {
+    for (const match of render(element).matchAll(/<img[^>]*data-px-art=""[^>]*>/g)) {
+      const tag = match[0];
+      const still = /data-px-still="([^"]*)"/.exec(tag);
+      const motion = /data-px-motion="([^"]*)"/.exec(tag);
+      expect(still).not.toBeNull();
+      expect(fs.existsSync(path.join(ART_DIR, path.basename(still[1])))).toBe(true);
+      if (motion) {
+        expect(motion[1]).toMatch(/\.gif$/);
+        expect(fs.existsSync(path.join(ART_DIR, path.basename(motion[1])))).toBe(true);
+        motions.push(motion[1]);
+      } else {
+        stills.push(still[1]);
+      }
+    }
+  });
+
+  it("animates the art the marketing site is built around", () => {
+    const unique = [...new Set(motions)];
+    for (const gif of ["/art/hero.gif", "/art/score.gif", "/art/permit.gif", "/art/refuse.gif"]) {
+      expect(unique).toContain(gif);
+    }
+    expect(unique.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("still ships a static frame for every plate", () => {
+    // the login plate is the one deliberate exception: it is background, and it
+    // is described anyway
+    expect(stills.length + motions.length).toBeGreaterThanOrEqual(12);
   });
 
   // Count-ups, corridor stages and the score marker all render their final

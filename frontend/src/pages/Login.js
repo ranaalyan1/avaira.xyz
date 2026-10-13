@@ -30,7 +30,7 @@ export default function Login() {
   return (
     <div className="px-site px-login" data-testid="login-page">
       <div className="px-login-art" aria-hidden="true">
-        <img src="/art/hero.png" alt="" />
+        <img src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" />
       </div>
       <span className="px-login-veil" aria-hidden="true" />
 

@@ -115,35 +115,45 @@ slashed, or an intent was refused.
 
 ## 5. Art direction
 
-The site carries **pixel plates** in `public/art/` (png, 6–15 kB each). They are
-rendered objects from the protocol's own world at machine resolution — dithered,
-hard-edged, on black:
+The site carries **pixel plates**, each one a still in `public/art/*.png` and a
+looping sequence in `public/art/*.gif`. They are rendered objects from the
+protocol's own world at machine resolution — dithered, hard-edged, on black:
 
-| Asset | Where it lands |
-| --- | --- |
-| `hero.png` | the home page head — a corridor of four gates with a lit card between them |
-| `score.png` | the Rate pillar and the score page head |
-| `underwrite.png` | the Clear pillar and the evidence band |
-| `network.png` | the Insure pillar and the docs page head |
-| `permit.png` · `refuse.png` | the two traces on `/gate` — a signed permit, a barrier across the corridor |
-| `burn.png` · `ledger.png` | the penalty ladder and the fee streams on `/score` |
+| Asset | Scene | Where it lands |
+| --- | --- | --- |
+| `hero.png` · `hero.gif` | a corridor of gates with a lit card walking them | the home hero and the gate page head |
+| `score.png` · `score.gif` | the dial, the needle sweeping to 87.4 | the score page head and the Rate pillar |
+| `underwrite.png` · `underwrite.gif` | bonded plates stacking with dust rising | the Clear pillar |
+| `network.png` · `network.gif` | a lattice with pulses travelling the links | the Insure pillar |
+| `ledger.png` · `ledger.gif` | a ledger writing its entries row by row | the evidence page head |
+| `burn.png` · `burn.gif` | the bond burning down under a falling red slash mark | the penalty band on `/score` |
+| `permit.png` · `permit.gif` | a permit signing itself and taking a seal | the permitted trace on `/gate` |
+| `refuse.png` · `refuse.gif` | a red barrier lowered across the corridor | the refused trace on `/gate` |
 
 Rules that keep them coherent:
 
-1. **Palette lock.** Black, indigo `#6E6BF2`, pale violet `#C9C7FF`, dithering for
-   the in-between tones. A plate that introduces another hue is regenerated.
-2. **Recipe.** Chunky pixel grid, no anti-aliasing, no text, no logos, no UI chrome.
-   Generated large, reduced to a small grid and upscaled with nearest-neighbour so
-   the pixels are real. Processed with ImageMagick only (`-filter point`, `-strip`);
-   sources and intermediates are deleted, and png is the only committed artifact.
-3. **Describe every plate.** Each `<img>` carries a written alt text saying what was
-   rendered — never the mood, never empty.
-4. **Leave room for type.** Plates sit in their own black band, or as a full-bleed
-   `PageHead` ground with a top-down veil. Type never lands on a busy area.
-5. **No pricing surfaces.** Tiers, per-check charges and revenue projections are not
-   part of this system: the site states mechanism and measured figures only, and
-   `design.smoke.test.js` fails on a `$` figure, the word "pricing" or a `#pricing`
-   anchor in the rendered pages.
+1. **Palette lock.** Black, indigo `#6E6BF2`, pale violet `#C9C7FF`, red `#F45B69`
+   for a refusal or a slash, in that order, plus dithering for the in-between
+   tones. A plate that introduces another hue is regenerated.
+2. **The script is the source.** `frontend/scripts/pixel_scenes.py` paints every
+   frame into a small RGB buffer and hands the sequence to ImageMagick, which maps
+   it onto the locked palette and writes both files. It is seeded, so re-running it
+   reproduces the committed art byte for byte. **Editing art means editing the
+   script, never the files.** `python3 scripts/pixel_scenes.py` from `frontend/`.
+3. **Still and sequence are the same scene.** The poster is a real frame of the
+   loop, so the client-side swap from still to sequence never changes the picture.
+4. **Delivery.** The markup carries the still — crawlers, no-JS visitors and the
+   smoke tests read it. `PixelArt` fetches the sequence while the page is idle and
+   swaps it in only when the visitor has not asked for reduced motion, so a GIF
+   never overrides that preference. `design.smoke.test.js` fails if a plate
+   declares a sequence that is not on disk.
+5. **Describe every plate.** Each `<img>` carries a written alt text saying what
+   was rendered — never the mood, never empty. Rewriting a scene means rewriting
+   its alt on every page that shows it.
+6. **No pricing surfaces.** Tiers, per-check charges and revenue projections are
+   not part of this system: the site states mechanism and measured figures only,
+   and `design.smoke.test.js` fails on a `$` figure, the word "pricing" or a
+   `#pricing` anchor in the rendered pages.
 
 ## 6. Adding a site page
 

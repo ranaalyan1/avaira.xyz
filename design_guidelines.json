@@ -164,17 +164,19 @@
     "palette_lock": "Every plate is restricted to black, indigo #6E6BF2 and pale violet #C9C7FF, with dithering for the in-between tones. A plate that introduces another hue is regenerated.",
     "recipe": "Chunky pixel grid, hard edges, no anti-aliasing, no text, no logos, no UI chrome. Generated large, reduced to a small grid and upscaled with nearest-neighbour so the pixels are real.",
     "assets": {
-      "hero": "/art/hero.png 480x268 — a corridor of four gates with a lit card between them",
-      "score": "/art/score.png 384x384 — a gauge with a lit arc and one needle",
-      "underwrite": "/art/underwrite.png 384x214 — a vault of stacked bonded plates with particles rising",
-      "network": "/art/network.png 480x268 — a lattice of connected nodes",
-      "permit": "/art/permit.png 384x209 — a signed permit card with a seal",
-      "refuse": "/art/refuse.png 384x214 — a barrier dropping across a corridor",
-      "burn": "/art/burn.png 384x572 — slashed collateral burning down",
-      "ledger": "/art/ledger.png 384x572 — a settled ledger stack"
+      "hero.png · hero.gif · 320x180": "a corridor of gates with a lit card walking them — home and the gate page head",
+      "score.png · score.gif · 256x256": "the score dial, the needle sweeping to 87.4 — the score page head and the Rate pillar",
+      "underwrite.png · underwrite.gif · 288x160": "bonded plates stacking with dust rising — the Clear pillar",
+      "network.png · network.gif · 288x160": "a lattice with pulses travelling the links — the Insure pillar",
+      "ledger.png · ledger.gif · 288x160": "a ledger writing its entries row by row — the evidence page head",
+      "burn.png · burn.gif · 192x288": "the bond burning down under a falling red slash mark — the penalty band on /score",
+      "permit.png · permit.gif · 288x160": "a permit signing itself and taking a seal — the permitted trace on /gate",
+      "refuse.png · refuse.gif · 288x160": "a red barrier lowered across the corridor — the refused trace on /gate"
     },
-    "processing": "ImageMagick only (no Pillow in the sandbox): scale down to a pixel grid, upscale with -filter point, -strip. PNG is the only committed artifact; sources and webp intermediates are deleted.",
-    "composition": "Plates sit in dedicated black bands or as full-bleed PageHead grounds with a top-down veil; type never lands on a busy area of a plate."
+    "processing": "ImageMagick only (no Pillow in the sandbox): frames are mapped to an 8-colour palette with -map, layered with -layers optimize at a 6-8 hundredths frame delay, and stripped. The still keeps the png path, the sequence the gif path, and both are committed.",
+    "composition": "Plates sit in dedicated black bands or as full-bleed PageHead grounds with a top-down veil; type never lands on a busy area of a plate.",
+    "generator": "frontend/scripts/pixel_scenes.py paints every frame into a small RGB buffer and hands the sequence to ImageMagick, which maps it onto the locked palette and writes both the looping .gif and the .png poster. Deterministic (seeded), so re-running the script reproduces the committed art byte for byte. Editing art means editing the script, never the files.",
+    "delivery": "The markup carries the still; the sequence is fetched while the page is idle and swapped in by PixelArt (components/marketing/pixel.jsx) only when the visitor has not asked for reduced motion. Still and sequence are the same scene, so the swap is invisible — and the smoke test fails if a declared sequence is not on disk."
   },
   "motion": {
     "library": "anime.js 4.x (dependencies: animejs ^4.5.0)",
@@ -199,7 +201,8 @@
       "score": "Weights and bands reveal once; the penalty ladder stays a document",
       "evidence": "Figures count up on entry; tables never animate",
       "docs": "Static — code is read, not performed",
-      "kept_still": "Every table, every trace, the refusal list and the 404"
+      "kept_still": "Every table, every trace, the refusal list and the 404",
+      "plates": "Every plate animates in place: the corridor walks its gates, the dial sweeps, the plates stack, the lattice pulses, the ledger writes, the bond burns, the permit seals and the barrier drops. The sequences are pictures, not scripts — the site's JS motion stays in src/lib/motion.js."
     }
   },
   "page_specific_rules": {
@@ -232,7 +235,7 @@
     "7. NO PRICING: no $ figures, no tier table, no revenue projection. The smoke test fails on `$<digit>`, \"pricing\" and \"per month\".",
     "8. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
     "9. PRE-RENDER: keep the `.px-static` style block and the copy in public/index.html in sync with the pixel tokens and the site pages — it is the one place the shell is written twice.",
-    "10. ART: pixel plates only, in public/art/*.png, processed with ImageMagick (-filter point). Delete sources and intermediates; never commit a webp or a 3D render again.",
+    "10. ART: every plate is generated — edit frontend/scripts/pixel_scenes.py and re-run it (ImageMagick maps the frames onto the locked palette and writes both the .gif and the .png poster). Keep the still and the sequence the same scene, update the alt text on every page that shows the plate, and never commit a webp, a 3D render or a hand-edited plate.",
     "11. LOCKFILES: CI installs with `yarn install --frozen-lockfile`, deployment with `npm ci` — update package.json, package-lock.json and yarn.lock together."
   ]
 }

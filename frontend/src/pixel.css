@@ -1189,3 +1189,21 @@
 :root .cyber-card:hover {
     box-shadow: none;
 }
+
+/* ── animated plates ──────────────────────────────────────────────────────
+ * Each plate ships as a still and as a looping sequence. The still is what the
+ * markup carries; the sequence is swapped in after first paint for visitors who
+ * allow motion, and both come from frontend/scripts/pixel_scenes.py, so the
+ * still is a real frame of the loop and the swap never changes the picture.
+ * The attribute marks every plate, wherever it lands.
+ */
+.px-site img[data-px-art] {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+.px-page-head-art img[data-px-art],
+.px-hero-art img[data-px-art] {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

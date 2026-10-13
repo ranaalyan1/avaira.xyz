@@ -9,20 +9,36 @@ import AgentDashboard from "@/components/AgentDashboard";
 import TrustHeatmap from "@/components/TrustHeatmap";
 
 import { CHART_COLORS, DARK, STATUS_COLORS as PLOT_STATUS_COLORS } from "@/lib/palette";
+import { useCountUp } from "@/lib/motion";
 
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
-  <div className={`cyber-card p-4 animate-slide-in stagger-${delay} depth-mini-panel hover:glow-red transition-all`} data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}>
-    <div className="flex items-center gap-3">
-      <div className={`p-2 border`} style={{ borderColor: `${color}40`, background: `${color}10` }}>
-        <Icon size={16} strokeWidth={1.5} style={{ color }} />
-      </div>
-      <div>
-        <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">{label}</p>
-        <p className="font-heading font-bold text-xl text-foreground mt-0.5" style={{ color: value > 0 ? undefined : undefined }}>{value}</p>
+// The figure counts up when the tile enters the viewport. The markup already
+// carries the final value, so a static render, a crawler or a reduced-motion
+// visitor reads the real number instead of a zero.
+const StatCard = ({ icon: Icon, label, value, color, delay }) => {
+  const numeric = typeof value === "number" ? value : Number.parseFloat(value);
+  const hasNumber = Number.isFinite(numeric);
+  const decimals = typeof value === "string" && value.includes(".") ? value.split(".")[1].length : 0;
+  const [figureRef, figure] = useCountUp(hasNumber ? numeric : 0, { decimals });
+
+  return (
+    <div
+      className={`cyber-card p-4 animate-slide-in stagger-${delay} depth-mini-panel hover:glow-red transition-all`}
+      data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="p-2 border" style={{ borderColor: `${color}40`, background: `${color}10` }}>
+          <Icon size={16} strokeWidth={1.5} style={{ color }} />
+        </div>
+        <div>
+          <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">{label}</p>
+          <p className="font-heading font-bold text-xl text-foreground mt-0.5" ref={figureRef}>
+            {hasNumber ? figure : value}
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const COLORS = CHART_COLORS;
 const STATUS_COLORS = PLOT_STATUS_COLORS;

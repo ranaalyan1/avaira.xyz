@@ -1,9 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { API } from "@/lib/api";
+import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
 
 export default function Login() {
   const navigate = useNavigate();
+  const cardTilt = usePointerTilt({ max: 4.5 });
+  const entrance = useEnterAnimation((_scope, root) => {
+    animate(root.querySelectorAll("[data-login-enter]"), {
+      opacity: [0, 1],
+      translateY: [14, 0],
+      duration: 620,
+      delay: stagger(90),
+      ease: "out(3)",
+    });
+  });
 
   const handleGoogleLogin = () => {
     const redirectUrl = window.location.origin + '/dashboard';
@@ -24,8 +35,8 @@ export default function Login() {
       <div className="mk-glow -z-10 h-[380px] w-[480px] left-1/2 top-[-140px] -translate-x-1/2 mk-glow-violet" />
       <div className="mk-glow -z-10 h-[280px] w-[340px] right-[8%] bottom-[-80px] mk-glow-sky opacity-40" />
 
-      <div className="w-full max-w-[420px]">
-        <div className="mb-7 text-center">
+      <div className="w-full max-w-[420px]" ref={entrance}>
+        <div className="mb-7 text-center" data-login-enter>
           <img
             src="/logo.png"
             alt="AVAIRA"
@@ -38,7 +49,8 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="mk-card p-6" data-testid="login-card">
+        <div className="login-card-3d" ref={cardTilt}>
+          <div className="mk-card p-6" data-testid="login-card" data-login-enter>
           <button
             data-testid="google-login-btn"
             onClick={handleGoogleLogin}
@@ -64,12 +76,13 @@ export default function Login() {
             Continue with X
           </button>
 
-          <div className="mt-5 flex items-center gap-2 border-t border-avaira-border pt-4">
-            <ShieldCheck size={13} className="flex-none text-avaira-primary" />
-            <p className="text-[12px] leading-relaxed text-avaira-muted">
-              Sessions are cookie-based and mirrored on-chain. By signing in you agree to the AVAIRA
-              Protocol terms.
-            </p>
+            <div className="mt-5 flex items-center gap-2 border-t border-avaira-border pt-4">
+              <ShieldCheck size={13} className="flex-none text-avaira-primary" />
+              <p className="text-[12px] leading-relaxed text-avaira-muted">
+                Sessions are cookie-based and mirrored on-chain. By signing in you agree to the AVAIRA
+                Protocol terms.
+              </p>
+            </div>
           </div>
         </div>
 

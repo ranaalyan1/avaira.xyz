@@ -2142,3 +2142,12 @@
         transition: none !important;
     }
 }
+
+/* ── sign-in card ───────────────────────────────────────────────────────── */
+
+/* The one marketing surface that takes a pointer tilt: a 3D wrapper around the
+ * card, a few degrees at most, fine pointers only. */
+.login-card-3d {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}

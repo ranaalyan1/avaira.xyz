@@ -3,8 +3,9 @@ import {
   LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, BookOpen,
   Menu, X, Users, LogOut, ChevronRight, Search,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/App";
+import { animate, prefersReducedMotion } from "@/lib/motion";
 
 const NAV_GROUPS = [
   {
@@ -46,6 +47,17 @@ export default function Layout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const currentNav = NAV_ITEMS.find((item) => item.path === location.pathname);
+  const contentRef = useRef(null);
+
+  // Console pages settle in rather than snapping: a short opacity ramp on the
+  // content surface whenever the route changes. Opacity only — a transform here
+  // would become the containing block for the sticky top bar.
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el || prefersReducedMotion()) return undefined;
+    const animation = animate(el, { opacity: [0, 1], duration: 280, ease: "out(2)" });
+    return () => animation.revert();
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -166,7 +178,7 @@ export default function Layout() {
 
       {/* Main content */}
       <main className="app-main-surface min-h-screen flex-1 lg:ml-[236px]" data-testid="main-content">
-        <div className="app-main-container">
+        <div className="app-main-container" ref={contentRef}>
           <header className="app-topbar px-4 py-3 pl-16 sm:px-6 lg:pl-6 md:px-8">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-[14px] font-semibold tracking-tight text-foreground">

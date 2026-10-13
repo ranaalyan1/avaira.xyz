@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import {
   Shield, FileKey, Heart, Zap, TrendingUp, Lock, Database, Globe, ChevronRight,
-  Code, Users, Wallet, ArrowRight, LogIn, Check, Ban, ShieldCheck, Layers,
+  Code, Users, Wallet, ArrowRight, LogIn, Check, Ban, ShieldCheck,
   Fingerprint, Gavel, ScrollText, Boxes, Github,
 } from "lucide-react";
 import { useAuth } from "@/App";

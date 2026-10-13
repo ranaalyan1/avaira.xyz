@@ -11,65 +11,68 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaCreditMarket.sol` |
-| source sha256 | `c7c9fe55787fd6f2aed395aeb7016efff76ddfc01d014b4e9fd90ef7cae0f0ed` |
-| external functions | 32 |
-| events | 7 |
-| custom errors | 12 |
-| deployed bytecode | 5119 bytes |
+| source sha256 | `fdf630e74e9b69db894265cec95d5fe80684278f907a57cb18801b45146bfd3a` |
+| external functions | 33 |
+| events | 8 |
+| custom errors | 14 |
+| deployed bytecode | 5579 bytes |
 
 ## Functions
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `0x249d39e9` | `BPS()` → (uint16) | view | — |
-| `0xa217fddf` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
-| `0x8b0fe355` | `LIQUIDATION_INCENTIVE_BPS()` → (uint16) | view | — |
-| `0xaa454ad7` | `TIER_A_MIN_SCORE()` → (uint8) | view | — |
-| `0x1bc799f9` | `TIER_A_RATIO_BPS()` → (uint16) | view | — |
-| `0x0b8edf8c` | `TIER_B_MIN_SCORE()` → (uint8) | view | — |
-| `0x0a99d48f` | `TIER_B_RATIO_BPS()` → (uint16) | view | — |
-| `0xa820120c` | `TIER_C_RATIO_BPS()` → (uint16) | view | — |
-| `0x38d52e0f` | `asset()` → (address) | view | — |
-| `0x74375359` | `availableLiquidity()` → (uint256) | view | @notice Liquidity currently available to borrow. |
-| `0x0ecbcdab` | `borrow(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
-| `0x2bf120a7` | `borrowCapacity(uint256)` → (uint256) | view | @notice Maximum additional debt `agentId` can currently support. |
-| `0xf4e240ff` | `borrower(uint256)` → (address) | view | — |
-| `0x3b1f18dd` | `collateral(uint256)` → (uint256) | view | — |
-| `0xb53b94b0` | `collateralRatioBps(uint256)` → (uint256) | view | @inheritdoc IAvairaCreditMarket @dev 110% for A-grade agents, 125% for B, 150% for C/ungraded — read live from the score. |
-| `0x1e0029c8` | `debt(uint256)` → (uint256) | view | — |
-| `0xece13732` | `depositCollateral(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
-| `0xf0f437b6` | `fundLiquidity(uint256)` | nonpayable | @notice Supplies lendable liquidity to the pool (mock market: no interest accounting). |
-| `0x248a9ca3` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
-| `0x2f2ff15d` | `grantRole(bytes32,address)` | nonpayable | — |
-| `0x91d14854` | `hasRole(bytes32,address)` → (bool) | view | — |
-| `0x134e18f4` | `identityRegistry()` → (address) | view | — |
-| `0x211a4443` | `isLiquidatable(uint256)` → (bool) | view | @notice True when the position breaches its score-implied collateral requirement. |
-| `0x415f1240` | `liquidate(uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket @dev Triggered by a score downgrade or a slash, not by price moves: the agent's own accountability record tightens its line. The liquidator closes the position by repaying the debt and … |
-| `0x36568abe` | `renounceRole(bytes32,address)` | nonpayable | — |
-| `0xd8aed145` | `repay(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
-| `0xd547741f` | `revokeRole(bytes32,address)` | nonpayable | — |
-| `0xe3b05f2f` | `setStakeRegistry(address)` | nonpayable | — |
-| `0x68304835` | `stakeRegistry()` → (address) | view | — |
-| `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
-| `0x15770f92` | `totalLiquidity()` → (uint256) | view | — |
-| `0x16078d04` | `totalOutstanding()` → (uint256) | view | — |
+| `—` | `BPS()` → (uint16) | view | — |
+| `—` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
+| `—` | `LIQUIDATION_INCENTIVE_BPS()` → (uint16) | view | — |
+| `—` | `TIER_A_MIN_SCORE()` → (uint8) | view | — |
+| `—` | `TIER_A_RATIO_BPS()` → (uint16) | view | — |
+| `—` | `TIER_B_MIN_SCORE()` → (uint8) | view | — |
+| `—` | `TIER_B_RATIO_BPS()` → (uint16) | view | — |
+| `—` | `TIER_C_RATIO_BPS()` → (uint16) | view | — |
+| `—` | `asset()` → (address) | view | — |
+| `—` | `availableLiquidity()` → (uint256) | view | @notice Liquidity currently available to borrow. |
+| `—` | `borrow(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
+| `—` | `borrowCapacity(uint256)` → (uint256) | view | @notice Maximum additional debt `agentId` can currently support. |
+| `—` | `borrower(uint256)` → (address) | view | — |
+| `—` | `collateral(uint256)` → (uint256) | view | — |
+| `—` | `collateralRatioBps(uint256)` → (uint256) | view | @inheritdoc IAvairaCreditMarket @dev 110% for A-grade agents, 125% for B, 150% for C/ungraded — read live from the score. |
+| `—` | `debt(uint256)` → (uint256) | view | — |
+| `—` | `depositCollateral(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
+| `—` | `fundLiquidity(uint256)` | nonpayable | @notice Supplies lendable liquidity to the pool (mock market: no interest accounting). |
+| `—` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
+| `—` | `grantRole(bytes32,address)` | nonpayable | — |
+| `—` | `hasRole(bytes32,address)` → (bool) | view | — |
+| `—` | `identityRegistry()` → (address) | view | — |
+| `—` | `isLiquidatable(uint256)` → (bool) | view | @notice True when the position breaches its score-implied collateral requirement. |
+| `—` | `liquidate(uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket @dev Triggered by a score downgrade or a slash, not by price moves: the agent's own accountability record tightens its line. The liquidator closes the position by repaying the debt and … |
+| `—` | `renounceRole(bytes32,address)` | nonpayable | — |
+| `—` | `repay(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket |
+| `—` | `revokeRole(bytes32,address)` | nonpayable | — |
+| `—` | `setStakeRegistry(address)` | nonpayable | — |
+| `—` | `stakeRegistry()` → (address) | view | — |
+| `—` | `supportsInterface(bytes4)` → (bool) | view | — |
+| `—` | `totalLiquidity()` → (uint256) | view | — |
+| `—` | `totalOutstanding()` → (uint256) | view | — |
+| `—` | `withdrawCollateral(uint256,uint256)` | nonpayable | @inheritdoc IAvairaCreditMarket @dev Collateral that is not securing outstanding debt is the agent's own capital and must be recoverable — otherwise the only way collateral ever leaves this contract is a liquidation. … |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `0x6697b232` | `AccessControlBadConfirmation()` | `AvairaIntentVault:0` | — |
-| `0xe2517d3f` | `AccessControlUnauthorizedAccount(address,bytes32)` | `AvairaIntentVault:0` | — |
-| `0x56172fd6` | `AgentIsBanned(uint256)` | `AvairaIntentVault:40` | — |
-| `0xb07e3bc4` | `InsufficientCollateral(uint256,uint256)` | `AvairaCreditMarket:32` | — |
-| `0xa17e11d5` | `InsufficientLiquidity(uint256,uint256)` | `AvairaCreditMarket:33` | — |
-| `0x4b03c457` | `NotAgentOperator(uint256,address)` | `AvairaIntentVault:41` | — |
-| `0x20be17d1` | `NotLiquidatable(uint256,uint256,uint256)` | `AvairaCreditMarket:34` | — |
-| `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
-| `0x3eb67429` | `RepayTooMuch(uint256,uint256)` | `AvairaCreditMarket:35` | — |
-| `0x5274afe7` | `SafeERC20FailedOperation(address)` | `AvairaIntentVault:0` | — |
-| `0xd92e233d` | `ZeroAddress()` | `AvairaIntentVault:56` | — |
-| `0x1f2a2005` | `ZeroAmount()` | `AvairaStakeRegistry:42` | — |
+| `—` | `AccessControlBadConfirmation()` | `?:?` | — |
+| `—` | `AccessControlUnauthorizedAccount(address,bytes32)` | `?:?` | — |
+| `—` | `AgentIsBanned(uint256)` | `?:?` | — |
+| `—` | `AgentNotEligibleForCredit(uint256,uint8)` | `?:?` | — |
+| `—` | `CollateralTooSmall(uint256,uint256)` | `?:?` | — |
+| `—` | `InsufficientCollateral(uint256,uint256)` | `?:?` | — |
+| `—` | `InsufficientLiquidity(uint256,uint256)` | `?:?` | — |
+| `—` | `NotAgentOperator(uint256,address)` | `?:?` | — |
+| `—` | `NotLiquidatable(uint256,uint256,uint256)` | `?:?` | — |
+| `—` | `ReentrancyGuardReentrantCall()` | `?:?` | — |
+| `—` | `RepayTooMuch(uint256,uint256)` | `?:?` | — |
+| `—` | `SafeERC20FailedOperation(address)` | `?:?` | — |
+| `—` | `ZeroAddress()` | `?:?` | — |
+| `—` | `ZeroAmount()` | `?:?` | — |
 
 ## Events
 
@@ -77,6 +80,7 @@
 | --- | --- |
 | `Borrowed(uint256 indexed, address indexed, uint256, uint256, uint8)` | 2/5 |
 | `CollateralDeposited(uint256 indexed, address indexed, uint256)` | 2/3 |
+| `CollateralWithdrawn(uint256 indexed, address indexed, uint256)` | 2/3 |
 | `Liquidated(uint256 indexed, address indexed, uint256, uint256)` | 2/4 |
 | `Repaid(uint256 indexed, address indexed, uint256, uint256)` | 2/4 |
 | `RoleAdminChanged(bytes32 indexed, bytes32 indexed, bytes32 indexed)` | 3/3 |

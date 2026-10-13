@@ -11,76 +11,76 @@
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaStakeRegistry.sol` |
-| source sha256 | `7a3dade2a1d40195034aeb146893f7aaf48b18c930145594d95d9346e58f71fc` |
+| source sha256 | `0f6a4796d7b4a7826c2561f0b1814570eda841111609c6bcf54f852b84b09296` |
 | external functions | 39 |
 | events | 14 |
 | custom errors | 16 |
-| deployed bytecode | 8182 bytes |
+| deployed bytecode | 8419 bytes |
 
 ## Functions
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `0xa217fddf` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
-| `0x5095af64` | `SLASHER_ROLE()` → (bytes32) | view | — |
-| `0x2367f6b5` | `accountStake(address)` → (uint256) | view | — |
-| `0x248a9ca3` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
-| `0x2f2ff15d` | `grantRole(bytes32,address)` | nonpayable | — |
-| `0x91d14854` | `hasRole(bytes32,address)` → (bool) | view | — |
-| `0x134e18f4` | `identityRegistry()` → (address) | view | — |
-| `0x053b56c0` | `isEligible(uint256)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
-| `0x66e305fd` | `isEligible(address)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
-| `0x1227a203` | `isStakedReviewer(address)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
-| `0x13c2bedc` | `minScore()` → (uint8) | view | — |
-| `0x375b3c0a` | `minStake()` → (uint256) | view | — |
-| `0x44a89bc1` | `primaryAgentOf(address)` → (uint256) | view | — |
-| `0x09df30ec` | `reactivate(uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
-| `0x36568abe` | `renounceRole(bytes32,address)` | nonpayable | — |
-| `0xd547741f` | `revokeRole(bytes32,address)` | nonpayable | — |
-| `0x752821e9` | `scoreOf(uint256)` → (uint8) | view | @inheritdoc IAvairaStakeRegistry |
-| `0xb82eaad7` | `scoreReader()` → (address) | view | — |
-| `0x1f8891d9` | `setMinScore(uint8)` | nonpayable | — |
-| `0x8c80fd90` | `setMinStake(uint256)` | nonpayable | — |
-| `0x937bef4b` | `setScoreReader(address)` | nonpayable | — |
-| `0x52348080` | `setSlasher(address,bool)` | nonpayable | — |
-| `0x27e62eb5` | `setSuspensionCooldown(uint64)` | nonpayable | — |
-| `0xf0f44260` | `setTreasury(address)` | nonpayable | — |
-| `0x5978f49f` | `slashAgent(uint256,uint8,address,bytes32,string)` → (uint256) | nonpayable | @inheritdoc IAvairaStakeRegistry @dev Half the slashed amount goes to `beneficiary` (the challenger), half to the treasury. |
-| `0x30040b87` | `slashCount(uint256)` → (uint256) | view | — |
-| `0x44f369a9` | `slashedTotal(uint256)` → (uint256) | view | — |
-| `0x7b0472f0` | `stake(uint256,uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
-| `0x24a66539` | `stakeOf(uint256)` → (uint256) | view | @inheritdoc IAvairaStakeRegistry |
-| `0x51ed6a30` | `stakeToken()` → (address) | view | — |
-| `0xac86e186` | `stakerOf(uint256)` → (address) | view | — |
-| `0xad35efd4` | `statusOf(uint256)` → (uint8) | view | @inheritdoc IAvairaStakeRegistry |
-| `0x185b6c6d` | `statusOfBatch(uint256[])` → (uint8[]) | view | @notice Age of the agent's identity, in seconds since registration is not tracked here; callers read the identity registry for that. |
-| `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
-| `0xdb584c78` | `suspendedUntil(uint256)` → (uint64) | view | — |
-| `0x99a95828` | `suspensionCooldown()` → (uint64) | view | — |
-| `0x61d027b3` | `treasury()` → (address) | view | — |
-| `0x9e2c8a5b` | `unstake(uint256,uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
-| `0x5ecba8dc` | `voluntaryExit(uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
+| `—` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
+| `—` | `SLASHER_ROLE()` → (bytes32) | view | — |
+| `—` | `accountStake(address)` → (uint256) | view | — |
+| `—` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
+| `—` | `grantRole(bytes32,address)` | nonpayable | — |
+| `—` | `hasRole(bytes32,address)` → (bool) | view | — |
+| `—` | `identityRegistry()` → (address) | view | — |
+| `—` | `isEligible(uint256)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `isEligible(address)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `isStakedReviewer(address)` → (bool) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `minScore()` → (uint8) | view | — |
+| `—` | `minStake()` → (uint256) | view | — |
+| `—` | `primaryAgentOf(address)` → (uint256) | view | — |
+| `—` | `reactivate(uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
+| `—` | `renounceRole(bytes32,address)` | nonpayable | — |
+| `—` | `revokeRole(bytes32,address)` | nonpayable | — |
+| `—` | `scoreOf(uint256)` → (uint8) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `scoreReader()` → (address) | view | — |
+| `—` | `setMinScore(uint8)` | nonpayable | — |
+| `—` | `setMinStake(uint256)` | nonpayable | — |
+| `—` | `setScoreReader(address)` | nonpayable | — |
+| `—` | `setSlasher(address,bool)` | nonpayable | — |
+| `—` | `setSuspensionCooldown(uint64)` | nonpayable | — |
+| `—` | `setTreasury(address)` | nonpayable | — |
+| `—` | `slashAgent(uint256,uint8,address,bytes32,string)` → (uint256) | nonpayable | @inheritdoc IAvairaStakeRegistry @dev Half the slashed amount goes to `beneficiary` (the challenger), half to the treasury. |
+| `—` | `slashCount(uint256)` → (uint256) | view | — |
+| `—` | `slashedTotal(uint256)` → (uint256) | view | — |
+| `—` | `stake(uint256,uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
+| `—` | `stakeOf(uint256)` → (uint256) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `stakeToken()` → (address) | view | — |
+| `—` | `stakerOf(uint256)` → (address) | view | — |
+| `—` | `statusOf(uint256)` → (uint8) | view | @inheritdoc IAvairaStakeRegistry |
+| `—` | `statusOfBatch(uint256[])` → (uint8[]) | view | @notice Age of the agent's identity, in seconds since registration is not tracked here; callers read the identity registry for that. |
+| `—` | `supportsInterface(bytes4)` → (bool) | view | — |
+| `—` | `suspendedUntil(uint256)` → (uint64) | view | — |
+| `—` | `suspensionCooldown()` → (uint64) | view | — |
+| `—` | `treasury()` → (address) | view | — |
+| `—` | `unstake(uint256,uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
+| `—` | `voluntaryExit(uint256)` | nonpayable | @inheritdoc IAvairaStakeRegistry |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `0x6697b232` | `AccessControlBadConfirmation()` | `AvairaIntentVault:0` | — |
-| `0xe2517d3f` | `AccessControlUnauthorizedAccount(address,bytes32)` | `AvairaIntentVault:0` | — |
-| `0x56172fd6` | `AgentIsBanned(uint256)` | `AvairaIntentVault:40` | — |
-| `0x83043b6d` | `AgentIsNotRegistered(uint256)` | `AvairaStakeRegistry:33` | — |
-| `0x644c0dc2` | `AgentIsSuspended(uint256)` | `AvairaStakeRegistry:37` | — |
-| `0x45be0a26` | `InsufficientStake(uint256,uint256)` | `AvairaStakeRegistry:41` | — |
-| `0x4b03c457` | `NotAgentOperator(uint256,address)` | `AvairaIntentVault:41` | — |
-| `0x4bc0cd76` | `NotSlasher(address)` | `AvairaStakeRegistry:40` | — |
-| `0xfbd09ea2` | `NotStaker(uint256,address)` | `AvairaStakeRegistry:36` | — |
-| `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
-| `0x5274afe7` | `SafeERC20FailedOperation(address)` | `AvairaIntentVault:0` | — |
-| `0x1bffc324` | `SlashOutOfRange(uint8)` | `AvairaStakeRegistry:39` | — |
-| `0x1a53e53a` | `StakeAlreadyOpenedBy(address,address)` | `AvairaStakeRegistry:35` | — |
-| `0x26447f7e` | `SuspensionCooldownActive(uint64)` | `AvairaStakeRegistry:38` | — |
-| `0xd92e233d` | `ZeroAddress()` | `AvairaIntentVault:56` | — |
-| `0x1f2a2005` | `ZeroAmount()` | `AvairaStakeRegistry:42` | — |
+| `—` | `AccessControlBadConfirmation()` | `?:?` | — |
+| `—` | `AccessControlUnauthorizedAccount(address,bytes32)` | `?:?` | — |
+| `—` | `AgentIsBanned(uint256)` | `?:?` | — |
+| `—` | `AgentIsNotRegistered(uint256)` | `?:?` | — |
+| `—` | `AgentIsSuspended(uint256)` | `?:?` | — |
+| `—` | `InsufficientStake(uint256,uint256)` | `?:?` | — |
+| `—` | `NotAgentOperator(uint256,address)` | `?:?` | — |
+| `—` | `NotSlasher(address)` | `?:?` | — |
+| `—` | `NotStaker(uint256,address)` | `?:?` | — |
+| `—` | `ReentrancyGuardReentrantCall()` | `?:?` | — |
+| `—` | `SafeERC20FailedOperation(address)` | `?:?` | — |
+| `—` | `SlashOutOfRange(uint8)` | `?:?` | — |
+| `—` | `StakeAlreadyOpenedBy(address,address)` | `?:?` | — |
+| `—` | `SuspensionCooldownActive(uint64)` | `?:?` | — |
+| `—` | `ZeroAddress()` | `?:?` | — |
+| `—` | `ZeroAmount()` | `?:?` | — |
 
 ## Events
 

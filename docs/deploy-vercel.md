@@ -8,7 +8,9 @@ output `frontend/build`). The FastAPI backend in `backend/` is *not* deployable
 to Vercel: `backend/server.py` calls `_get_required_env("MONGO_URL")` at import
 time and needs MongoDB plus OAuth credentials, so it belongs on a container host
 (Railway / Fly / any Docker host — see `backend/railway.json` and
-`docker-compose.yml`). Point the frontend at it with `REACT_APP_BACKEND_URL`.
+`docker-compose.yml`). Point the frontend at it with `REACT_APP_BACKEND_URL`, or
+proxy it same-origin — both recipes live in
+[`deploy-backend.md`](./deploy-backend.md).
 
 ---
 
@@ -29,6 +31,11 @@ time and needs MongoDB plus OAuth credentials, so it belongs on a container host
 
 ## Path A — Import the project in the Vercel dashboard (recommended)
 
+0. **To answer on `https://avaira.vercel.app`, the Vercel project has to be named
+   `avaira`** (the `*.vercel.app` subdomain follows the project name). That URL
+   currently returns Vercel's `404: NOT_FOUND`, so either create the project with
+   that name, or deploy to the existing project and add `avaira.vercel.app` under
+   *Settings → Domains*.
 1. **Vercel → Add New → Project → Import** `ranaalyan1/avaira.xyz`.
 2. Set **Root Directory** to `frontend`.
    *Leave it empty only if you prefer deploying from the repository root — the
@@ -87,6 +94,17 @@ Add three repository secrets (**Settings → Secrets and variables → Actions**
 Then trigger a deploy. On success the workflow publishes build artifacts and
 reports the deployment status back to Vercel through
 `vercel/repository-dispatch/actions/status`.
+
+**Without those secrets the workflow stays green instead of failing**: the deploy
+step detects the missing credentials, prints a warning annotation pointing here,
+and skips — the backend tests and the verified frontend build still run on every
+push to `main`.
+
+The check-status step posts names like `Vercel - avaira: backend-tests`. If your
+Vercel project is named differently (the older project in this repo's history was
+`avaira-v2`), set a repository variable **`VERCEL_CHECK_PREFIX`**
+(*Settings → Secrets and variables → Actions → Variables*) to e.g.
+`Vercel - avaira-v2` — no YAML edit required.
 
 > Why this needed fixing: the workflow file contained unquoted `name:` values of
 > the form `Vercel - avaira-v2: backend-tests`. A colon followed by a space is

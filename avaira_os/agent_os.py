@@ -21,6 +21,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from .events import CognitiveLedger, EventBus, EventType
+from .secrets import resolve_root_secret
 from .execution_gate import (AttestationService, ExecutionGate,
                              LocalLedgerSlashing, RefusalReason, SlashReceipt)
 from .kernel import ChunkKind, GlobalWorkingMemory, InterruptSignal, ProductionRule, RuleEngine
@@ -61,11 +62,13 @@ class AgentOS:
     def __init__(self, envelope: Envelope, agent_id: str = "avaira-agent-01",
                  initial_state: Optional[Dict[str, float]] = None,
                  stake: Optional[LocalLedgerSlashing] = None,
-                 secret: str = "avaira-v5-hardware-root-of-trust",
+                 secret: str | None = None,
                  sandbox_runs: int = 200) -> None:
         self.envelope = envelope
         self.agent_id = agent_id
-        self.secret = secret
+        # One root secret per OS instance: an env-provided secret, a per-installation
+        # secret file, never the repository literal this used to default to.
+        self.secret, self.secret_source = (secret, "explicit") if secret else resolve_root_secret()
         cash = envelope.bound_of("cash_usd")
         self.initial_state: Dict[str, float] = initial_state or {
             "cash_usd": cash.hi if cash else envelope.cost_cap_usd,
@@ -82,8 +85,8 @@ class AgentOS:
         self.prover = SymbolicProver()
         self.sandbox = ShadowSandbox(runs=sandbox_runs)
         # Pillar D — hardened execution
-        self.gate = ExecutionGate(secret)
-        self.attestations = AttestationService(secret)
+        self.gate = ExecutionGate(self.secret)
+        self.attestations = AttestationService(self.secret)
         self.stake = stake or LocalLedgerSlashing()
         # Pillar E — orchestration
         self.ledger = CognitiveLedger()

@@ -1,30 +1,29 @@
 # Avaira — Monad-native accountability layer for the agent economy.
 #
-#   make install       install every dependency (contracts, SDK, services, python)
-#   make test          run everything: Foundry suite + SDK tests + scorer tests
-#   make deploy-monad  deploy the whole stack to Monad testnet and verify it
-#   make gateway       start the API + dashboard on http://localhost:8402
-#   make demo-heist    run "The Agent Heist" scenario end to end
-#   make metrics       refresh metrics/ from real runs (gas, latency, coverage)
+#   make                 show this help
+#   make setup           one-command setup + verification of the core (~7s, no keys)
+#   make setup-dev       + SDKs and scorer
+#   make setup-full      + contracts (Foundry) and frontend deps
+#   make console         browser Quickstart Console on http://localhost:8402
+#   make test            run every suite that is installed locally
+#   make demo            deterministic end-to-end lifecycle trace (--check in CI)
+#   make demo-os         the 4 deterministic proof artifacts (Cognitive OS)
+#   make deploy-monad    deploy the 6-contract stack to Monad testnet (needs funds)
+#   make verify-deploy   assert the deployed site is serving AVAIRA (URL=…)
 #
-#   make check         everything CI runs except the slow campaign matrix
-#   make redteam       attack scenarios against the compiled bytecode (needs an EVM harness)
-#   make fuzz          deterministic campaign matrix over SEEDS, then aggregated
-#   make parity        cross-language canonical-encoding parity (Python / TypeScript / on-chain)
-#   make demo          deterministic end-to-end lifecycle trace (+ --check in CI)
-#   make specs         regenerate audit/specs from the build
-#   make doctor        repo self-consistency: claims vs checks
-#   make verify        compile + check + redteam + parity + demo + doctor
-#   make verify-deploy assert the deployed site is really serving AVAIRA (URL=…)
-#
-# Everything reads contracts/.env (see contracts/.env.example).
+# `make setup` is the recommended entry point; it wraps ./setup.sh, which is
+# idempotent and safe to re-run. Everything chain-related reads contracts/.env
+# (see contracts/.env.example).
+
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8402
 CHAIN_ID ?= 10143
-PY ?= python3
+# Absolute so recipes that `cd` into a subdirectory still find the venv.
+VENV_PY := $(shell test -x .venv/bin/python && echo $(CURDIR)/.venv/bin/python || echo python3)
+PY := $(VENV_PY)
 NODE ?= node
 
 # The fuzz matrix: seeds are fixed, so `make fuzz` on any machine reproduces the same report.
@@ -35,13 +34,40 @@ FUZZ_JOBS ?= 2
 REPORTS := verification/reports
 
 .PHONY: help install install-verification test test-contracts test-sdk test-scorer test-python \
-        deploy-monad verify-monad benchmark gate-bench measure-monad metrics \
-        gateway dashboard score leaderboard demo-heist demo-sybil anvil \
-        smoke-kimi smoke-privy fmt clean legacy-dev \
+        setup setup-dev setup-full setup-check quickstart console gateway demo-os \
+        test-core \
+        deploy-monad verify-monad benchmark gate-bench measure-monad \
+        fmt clean legacy-dev \
         compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
+
+# ── setup ───────────────────────────────────────────────────────────────────────
+
+setup: quickstart
+quickstart:
+	./setup.sh --yes
+
+setup-dev:
+	./setup.sh --dev --yes
+
+setup-full:
+	./setup.sh --full --yes
+
+setup-check:
+	./setup.sh --check
+
+# Alias kept for older docs: the old `services/gateway` was never committed, the
+# working local service is the Quickstart Console.
+gateway: console
+
+console:
+	./setup.sh --serve --port $(PORT)
+
+# The four deterministic proof artifacts; SETUP.md and CI call this module directly.
+demo-os:
+	$(PY) -m avaira_os.demos
 
 install:
 	@echo "→ verification toolchain (solc-js)"
@@ -72,10 +98,24 @@ install-verification:
 
 # ── tests ───────────────────────────────────────────────────────────────────────
 
-test: test-contracts test-sdk test-scorer
-	@echo "✓ all suites green"
+# Runs the fast core suite first (works with zero configuration), then every
+# optional suite whose toolchain is actually present.
+test: test-core
+	@if command -v forge >/dev/null 2>&1; then $(MAKE) test-contracts; \
+	else echo "  · skipping contracts — forge not installed (make setup-full --with-foundry)"; fi
+	@if command -v npm >/dev/null 2>&1 && [ -d sdk/typescript/node_modules ]; then \
+	$(MAKE) test-sdk; else echo "  · skipping TS SDK — run make setup-dev"; fi
+	@if command -v npm >/dev/null 2>&1 && [ -d services/scorer/node_modules ]; then \
+	$(MAKE) test-scorer; else echo "  · skipping scorer — run make setup-dev"; fi
+	@if [ -d sdk/python ]; then $(MAKE) test-python; fi
+	@echo "✓ every installed suite is green"
+
+test-core:
+	$(PY) -m pytest tests/test_cognitive_os.py -q
+	$(PY) -m avaira_os.demos >/dev/null && echo "✓ 4/4 proof artifacts PASS"
 
 test-contracts:
+	@command -v forge >/dev/null 2>&1 || { echo "forge not installed — run: ./setup.sh --full --with-foundry"; exit 1; }
 	cd contracts && forge test
 
 test-sdk:
@@ -85,7 +125,7 @@ test-scorer:
 	cd services/scorer && npm run typecheck && npm test
 
 test-python:
-	cd sdk/python && python3 -m pytest -q
+	cd sdk/python && $(PY) -m pytest -q
 
 # ── verification ─────────────────────────────────────────────────────────────────
 #
@@ -173,47 +213,10 @@ benchmark:
 measure-monad:
 	cd sdk/typescript && npm run benchmark -- --rpc $${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz} --chain $(CHAIN_ID) --runs $${RUNS:-50}
 
-# The same benchmark against a throwaway local chain — no faucet, no funds.
+# Same benchmark against a throwaway local chain — no faucet, no funds.
 gate-bench:
-	cd demo && ./bench-local.sh
-
-# Refresh metrics/ from real runs.
-metrics:
-	cd contracts && make benchmark
-	cd sdk/typescript && npm run benchmark -- --chain $(CHAIN_ID) --runs $${RUNS:-50} --out ../../metrics/gate-latency.json || true
-	$(PY) scripts/collect-metrics.py || true
-
-# ── services ────────────────────────────────────────────────────────────────────
-
-gateway:
-	@test -d services/gateway || { echo "services/gateway does not exist in this repository — see STATE.md (open items) / SCOPE_PROPOSALS.md SP-06"; exit 1; }
-	cd services/gateway && PORT=$(PORT) npm start
-
-# Alias: the dashboard is served by the gateway at /.
-dashboard: gateway
-
-score:
-	cd services/scorer && npm run score -- --agent $${AGENT:-1} --anchor
-
-leaderboard:
-	cd services/scorer && npm run leaderboard
-
-demo-heist:
-	cd demo && ./heist.sh
-
-demo-sybil:
-	cd demo && ./sybil.sh
-
-anvil:
-	anvil --chain-id $(CHAIN_ID) --block-time 0.4
-
-# ── sponsor smoke tests (require real credentials) ──────────────────────────────
-
-smoke-kimi:
-	cd services/scorer && npm run smoke:kimi
-
-smoke-privy:
-	cd services/gateway && npm run smoke:privy
+	@if [ -d demo ]; then cd demo && ./bench-local.sh; \
+	else echo "local gate benchmark is unavailable in this checkout"; fi
 
 # ── housekeeping ────────────────────────────────────────────────────────────────
 
@@ -222,7 +225,7 @@ fmt:
 	cd sdk/typescript && npx prettier --write 'src/**/*.ts' 'test/**/*.ts' 2>/dev/null || true
 
 clean:
-	cd contracts && forge clean
+	cd contracts && forge clean 2>/dev/null || true
 	rm -rf sdk/typescript/dist services/*/dist
 
 # The pre-Monad offchain product is still runnable; it is not part of the v2 path.

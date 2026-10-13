@@ -33,8 +33,16 @@ class AvairaAgent:
         return self._planned_intent(market_context, history)
 
     def validate(self, intent: ExecutionIntent) -> dict:
+        """Local pre-execution wall. Both declared caps bind (the tighter one wins):
+        `max_tx_value` is the per-transaction ceiling and `max_spend_usd` the run ceiling,
+        and only the first was checked — an envelope declaring max_tx_value=1 with
+        max_spend_usd=0.5 happily approved a 1.0 spend."""
         if intent.value_usd > self.risk_envelope.max_tx_value:
             return {"valid": False, "reason": f"value_usd {intent.value_usd} exceeds max_tx_value {self.risk_envelope.max_tx_value}"}
+        if intent.value_usd > self.risk_envelope.max_spend_usd:
+            return {"valid": False, "reason": f"value_usd {intent.value_usd} exceeds max_spend_usd {self.risk_envelope.max_spend_usd}"}
+        if intent.value_usd < 0:
+            return {"valid": False, "reason": f"value_usd {intent.value_usd} is negative"}
         if intent.action not in self.risk_envelope.allowed_actions:
             return {"valid": False, "reason": f"action '{intent.action}' is not allowed by the registered risk envelope"}
         return {"valid": True, "reason": "within risk envelope"}

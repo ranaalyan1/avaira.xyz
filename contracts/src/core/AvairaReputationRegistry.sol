@@ -50,6 +50,8 @@ contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004Rep
     error NoReviewersSupplied();
     error InvalidScore(uint8 score);
     error LengthMismatch();
+    error ValueOutOfRange(int128 value);
+    error StringTooLong(string field, uint256 length);
 
     /* --------------------------------- roles --------------------------------- */
 
@@ -102,6 +104,13 @@ contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004Rep
         string feedbackURI;
         bytes32 feedbackHash;
     }
+
+    /// @notice Largest magnitude a feedback value may carry. With the 18-decimal normalisation
+    ///         `getSummary` applies, `1e20 * 10^18` is still inside `int128`, so a review can
+    ///         never push an aggregate summary outside its own return type.
+    int128 private constant MAX_ABS_VALUE = 1e20;
+    /// @notice Longest accepted free-text field, to keep reviewers from bloating storage.
+    uint256 private constant MAX_STRING_LENGTH = 512;
 
     /// @notice x402-style settlement proof accompanying grounded feedback.
     /// @dev `token` must be the configured settlement token; `payer` must be the reviewer;
@@ -335,7 +344,14 @@ contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004Rep
                 scaled += int256(record.value) * int256(10 ** (maxDecimals - record.valueDecimals));
             }
         }
-        summaryValue = int128(scaled / int256(uint256(count)));
+        // Defence in depth for records written before the bound existed: clamp before the
+        // narrowing cast, because `int128(x)` on an out-of-range `x` truncates to garbage
+        // instead of reverting. A summary must never be a silently wrong number.
+        int256 average = scaled / int256(uint256(count));
+        if (average > type(int128).max) average = type(int128).max;
+        else if (average < type(int128).min) average = type(int128).min;
+
+        summaryValue = int128(average);
         summaryValueDecimals = maxDecimals;
     }
 
@@ -430,6 +446,18 @@ contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004Rep
         if (input.valueDecimals > 18) revert ValueDecimalsTooLarge(input.valueDecimals);
         if (!_agentExists(input.agentId)) revert NotRegisteredAgent(input.agentId);
         if (_isAgentOperator(input.agentId, msg.sender)) revert ReviewerIsAgentOperator(msg.sender, input.agentId);
+
+        // Bounds. `getSummary` normalises every value to the largest decimal count it saw and
+        // then narrows the average with an explicit `int128(...)` cast — which *truncates*
+        // silently rather than reverting. Unbounded input therefore let one reviewer poison
+        // the aggregate that every consumer of this agent's reputation reads. Bounding both
+        // the magnitude and the decimal count keeps normalised values inside int128.
+        if (input.value > MAX_ABS_VALUE || input.value < -MAX_ABS_VALUE) revert ValueOutOfRange(input.value);
+        if (bytes(input.tag2).length > MAX_STRING_LENGTH) revert StringTooLong("tag2", bytes(input.tag2).length);
+        if (bytes(input.endpoint).length > MAX_STRING_LENGTH) revert StringTooLong("endpoint", bytes(input.endpoint).length);
+        if (bytes(input.feedbackURI).length > MAX_STRING_LENGTH) {
+            revert StringTooLong("feedbackURI", bytes(input.feedbackURI).length);
+        }
     }
 
     function _writeFeedback(FeedbackInput memory input, address reviewer, uint8 grounding, uint256 paymentValue)

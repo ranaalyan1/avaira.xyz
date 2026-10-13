@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Avaira — Quickstart Console (snapshot)</title>
+<style>
+  :root { --bg:#0a0e14; --panel:#111823; --line:#1e2a3a; --ink:#e6f1ff;
+          --dim:#8ba3bd; --cyan:#00e5ff; --green:#10b981; --red:#ef4444; --amber:#f59e0b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .wrap { max-width:1000px; margin:0 auto; padding:36px 22px 72px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:4px; }
+  .mark { width:44px; height:44px; border-radius:12px; flex:0 0 auto;
+          background:linear-gradient(135deg,var(--cyan),#7c3aed);
+          display:grid; place-items:center; font-weight:800; color:#04121a; font-size:20px; }
+  h1 { font-size:25px; margin:0; letter-spacing:-.01em; }
+  .sub { color:var(--dim); margin:2px 0 22px; font-size:14px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px;
+          padding:18px; margin-bottom:16px; }
+  .pill { display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:999px;
+          font-size:12.5px; font-weight:600; border:1px solid var(--line); background:#0d1520; margin:0 6px 6px 0; }
+  .pill.ok { color:var(--green); border-color:#134e3a; }
+  .pill.no { color:var(--red); border-color:#5a1f1f; }
+  .pill.info { color:var(--cyan); border-color:#12414d; }
+  .dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  button { font:inherit; font-weight:600; cursor:pointer; border-radius:10px; padding:11px 16px;
+           border:1px solid var(--line); background:#16212f; color:var(--ink); transition:.15s; width:100%; text-align:left; }
+  button:hover { border-color:var(--cyan); color:var(--cyan); }
+  button.active { border-color:var(--cyan); background:#0e2b33; color:var(--cyan); }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--dim); margin:0 0 12px; }
+  pre { background:#070c13; border:1px solid var(--line); border-radius:10px; padding:14px;
+        overflow:auto; max-height:420px; font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+        color:#cfe6ff; margin:14px 0 0; white-space:pre-wrap; word-break:break-word; }
+  code { font-family:ui-monospace,Menlo,monospace; background:#0d1520; border:1px solid var(--line);
+         padding:1.5px 6px; border-radius:6px; font-size:13px; }
+  .kv { display:flex; justify-content:space-between; gap:12px; padding:7px 0;
+        border-bottom:1px dashed #16202e; font-size:13.5px; }
+  .kv:last-child { border-bottom:0; }
+  .kv span:first-child { color:var(--dim); }
+  .mono { font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+  .hint { color:var(--dim); font-size:13px; margin-top:9px; }
+  .banner { border:1px solid #12414d; background:#0b1f26; color:var(--cyan);
+            border-radius:10px; padding:10px 14px; font-size:13.5px; margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">A</div>
+    <div>
+      <h1>Avaira Quickstart Console</h1>
+      <div class="sub" style="margin:0">Real transcripts from a real run — no keys, no chain, no database.</div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">
+    Static snapshot · captured 2026-10-06 15:59:55 UTC · commit <span class="mono">8af1d49</span> · interpreter <span class="mono">/home/user/avaira.xyz/.venv/bin/python</span>
+    — press a button below to replay it, or serve this repo and it re-runs live.
+  </div>
+
+  <div class="card">
+    <h2>Environment</h2>
+    <div class="row">
+      <span class="pill ok"><i class="dot"></i>Cognitive OS verified · pydantic 2.13.5 · python 3.11.2</span>
+      <span class="pill info"><i class="dot"></i>/home/user/avaira.xyz/.venv/bin/python (pydantic 2.13.5, python 3.11.2)</span>
+    </div>
+    <div style="margin-top:12px">
+      <div class="kv"><span>Repository</span><span class="mono">/home/user/avaira.xyz</span></div>
+      <div class="kv"><span>Setup entry point</span><span class="mono">./setup.sh</span></div>
+      <div class="kv"><span>Live console (if running)</span><span class="mono">./setup.sh --serve → http://localhost:8402</span></div>
+      <div class="kv"><span>Chain tooling</span><span class="mono">node, npm</span></div>
+      <div class="kv"><span>Captured at</span><span class="mono">2026-10-06 15:59:55 UTC</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Run the verification</h2>
+    <div class="grid">
+      <div>
+        <button id="btn-demos">▸ Proof artifacts <span style="color:var(--green)">4/4 PASS</span></button>
+        <div class="hint">4 deterministic proofs: self-correction, ambiguity suspension, math-safety clamp, pre-execution slash · 212 ms</div>
+      </div>
+      <div>
+        <button id="btn-tests">▸ Kernel tests <span style="color:var(--green)">21 passed</span></button>
+        <div class="hint">21 tests across the five Cognitive OS pillars · 354 ms</div>
+      </div>
+    </div>
+    <pre id="out">
+========================================================================
+  PROOF ARTIFACT 1 — SELF-CORRECTION (sandbox catches a bug)
+========================================================================
+status            : COMPLETED
+proof verdict     : SAFE
+sandbox confidence: 1.000
+plan hash         : 42bd2d5bbcefad7198b9fb4a…
+final state       : {&#x27;cash_usd&#x27;: 8.425, &#x27;spend_total_usd&#x27;: 91.575}
+
+event transcript:
+  000 GOAL_SET             {&quot;goal&quot;:&quot;deploy the payments service release&quot;}
+  001 PLAN_EMITTED         {&quot;iteration&quot;:0,&quot;plan_hash&quot;:&quot;edba89a905bccf9eb446b68d033c1941281a00f096dff45feedff3ad47738581&quot;,&quot;steps
+  002 PROOF_COMPLETED      {&quot;reason&quot;:&quot;step &#x27;deploy&#x27; drives &#x27;cash_usd&#x27; below_lo its hard rule [0.0, 100.0]&quot;,&quot;verdict&quot;:&quot;UNSAFE&quot;}
+  003 CRITIQUE             {&quot;back_edge&quot;:&quot;PLAN&quot;,&quot;origin&quot;:&quot;prover&quot;,&quot;reason&quot;:&quot;step &#x27;deploy&#x27; drives &#x27;cash_usd&#x27; below_lo its hard ru
+  004 PLAN_EMITTED         {&quot;iteration&quot;:1,&quot;plan_hash&quot;:&quot;42bd2d5bbcefad7198b9fb4aac79fa2f313d0d7b7b0403a34f824472d37224e3&quot;,&quot;steps
+  005 PROOF_COMPLETED      {&quot;reason&quot;:&quot;all state variables proven inside hard-rule boundaries for the full parameter space&quot;,&quot;ver
+  006 SIMULATION_COMPLETED {&quot;confidence&quot;:1.0,&quot;runs&quot;:200,&quot;violations&quot;:0}
+  007 EXECUTED             {&quot;audit_id&quot;:&quot;AUD-42BD2D5BBCEF&quot;,&quot;final_state&quot;:{&quot;cash_usd&quot;:8.425,&quot;spend_total_usd&quot;:91.575}}
+  008 MEMORY_WRITTEN       {&quot;belief&quot;:&quot;agent/executed_plan/42bd2d5bbcefad71&quot;}
+  009 COMPLETED            {&quot;plan_hash&quot;:&quot;42bd2d5bbcefad7198b9fb4aac79fa2f313d0d7b7b0403a34f824472d37224e3&quot;}
+
+ledger tamper-evident: True
+self-correction demonstrated: True
+
+========================================================================
+  PROOF ARTIFACT 2 — AMBIGUITY (suspend at AWAIT_INPUT, resume on answer)
+========================================================================
+status after run  : AWAIT_INPUT
+pending question  : What is the exact payment amount in USD?
+suspended at AWAIT_INPUT: True
+
+answer submitted  : amount_usd ∈ [20.00, 30.00]
+status after resume: COMPLETED
+proof verdict     : SAFE
+final state       : {&#x27;cash_usd&#x27;: 75.0, &#x27;spend_total_usd&#x27;: 25.0}
+
+event transcript:
+  000 GOAL_SET             {&quot;goal&quot;:&quot;pay the vendor invoice&quot;}
+  001 AMBIGUITY_SUSPENDED  {&quot;question&quot;:&quot;What is the exact payment amount in USD?&quot;,&quot;question_id&quot;:&quot;amount_usd&quot;}
+  002 INPUT_RESUMED        {&quot;bound&quot;:[20.0,30.0],&quot;param&quot;:&quot;amount_usd&quot;}
+  003 PLAN_EMITTED         {&quot;iteration&quot;:0,&quot;plan_hash&quot;:&quot;0ce6c5f3e42646624b43d752bc9915fae89969a9e997dbfa61aed09a8d7c88ce&quot;,&quot;steps
+  004 PROOF_COMPLETED      {&quot;reason&quot;:&quot;all state variables proven inside hard-rule boundaries for the full parameter space&quot;,&quot;ver
+  005 SIMULATION_COMPLETED {&quot;confidence&quot;:1.0,&quot;runs&quot;:200,&quot;violations&quot;:0}
+  006 EXECUTED             {&quot;audit_id&quot;:&quot;AUD-0CE6C5F3E426&quot;,&quot;final_state&quot;:{&quot;cash_usd&quot;:75.0,&quot;spend_total_usd&quot;:25.0}}
+  007 MEMORY_WRITTEN       {&quot;belief&quot;:&quot;agent/executed_plan/0ce6c5f3e4264662&quot;}
+  008 COMPLETED            {&quot;plan_hash&quot;:&quot;0ce6c5f3e42646624b43d752bc9915fae89969a9e997dbfa61aed09a8d7c88ce&quot;}
+
+ambiguity handling demonstrated: True
+
+========================================================================
+  PROOF ARTIFACT 3 — MATH SAFETY (UNSAFE for over-budget, clamp to $95)
+========================================================================
+status            : COMPLETED
+proof verdict     : SAFE
+plan iterations   : 1
+actual spend      : $95.00 (cap $100.00)
+
+event transcript:
+  000 GOAL_SET             {&quot;goal&quot;:&quot;pay vendor invoice of $120&quot;}
+  001 PLAN_EMITTED         {&quot;iteration&quot;:0,&quot;plan_hash&quot;:&quot;70eb8d0bebd82ad229061fe3f984f653ac667c966d940e0912006fbe1142b402&quot;,&quot;steps
+  002 PROOF_COMPLETED      {&quot;reason&quot;:&quot;step &#x27;pay&#x27; drives &#x27;cash_usd&#x27; below_lo its hard rule [0.0, 100.0]&quot;,&quot;verdict&quot;:&quot;UNSAFE&quot;}
+  003 CRITIQUE             {&quot;back_edge&quot;:&quot;PLAN&quot;,&quot;origin&quot;:&quot;prover&quot;,&quot;reason&quot;:&quot;step &#x27;pay&#x27; drives &#x27;cash_usd&#x27; below_lo its hard rule 
+  004 PLAN_EMITTED         {&quot;iteration&quot;:1,&quot;plan_hash&quot;:&quot;9a7fc0be37ba32ef250aeb0b04ed5fa0421331fc09f09fcf0aea5fcedbd2d03d&quot;,&quot;steps
+  005 PROOF_COMPLETED      {&quot;reason&quot;:&quot;all state variables proven inside hard-rule boundaries for the full parameter space&quot;,&quot;ver
+  006 SIMULATION_COMPLETED {&quot;confidence&quot;:1.0,&quot;runs&quot;:200,&quot;violations&quot;:0}
+  007 EXECUTED             {&quot;audit_id&quot;:&quot;AUD-9A7FC0BE37BA&quot;,&quot;final_state&quot;:{&quot;cash_usd&quot;:5.0,&quot;spend_total_usd&quot;:95.0}}
+  008 MEMORY_WRITTEN       {&quot;belief&quot;:&quot;agent/executed_plan/9a7fc0be37ba32ef&quot;}
+  009 COMPLETED            {&quot;plan_hash&quot;:&quot;9a7fc0be37ba32ef250aeb0b04ed5fa0421331fc09f09fcf0aea5fcedbd2d03d&quot;}
+
+math-safety clamp to $95 demonstrated: True
+
+========================================================================
+  PROOF ARTIFACT 4 — SLASH (forced violation, gate refuses, stake burns)
+========================================================================
+stake before      : $100.00
+status            : SLASHED
+gate refusals     : invalid_certificate_signature
+stake burned      : $25.00
+stake remaining   : $75.00
+
+on-chain settlement (dry-run):
+  to     : 0x5eb3E0eE3bE9E0964b0F1Eaa3Cd2bE74ba3746C2
+  func   : freezeAndSlash(address,uint256,string)
+  data   : 0xbd670dc100000000000000000000000011111111…
+
+event transcript:
+  000 GOAL_SET             {&quot;forced_violation&quot;:true,&quot;goal&quot;:&quot;pay vendor invoice of $40&quot;}
+  001 PLAN_EMITTED         {&quot;iteration&quot;:0,&quot;plan_hash&quot;:&quot;ca362c90612accff8700f33371a4ef452a63846905fcc47e460684d4e75a31bf&quot;,&quot;steps
+  002 PROOF_COMPLETED      {&quot;reason&quot;:&quot;all state variables proven inside hard-rule boundaries for the full parameter space&quot;,&quot;ver
+  003 SIMULATION_COMPLETED {&quot;confidence&quot;:1.0,&quot;runs&quot;:200,&quot;violations&quot;:0}
+  004 GATE_REFUSED         {&quot;refusals&quot;:[&quot;invalid_certificate_signature&quot;],&quot;tamper_detected&quot;:true}
+  005 SLASHED              {&quot;amount&quot;:25.0,&quot;evidence_hash&quot;:&quot;7033963d577cdc6ea9ce453db56ce8a184d910ed4aa6854f099f5e4bb095d626&quot;,&quot;r
+
+atomic slash demonstrated: True
+
+========================================================================
+  SUMMARY
+========================================================================
+  [PASS] self_correction  — Self-Correction: bug caught -&gt; fixed -&gt; deployed
+  [PASS] ambiguity        — Ambiguity: AWAIT_INPUT suspension -&gt; resume
+  [PASS] math_safety      — Math Safety: UNSAFE -&gt; clamp to $95
+  [PASS] slash            — Slash: gate refusal -&gt; atomic stake burn
+
+all proof artifacts: PASS
+</pre>
+  </div>
+
+  <div class="card">
+    <h2>What am I looking at?</h2>
+    <ol style="color:var(--dim); padding-left:20px; margin:0">
+      <li><b style="color:var(--ink)">Proof artifacts</b> — the interval prover rejects an under-budgeted plan with a witness counterexample and the loop self-corrects; an underspecified goal suspends at <code>AWAIT_INPUT</code> instead of guessing; a $120 transfer is clamped to $95 against a $100 cap; and a plan with a forged certificate is refused <i>before</i> execution while 25% of stake burns.</li>
+      <li><b style="color:var(--ink)">Kernel tests</b> — 21 tests over the five pillars: cognitive kernel, three-tier memory, symbolic prover + sandbox, hardened execution gate, cognitive ledger.</li>
+      <li>Both are deterministic (seeded RNG, logical clock), so two runs are byte-identical — which is why this snapshot is evidence and not a screenshot.</li>
+    </ol>
+    <div class="hint">Reproduce locally: <code>git clone … &amp;&amp; ./setup.sh</code> — ~7s, no API keys, no wallet, no database.</div>
+  </div>
+</div>
+
+<script id="data" type="application/json">{"results": {"demos": {"id": "demos", "label": "Proof artifacts", "blurb": "4 deterministic proofs: self-correction, ambiguity suspension, math-safety clamp, pre-execution slash", "ok": true, "exitCode": 0, "durationMs": 212, "output": "\n========================================================================\n  PROOF ARTIFACT 1 \u2014 SELF-CORRECTION (sandbox catches a bug)\n========================================================================\nstatus            : COMPLETED\nproof verdict     : SAFE\nsandbox confidence: 1.000\nplan hash         : 42bd2d5bbcefad7198b9fb4a\u2026\nfinal state       : {'cash_usd': 8.425, 'spend_total_usd': 91.575}\n\nevent transcript:\n  000 GOAL_SET             {\"goal\":\"deploy the payments service release\"}\n  001 PLAN_EMITTED         {\"iteration\":0,\"plan_hash\":\"edba89a905bccf9eb446b68d033c1941281a00f096dff45feedff3ad47738581\",\"steps\n  002 PROOF_COMPLETED      {\"reason\":\"step 'deploy' drives 'cash_usd' below_lo its hard rule [0.0, 100.0]\",\"verdict\":\"UNSAFE\"}\n  003 CRITIQUE             {\"back_edge\":\"PLAN\",\"origin\":\"prover\",\"reason\":\"step 'deploy' drives 'cash_usd' below_lo its hard ru\n  004 PLAN_EMITTED         {\"iteration\":1,\"plan_hash\":\"42bd2d5bbcefad7198b9fb4aac79fa2f313d0d7b7b0403a34f824472d37224e3\",\"steps\n  005 PROOF_COMPLETED      {\"reason\":\"all state variables proven inside hard-rule boundaries for the full parameter space\",\"ver\n  006 SIMULATION_COMPLETED {\"confidence\":1.0,\"runs\":200,\"violations\":0}\n  007 EXECUTED             {\"audit_id\":\"AUD-42BD2D5BBCEF\",\"final_state\":{\"cash_usd\":8.425,\"spend_total_usd\":91.575}}\n  008 MEMORY_WRITTEN       {\"belief\":\"agent/executed_plan/42bd2d5bbcefad71\"}\n  009 COMPLETED            {\"plan_hash\":\"42bd2d5bbcefad7198b9fb4aac79fa2f313d0d7b7b0403a34f824472d37224e3\"}\n\nledger tamper-evident: True\nself-correction demonstrated: True\n\n========================================================================\n  PROOF ARTIFACT 2 \u2014 AMBIGUITY (suspend at AWAIT_INPUT, resume on answer)\n========================================================================\nstatus after run  : AWAIT_INPUT\npending question  : What is the exact payment amount in USD?\nsuspended at AWAIT_INPUT: True\n\nanswer submitted  : amount_usd \u2208 [20.00, 30.00]\nstatus after resume: COMPLETED\nproof verdict     : SAFE\nfinal state       : {'cash_usd': 75.0, 'spend_total_usd': 25.0}\n\nevent transcript:\n  000 GOAL_SET             {\"goal\":\"pay the vendor invoice\"}\n  001 AMBIGUITY_SUSPENDED  {\"question\":\"What is the exact payment amount in USD?\",\"question_id\":\"amount_usd\"}\n  002 INPUT_RESUMED        {\"bound\":[20.0,30.0],\"param\":\"amount_usd\"}\n  003 PLAN_EMITTED         {\"iteration\":0,\"plan_hash\":\"0ce6c5f3e42646624b43d752bc9915fae89969a9e997dbfa61aed09a8d7c88ce\",\"steps\n  004 PROOF_COMPLETED      {\"reason\":\"all state variables proven inside hard-rule boundaries for the full parameter space\",\"ver\n  005 SIMULATION_COMPLETED {\"confidence\":1.0,\"runs\":200,\"violations\":0}\n  006 EXECUTED             {\"audit_id\":\"AUD-0CE6C5F3E426\",\"final_state\":{\"cash_usd\":75.0,\"spend_total_usd\":25.0}}\n  007 MEMORY_WRITTEN       {\"belief\":\"agent/executed_plan/0ce6c5f3e4264662\"}\n  008 COMPLETED            {\"plan_hash\":\"0ce6c5f3e42646624b43d752bc9915fae89969a9e997dbfa61aed09a8d7c88ce\"}\n\nambiguity handling demonstrated: True\n\n========================================================================\n  PROOF ARTIFACT 3 \u2014 MATH SAFETY (UNSAFE for over-budget, clamp to $95)\n========================================================================\nstatus            : COMPLETED\nproof verdict     : SAFE\nplan iterations   : 1\nactual spend      : $95.00 (cap $100.00)\n\nevent transcript:\n  000 GOAL_SET             {\"goal\":\"pay vendor invoice of $120\"}\n  001 PLAN_EMITTED         {\"iteration\":0,\"plan_hash\":\"70eb8d0bebd82ad229061fe3f984f653ac667c966d940e0912006fbe1142b402\",\"steps\n  002 PROOF_COMPLETED      {\"reason\":\"step 'pay' drives 'cash_usd' below_lo its hard rule [0.0, 100.0]\",\"verdict\":\"UNSAFE\"}\n  003 CRITIQUE             {\"back_edge\":\"PLAN\",\"origin\":\"prover\",\"reason\":\"step 'pay' drives 'cash_usd' below_lo its hard rule \n  004 PLAN_EMITTED         {\"iteration\":1,\"plan_hash\":\"9a7fc0be37ba32ef250aeb0b04ed5fa0421331fc09f09fcf0aea5fcedbd2d03d\",\"steps\n  005 PROOF_COMPLETED      {\"reason\":\"all state variables proven inside hard-rule boundaries for the full parameter space\",\"ver\n  006 SIMULATION_COMPLETED {\"confidence\":1.0,\"runs\":200,\"violations\":0}\n  007 EXECUTED             {\"audit_id\":\"AUD-9A7FC0BE37BA\",\"final_state\":{\"cash_usd\":5.0,\"spend_total_usd\":95.0}}\n  008 MEMORY_WRITTEN       {\"belief\":\"agent/executed_plan/9a7fc0be37ba32ef\"}\n  009 COMPLETED            {\"plan_hash\":\"9a7fc0be37ba32ef250aeb0b04ed5fa0421331fc09f09fcf0aea5fcedbd2d03d\"}\n\nmath-safety clamp to $95 demonstrated: True\n\n========================================================================\n  PROOF ARTIFACT 4 \u2014 SLASH (forced violation, gate refuses, stake burns)\n========================================================================\nstake before      : $100.00\nstatus            : SLASHED\ngate refusals     : invalid_certificate_signature\nstake burned      : $25.00\nstake remaining   : $75.00\n\non-chain settlement (dry-run):\n  to     : 0x5eb3E0eE3bE9E0964b0F1Eaa3Cd2bE74ba3746C2\n  func   : freezeAndSlash(address,uint256,string)\n  data   : 0xbd670dc100000000000000000000000011111111\u2026\n\nevent transcript:\n  000 GOAL_SET             {\"forced_violation\":true,\"goal\":\"pay vendor invoice of $40\"}\n  001 PLAN_EMITTED         {\"iteration\":0,\"plan_hash\":\"ca362c90612accff8700f33371a4ef452a63846905fcc47e460684d4e75a31bf\",\"steps\n  002 PROOF_COMPLETED      {\"reason\":\"all state variables proven inside hard-rule boundaries for the full parameter space\",\"ver\n  003 SIMULATION_COMPLETED {\"confidence\":1.0,\"runs\":200,\"violations\":0}\n  004 GATE_REFUSED         {\"refusals\":[\"invalid_certificate_signature\"],\"tamper_detected\":true}\n  005 SLASHED              {\"amount\":25.0,\"evidence_hash\":\"7033963d577cdc6ea9ce453db56ce8a184d910ed4aa6854f099f5e4bb095d626\",\"r\n\natomic slash demonstrated: True\n\n========================================================================\n  SUMMARY\n========================================================================\n  [PASS] self_correction  \u2014 Self-Correction: bug caught -> fixed -> deployed\n  [PASS] ambiguity        \u2014 Ambiguity: AWAIT_INPUT suspension -> resume\n  [PASS] math_safety      \u2014 Math Safety: UNSAFE -> clamp to $95\n  [PASS] slash            \u2014 Slash: gate refusal -> atomic stake burn\n\nall proof artifacts: PASS\n", "argv": ["-m", "avaira_os.demos"], "cmd": "python -m avaira_os.demos"}, "tests": {"id": "tests", "label": "Kernel tests", "blurb": "21 tests across the five Cognitive OS pillars", "ok": true, "exitCode": 0, "durationMs": 354, "output": ".....................                                                    [100%]\n21 passed in 0.17s\n", "argv": ["-m", "pytest", "tests/test_cognitive_os.py", "-q"], "cmd": "python -m pytest tests/test_cognitive_os.py -q"}}}</script>
+<script>
+const R = JSON.parse(document.getElementById('data').textContent);
+const out = document.getElementById('out');
+const btns = { demos: document.getElementById('btn-demos'), tests: document.getElementById('btn-tests') };
+
+function show(id) {
+  const r = R.results[id];
+  out.textContent = `$ ${r.cmd}
+` + '─'.repeat(72) + '
+' + r.output +
+    (r.ok ? '' : `
+
+*** exit ${r.exitCode} — this run FAILED ***`);
+  for (const [key, b] of Object.entries(btns)) b.classList.toggle('active', key === id);
+}
+
+async function go(id) {
+  // If this file is being served by tools/quickstart/server.py, re-run for real.
+  show(id);
+  try {
+    const res = await fetch('/api/run/' + id, { method: 'POST' });
+    if (!res.ok) return;
+    const live = await res.json();
+    R.results[id] = { ...R.results[id], output: live.output, ok: live.ok,
+                      exitCode: live.exitCode, durationMs: live.durationMs, cmd: R.results[id].cmd + '   (live)' };
+    show(id);
+  } catch (e) { /* static snapshot: the captured transcript is already on screen */ }
+}
+btns.demos.addEventListener('click', () => go('demos'));
+btns.tests.addEventListener('click', () => go('tests'));
+show('demos');
+</script>
+</body>
+</html>

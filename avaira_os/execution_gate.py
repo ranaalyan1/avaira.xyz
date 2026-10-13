@@ -24,6 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .schemas import (Envelope, Plan, SafetyCertificate, TEEAttestation,
                       sha256_canonical)
+from .secrets import resolve_root_secret
 
 # ---------------------------------------------------------------------------
 # Hardware attestation (simulated Nitro enclave, deterministic & offline)
@@ -41,8 +42,10 @@ class AttestationService:
     RUNTIME_IMAGE = b"avaira-cognitive-os-v5.0-runtime"
     KERNEL_IMAGE = b"nitro-v5-kernel-5.15"
 
-    def __init__(self, secret: str = "avaira-v5-hardware-root-of-trust") -> None:
-        self.secret = secret
+    def __init__(self, secret: str | None = None) -> None:
+        # No shipped default: an env-provided root secret in production, a per-installation
+        # secret file otherwise (see avaira_os/secrets.py).
+        self.secret, self.secret_source = (secret, "explicit") if secret else resolve_root_secret()
         self.expected_pcr0 = hashlib.sha256(self.RUNTIME_IMAGE).hexdigest()
 
     def issue(self, agent_id: str, nonce: str) -> TEEAttestation:
@@ -94,7 +97,8 @@ class GateDecision(BaseModel):
 class ExecutionGate:
     """Strict boolean gate: no valid attestation + certificate + envelope, no execution."""
 
-    def __init__(self, secret: str = "avaira-v5-hardware-root-of-trust") -> None:
+    def __init__(self, secret: str | None = None) -> None:
+        secret = secret or resolve_root_secret()[0]
         self.secret = secret
         self.attestations = AttestationService(secret)
 

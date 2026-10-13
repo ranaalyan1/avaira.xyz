@@ -29,7 +29,7 @@ const ContractCard = ({ contract }) => {
             <Icon size={16} className="text-avaira-primary" strokeWidth={1.5} />
           </div>
           <div>
-            <h3 className="font-heading font-bold text-base text-foreground uppercase tracking-tight">{contract.name}</h3>
+            <h3 className="text-base font-semibold tracking-tight text-foreground">{contract.name}</h3>
             <div className="mt-0.5 max-w-[300px]">
               {contract.address && !contract.address.startsWith("Not") ? (
                 <a
@@ -53,9 +53,9 @@ const ContractCard = ({ contract }) => {
         <div className="px-4 pb-4 space-y-4 border-t border-avaira-border pt-4 animate-slide-in">
           <p className="font-mono text-xs text-avaira-muted">{contract.description}</p>
 
-          {/* State Variables */}
+          {/* State variables */}
           <div>
-            <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-primary mb-2">State Variables</h4>
+            <h4 className="text-[11px] font-semibold tracking-tight text-avaira-primary mb-2">State variables</h4>
             <div className="space-y-1">
               {contract.state_variables.map((sv, i) => (
                 <div key={i} className="flex items-start gap-2 p-1.5 bg-black/40">
@@ -69,7 +69,7 @@ const ContractCard = ({ contract }) => {
 
           {/* Functions */}
           <div>
-            <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-primary mb-2">Functions</h4>
+            <h4 className="text-[11px] font-semibold tracking-tight text-avaira-primary mb-2">Functions</h4>
             <div className="space-y-1.5">
               {contract.functions.map((fn, i) => (
                 <div key={i} className="p-2 bg-black/40 border-l-2 border-avaira-primary/30">
@@ -89,7 +89,7 @@ const ContractCard = ({ contract }) => {
 
           {/* Events */}
           <div>
-            <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-primary mb-2">Events</h4>
+            <h4 className="text-[11px] font-semibold tracking-tight text-avaira-primary mb-2">Events</h4>
             <div className="space-y-1">
               {contract.events.map((ev, i) => (
                 <div key={i} className="p-1.5 bg-black/40">
@@ -116,7 +116,7 @@ export default function SmartContracts() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <p className="font-mono text-xs text-avaira-muted animate-glow-pulse">LOADING CONTRACT DATA...</p>
+      <p className="font-mono text-xs text-avaira-muted animate-glow-pulse">Loading contract data…</p>
     </div>
   );
 
@@ -124,8 +124,8 @@ export default function SmartContracts() {
     <div className="page-shell animate-slide-in" data-testid="smart-contracts-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Smart Contracts</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">AVALANCHE FUJI C-CHAIN ARCHITECTURE</p>
+          <h1 className="page-title">Smart Contracts</h1>
+          <p className="page-subtitle">Avalanche Fuji C-Chain architecture</p>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export default function SmartContracts() {
           </div>
 
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-red mb-3 flex items-center gap-2">
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-red mb-3 flex items-center gap-2">
               <AlertTriangle size={14} /> Attack Surfaces
             </h2>
             <div className="space-y-2">

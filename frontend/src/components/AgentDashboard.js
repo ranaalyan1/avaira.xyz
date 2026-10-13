@@ -5,6 +5,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 import { API } from "@/lib/api";
 
+import { DARK } from "@/lib/palette";
+
 function useAgentLeaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -300,11 +302,11 @@ export default function AgentDashboard() {
           {historySeries.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={historySeries}>
-                <CartesianGrid stroke="#1a1a1a" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fill: "#858585", fontSize: 10 }} stroke="#333" />
-                <YAxis tick={{ fill: "#858585", fontSize: 10 }} stroke="#333" domain={[0, 100]} />
-                <Tooltip contentStyle={{ background: "#0A0A0A", border: "1px solid #333", color: "#E0E0E0" }} />
-                <Line type="monotone" dataKey="score" stroke="#00F0FF" strokeWidth={2} dot={{ r: 3, fill: "#39FF14" }} />
+                <CartesianGrid stroke={DARK.hairline} strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={{ fill: DARK.textMuted, fontSize: 10 }} stroke={DARK.hairline} />
+                <YAxis tick={{ fill: DARK.textMuted, fontSize: 10 }} stroke={DARK.hairline} domain={[0, 100]} />
+                <Tooltip contentStyle={{ background: DARK.card, border: `1px solid ${DARK.hairlineStrong}`, color: DARK.textPrimary }} />
+                <Line type="monotone" dataKey="score" stroke={DARK.info} strokeWidth={2} dot={{ r: 3, fill: DARK.success }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (

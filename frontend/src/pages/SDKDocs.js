@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import { API } from "@/lib/api";
 
+import { DARK } from "@/lib/palette";
+
 const CopyBtn = ({ text }) => {
   const [copied, setCopied] = useState(false);
   const handle = () => {
@@ -41,7 +43,7 @@ export default function SDKDocs() {
 
   if (!docs) return (
     <div className="flex items-center justify-center h-64">
-      <p className="font-mono text-xs text-avaira-muted animate-glow-pulse">LOADING SDK DOCS...</p>
+      <p className="font-mono text-xs text-avaira-muted animate-glow-pulse">Loading SDK docs…</p>
     </div>
   );
 
@@ -49,8 +51,8 @@ export default function SDKDocs() {
     <div className="page-shell animate-slide-in" data-testid="sdk-docs-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">SDK Documentation</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">INTEGRATE IN 4 FUNCTION CALLS</p>
+          <h1 className="page-title">SDK Documentation</h1>
+          <p className="page-subtitle">Integrate in four function calls</p>
         </div>
       </div>
 
@@ -74,7 +76,7 @@ export default function SDKDocs() {
 
       {/* Quick Start */}
       <div className="cyber-card p-4 mb-6">
-        <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-primary mb-3 flex items-center gap-2">
+        <h2 className="text-[13px] font-semibold tracking-tight text-avaira-primary mb-3 flex items-center gap-2">
           <Code size={14} /> Quick Start
         </h2>
         <CodeBlock code={docs.quick_start} lang="typescript" />
@@ -84,7 +86,7 @@ export default function SDKDocs() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Function Nav */}
         <div className="space-y-1.5">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">API Reference</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">API reference</h2>
           {docs.functions.map((fn, i) => (
             <button
               key={fn.name}
@@ -114,7 +116,7 @@ export default function SDKDocs() {
 
               {/* Parameters */}
               <div className="mb-4">
-                <h3 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-muted mb-2">Parameters</h3>
+                <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Parameters</h3>
                 <div className="space-y-1">
                   {docs.functions[activeFunc].params.map((p, i) => (
                     <div key={i} className="flex items-center gap-3 p-2 bg-black/40">
@@ -127,7 +129,7 @@ export default function SDKDocs() {
 
               {/* Returns */}
               <div className="mb-4">
-                <h3 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-muted mb-2">Returns</h3>
+                <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Returns</h3>
                 <div className="p-2 bg-black/40">
                   <code className="font-mono text-xs text-avaira-green">{docs.functions[activeFunc].returns}</code>
                 </div>
@@ -135,7 +137,7 @@ export default function SDKDocs() {
 
               {/* Example */}
               <div>
-                <h3 className="font-heading font-semibold text-xs uppercase tracking-wider text-avaira-muted mb-2">Example</h3>
+                <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Example</h3>
                 <CodeBlock code={docs.functions[activeFunc].example} />
               </div>
             </div>
@@ -143,9 +145,9 @@ export default function SDKDocs() {
         </div>
       </div>
 
-      {/* Fee Structure */}
+      {/* Fee structure */}
       <div className="cyber-card p-4 mt-6">
-        <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Fee Structure</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Fee structure</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-3 border border-avaira-border">
             <p className="font-heading font-bold text-lg text-avaira-green">85%</p>
@@ -167,17 +169,17 @@ export default function SDKDocs() {
 
       {/* Scoring Reference */}
       <div className="cyber-card p-4 mt-4">
-        <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Avaira Score Reference</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Avaira score reference</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
           {[
-            { grade: 'AAA', range: '90-100', color: '#39FF14' },
-            { grade: 'AA', range: '80-89', color: '#00F0FF' },
-            { grade: 'A', range: '70-79', color: '#00F0FF' },
-            { grade: 'BBB', range: '60-69', color: '#FFD300' },
-            { grade: 'BB', range: '50-59', color: '#FFD300' },
-            { grade: 'B', range: '40-49', color: '#FF8C00' },
-            { grade: 'CCC', range: '30-39', color: '#FF003C' },
-            { grade: 'D', range: '0-29', color: '#FF003C' },
+            { grade: 'AAA', range: '90-100', color: DARK.success },
+            { grade: 'AA', range: '80-89', color: DARK.info },
+            { grade: 'A', range: '70-79', color: DARK.info },
+            { grade: 'BBB', range: '60-69', color: DARK.warning },
+            { grade: 'BB', range: '50-59', color: DARK.warning },
+            { grade: 'B', range: '40-49', color: DARK.warning },
+            { grade: 'CCC', range: '30-39', color: DARK.danger },
+            { grade: 'D', range: '0-29', color: DARK.danger },
           ].map(g => (
             <div key={g.grade} className="p-2 border border-avaira-border text-center">
               <p className="font-heading font-bold text-lg" style={{ color: g.color }}>{g.grade}</p>

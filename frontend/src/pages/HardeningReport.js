@@ -45,7 +45,7 @@ export default function HardeningReport() {
         <div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="text-avaira-green" size={24} />
-            <h2 className="font-heading font-bold text-xl text-foreground uppercase tracking-tight">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
               AGENT HARDENING REPORT
             </h2>
             <span className="px-2 py-0.5 font-mono text-[10px] bg-avaira-green/20 text-avaira-green uppercase">
@@ -99,7 +99,7 @@ export default function HardeningReport() {
       <div className="p-6 border border-avaira-border bg-avaira-card">
         <div className="flex items-center gap-2 mb-4">
           <ShieldAlert className="text-red-400" size={18} />
-          <h3 className="font-heading font-bold text-sm text-foreground uppercase">
+          <h3 className="text-[13px] font-semibold tracking-tight text-foreground">
             BLOCKED THREAT INTERCEPTS (KILL-SWITCH ENFORCED)
           </h3>
         </div>
@@ -139,7 +139,7 @@ export default function HardeningReport() {
       <div className="p-6 border border-avaira-border bg-avaira-card">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 className="text-avaira-green" size={18} />
-          <h3 className="font-heading font-bold text-sm text-foreground uppercase">
+          <h3 className="text-[13px] font-semibold tracking-tight text-foreground">
             HASH-LINKED VERIFIED EXECUTION CHAIN
           </h3>
         </div>

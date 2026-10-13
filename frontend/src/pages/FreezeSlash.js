@@ -75,8 +75,8 @@ export default function FreezeSlash() {
     <div className="page-shell animate-slide-in" data-testid="freeze-slash-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Freeze & Slash</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">{frozenAgents.length} FROZEN / {events.length} EVENTS</p>
+          <h1 className="page-title">Freeze & Slash</h1>
+          <p className="page-subtitle">{frozenAgents.length} frozen · {events.length} events</p>
         </div>
         <div className="flex items-center gap-2">
           <button data-testid="refresh-freeze-btn" onClick={fetchData} className="p-2 border border-avaira-border text-avaira-muted hover:text-avaira-primary hover:border-avaira-primary transition-colors">
@@ -92,7 +92,7 @@ export default function FreezeSlash() {
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
               <DialogHeader>
-                <DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Freeze Agent</DialogTitle>
+                <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Freeze Agent</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleFreeze} className="space-y-3 mt-2" data-testid="freeze-agent-form">
                 <div>
@@ -131,7 +131,7 @@ export default function FreezeSlash() {
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
               <DialogHeader>
-                <DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Slash Collateral</DialogTitle>
+                <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Slash Collateral</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSlash} className="space-y-3 mt-2" data-testid="slash-agent-form">
                 <div>
@@ -180,7 +180,7 @@ export default function FreezeSlash() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Frozen Agents */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-red mb-3 flex items-center gap-2">
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-red mb-3 flex items-center gap-2">
             <ShieldOff size={14} /> Frozen Agents ({frozenAgents.length})
           </h2>
           {frozenAgents.length === 0 ? (
@@ -190,7 +190,7 @@ export default function FreezeSlash() {
               {frozenAgents.map(a => (
                 <div key={a.id} className="p-3 bg-red-500/5 border border-red-500/20" data-testid={`frozen-agent-${a.id}`}>
                   <div className="flex items-center justify-between">
-                    <span className="font-heading font-bold text-sm text-foreground uppercase">{a.name}</span>
+                    <span className="text-[13px] font-semibold tracking-tight text-foreground">{a.name}</span>
                     <span className="status-dot frozen" />
                   </div>
                   <div className="font-mono text-[10px] text-avaira-muted mt-1 space-y-0.5">
@@ -205,7 +205,7 @@ export default function FreezeSlash() {
 
         {/* Event Log */}
         <div className="lg:col-span-2 cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3 flex items-center gap-2">
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
             <AlertTriangle size={14} className="text-avaira-yellow" /> Event Log
           </h2>
           {events.length === 0 ? (

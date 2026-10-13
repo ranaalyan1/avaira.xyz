@@ -1,26 +1,78 @@
 import { useNavigate } from "react-router-dom";
-import { Shield, FileKey, Heart, Zap, TrendingUp, Lock, Database, Globe, ChevronRight, Code, Users, Wallet, ArrowRight, LogIn } from "lucide-react";
+import {
+  Shield, FileKey, Heart, Zap, TrendingUp, Lock, Database, Globe, ChevronRight,
+  Code, Users, Wallet, ArrowRight, LogIn, Check, Ban, ShieldCheck, Layers,
+  Fingerprint, Gavel, ScrollText, Boxes, Github,
+} from "lucide-react";
 import { useAuth } from "@/App";
+import { MockConsole, MockGate, MockRegistry, WindowFrame } from "@/components/marketing/Mockups";
 
 const PILLARS = [
-  { icon: TrendingUp, title: "RATE", subtitle: "The Moody's Function", color: "#00F0FF", desc: "Every AI agent gets an Avaira Score (AAA to D). No enterprise will trust an unrated agent. The rating becomes the standard.", stat: "$50B+ market" },
-  { icon: FileKey, title: "CLEAR", subtitle: "The DTCC Function", color: "#39FF14", desc: "Every agent transaction passes through our settlement layer. We see every execution. Unmatched data. Unmatched risk models.", stat: "$2.5Q processed/yr" },
-  { icon: Heart, title: "INSURE", subtitle: "The Lloyd's Function", color: "#7000FF", desc: "Human underwriters stake capital against agent missions. Agent fails \u2192 collateral covers losses. Agent succeeds \u2192 underwriters earn yield.", stat: "$100B+ in premiums" },
+  { icon: TrendingUp, title: "RATE", subtitle: "The Moody’s function", color: "var(--accent)", tone: "avaira-primary", desc: "Every AI agent gets an Avaira Score (AAA to D). No enterprise will trust an unrated agent. The rating becomes the standard.", stat: "$50B+ market" },
+  { icon: FileKey, title: "CLEAR", subtitle: "The DTCC function", color: "var(--success)", tone: "avaira-green", desc: "Every agent transaction passes through our settlement layer. We see every execution. Unmatched data. Unmatched risk models.", stat: "$2.5Q processed/yr" },
+  { icon: Heart, title: "INSURE", subtitle: "The Lloyd’s function", color: "var(--violet)", tone: "avaira-purple", desc: "Human underwriters stake capital against agent missions. Agent fails → collateral covers losses. Agent succeeds → underwriters earn yield.", stat: "$100B+ in premiums" },
 ];
 
 const MOATS = [
-  { icon: Database, title: "DATA FLYWHEEL", desc: "More agents \u2192 better risk models \u2192 more accurate scores \u2192 more enterprises \u2192 more agents. Gap widens over time." },
-  { icon: Lock, title: "REGULATORY CAPTURE", desc: "Define the standard before regulators do. Regulation doesn't kill you. Regulation IS you." },
-  { icon: Users, title: "THREE-SIDED NETWORK", desc: "Agents + Underwriters + Enterprises. Three-sided network effects are nearly impossible to replicate." },
-  { icon: Shield, title: "SWITCHING COSTS", desc: "Behavioral history, Avaira Score, insurance coverage, enterprise contracts. Switching cost: 6+ months. Nobody switches." },
-  { icon: Globe, title: "HIGH-PERFORMANCE INFRASTRUCTURE", desc: "Sub-200ms finality. Sovereign rules. Optimized execution. The speed required to be a real-time circuit breaker." },
+  { icon: Database, title: "Data flywheel", desc: "More agents → better risk models → more accurate scores → more enterprises → more agents. The gap widens over time." },
+  { icon: Lock, title: "Regulatory capture", desc: "Define the standard before regulators do. Regulation doesn’t kill you. Regulation is you." },
+  { icon: Users, title: "Three-sided network", desc: "Agents, underwriters and enterprises. Three-sided network effects are nearly impossible to replicate." },
+  { icon: Shield, title: "Switching costs", desc: "Behavioural history, Avaira Score, insurance coverage, enterprise contracts. Switching cost: 6+ months. Nobody switches." },
+  { icon: Globe, title: "High-performance infrastructure", desc: "Sub-200ms finality. Sovereign rules. Optimised execution. The speed a real-time circuit breaker requires." },
+];
+
+const STEPS = [
+  { step: "01", label: "Register", desc: "Agent stakes collateral" },
+  { step: "02", label: "Declare", desc: "Submit mission intent" },
+  { step: "03", label: "Validate", desc: "Risk envelope check" },
+  { step: "04", label: "Permit", desc: "EIP-712 signed" },
+  { step: "05", label: "Execute", desc: "Verified execution" },
+  { step: "06", label: "Settle", desc: "Fees split 85/10/5" },
 ];
 
 const REVENUE = [
-  { name: "Agent Registration", year1: "$1.2M", year5: "$240M", desc: "SaaS tiers: Free / Growth ($200/mo) / Enterprise ($2,000/mo)" },
-  { name: "Underwriting Spread", year1: "$2M", year5: "$400M", desc: "5% protocol fee on every settled mission" },
-  { name: "Slashing Revenue", year1: "$500K", year5: "$50M", desc: "20% of all slashed collateral \u2014 pure insurance profit" },
-  { name: "Data & Analytics", year1: "$300K", year5: "$80M", desc: "Bloomberg Terminal for AI agents. $0.01/query API access" },
+  { name: "Agent registration", year1: "$1.2M", year5: "$240M", desc: "SaaS tiers: Free / Growth ($200/mo) / Enterprise ($2,000/mo)" },
+  { name: "Underwriting spread", year1: "$2M", year5: "$400M", desc: "5% protocol fee on every settled mission" },
+  { name: "Slashing revenue", year1: "$500K", year5: "$50M", desc: "20% of all slashed collateral — pure insurance profit" },
+  { name: "Data & analytics", year1: "$300K", year5: "$80M", desc: "Bloomberg terminal for AI agents. $0.01/query API access" },
+];
+
+const STANDARDS = [
+  { icon: Fingerprint, name: "ERC-8004", desc: "Bond-backed agent identity and on-chain status" },
+  { icon: Wallet, name: "x402", desc: "Agent payments settle where the work happens" },
+  { icon: ScrollText, name: "EIP-712", desc: "Typed, signed execution permits" },
+  { icon: Gavel, name: "OPA Rego", desc: "Policies as versioned, testable files" },
+  { icon: Boxes, name: "EVM chains", desc: "Fuji deployment addresses, Monad deploy script" },
+  { icon: ShieldCheck, name: "TEE attestation", desc: "Execution image digests verified, not assumed" },
+];
+
+const DIFFERENTIATORS = [
+  { icon: ShieldCheck, title: "Pre-execution, not post-hoc", desc: "The gate runs before your code touches capital, not after the logs look strange." },
+  { icon: FileKey, title: "Signed permits, not prompts", desc: "Every approved action carries a typed, verifiable permit." },
+  { icon: Lock, title: "Tamper-evident, not mutable", desc: "Hash-chained local trail with a Merkle root committed on-chain." },
+  { icon: Ban, title: "Consequences, not alerts", desc: "Freeze, slash and credit-freeze happen automatically, in under 200ms." },
+];
+
+const OWNERSHIP = [
+  { title: "Bring your own model", desc: "Nothing in the gate depends on which LLM produced the intent." },
+  { title: "Self-host or managed", desc: "The full stack runs from docker-compose on your own infrastructure." },
+  { title: "No framework lock-in", desc: "TypeScript, Python and Rust SDKs wrap a single callable." },
+  { title: "Open interfaces", desc: "ERC-8004 identity, x402 payments and Rego policies are files you own." },
+];
+
+const TIERS = [
+  { name: "Free", price: "$0", cadence: "forever", desc: "Evaluate the gate on one agent.", features: ["1 registered agent", "Risk envelope enforcement", "Hash-chained audit trail", "Community support"], cta: "Start free", featured: false },
+  { name: "Growth", price: "$200", cadence: "per month", desc: "For teams putting agents in front of customers.", features: ["Unlimited agents", "Avaira Score + credit market", "Insurance pool coverage", "On-chain anchoring", "Priority support"], cta: "Start with Growth", featured: true },
+  { name: "Enterprise", price: "$2,000", cadence: "per month", desc: "For regulated deployments and underwriters.", features: ["Dedicated settlement lanes", "Custom Rego policy packs", "SLA + named engineer", "Private deployment"], cta: "Talk to us", featured: false },
+];
+
+const FAQ = [
+  ["How is this different from prompt-based guardrails?", "Prompts are advisory. AVAIRA places a hard gate between your agent and the action: the risk envelope, the policy engine and the symbolic prover all have to agree before a permit is issued, and the agent never runs execute_fn otherwise."],
+  ["Does my agent’s model or framework matter?", "No. You wrap a single callable, so any model that can call a function is compatible — the gate reasons about the intent, not about what generated it."],
+  ["What happens when an agent misbehaves?", "Deviation freezes the agent, slashes collateral and compensates the insurance pool within 200ms. Recovery runs through a documented warning → suspension → ban ladder, not a support ticket."],
+  ["How is the Avaira Score computed?", "Six Sybil-resistant components driven by settled payments and behavioural history, with Laplace smoothing for small samples. It is deterministic: the same history produces the same score, so it can be recomputed and challenged on-chain."],
+  ["Can we self-host it?", "Yes. docker-compose brings up the API, MongoDB, the OPA policy engine and the anchor cron; the SDKs point at your own host. Managed hosting is available when you would rather not run MongoDB yourself."],
+  ["Which chains are supported?", "EVM chains. The contract stack ships with Fuji deployment addresses and a Foundry deploy script for any EVM target, plus an ERC-8004 identity interface that keeps the registry portable."],
 ];
 
 const SDK_CODE = `from avaira import AvairaClient, AvairaConfig, RiskEnvelope
@@ -38,118 +90,168 @@ result = await avaira.run(
 
 print(result["status"]) # 'completed' or 'blocked'`;
 
+const SDK_CALLS = [
+  ["register", "Register agent with collateral and risk envelope"],
+  ["declareIntent", "Declare mission intent before executing"],
+  ["execute", "Execute through AVAIRA’s enforcement layer"],
+  ["settle", "Settle mission with 85/10/5 fee split"],
+];
+
+const NavLink = ({ href, children }) => (
+  <a
+    href={href}
+    className="hidden text-[13px] font-medium text-avaira-muted transition-colors hover:text-foreground lg:block"
+  >
+    {children}
+  </a>
+);
+
+const SectionHead = ({ eyebrow, title, lede, align = "left", id }) => (
+  <div className={align === "center" ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
+    {eyebrow && <p className="mk-eyebrow mb-3">{eyebrow}</p>}
+    <h2 id={id} className={`mk-display ${align === "center" ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"}`}>
+      {title}
+    </h2>
+    {lede && <p className="mk-lede mt-4">{lede}</p>}
+  </div>
+);
+
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const goToProtocol = () => {
     if (user) {
-      navigate('/dashboard');
+      navigate("/dashboard");
       return;
     }
-    navigate('/login?redirect=/dashboard');
+    navigate("/login?redirect=/dashboard");
   };
 
   return (
-    <div className="min-h-screen bg-avaira-bg text-foreground overflow-x-hidden" data-testid="landing-page">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-avaira-bg/80 backdrop-blur-lg border-b border-avaira-border">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 depth-stage">
-            <img src="/logo.png" alt="AVAIRA" className="w-9 h-9 sm:w-10 sm:h-10 logo-3d" />
-            <span className="font-heading font-bold text-xl sm:text-2xl text-avaira-primary tracking-tight uppercase">AVAIRA</span>
+    <div className="theme-marketing min-h-screen bg-avaira-bg text-foreground overflow-x-hidden" data-testid="landing-page">
+      {/* ── Nav ───────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 border-b border-avaira-border bg-avaira-bg/85 backdrop-blur-xl">
+        <div className="mk-container mk-container-wide flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="AVAIRA" className="h-8 w-8 rounded-lg" />
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">AVAIRA</span>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="#pillars" className="font-mono text-xs text-avaira-muted hover:text-avaira-primary transition-colors hidden sm:block">PROTOCOL</a>
-            <a href="#moats" className="font-mono text-xs text-avaira-muted hover:text-avaira-primary transition-colors hidden sm:block">MOATS</a>
-            <a href="#revenue" className="font-mono text-xs text-avaira-muted hover:text-avaira-primary transition-colors hidden sm:block">REVENUE</a>
-            <a href="#sdk" className="font-mono text-xs text-avaira-muted hover:text-avaira-primary transition-colors hidden sm:block">SDK</a>
+
+          <div className="flex items-center gap-7">
+            <NavLink href="#pillars">Protocol</NavLink>
+            <NavLink href="#execution">Execution</NavLink>
+            <NavLink href="#moats">Why it compounds</NavLink>
+            <NavLink href="#pricing">Pricing</NavLink>
+            <NavLink href="#faq">FAQ</NavLink>
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
               data-testid="nav-login-btn"
-              onClick={() => navigate('/login')}
-              className="font-mono text-xs text-avaira-muted border border-avaira-border px-3 py-1.5 hover:border-avaira-primary hover:text-avaira-primary transition-colors hidden sm:flex items-center gap-1.5"
+              onClick={() => navigate("/login")}
+              className="mk-btn hidden text-avaira-muted hover:text-foreground sm:inline-flex"
             >
-              <LogIn size={12} /> SIGN IN
+              Sign in
             </button>
             <button
               data-testid="launch-protocol-btn"
               onClick={goToProtocol}
-              className="cyber-btn bg-avaira-primary text-white px-4 py-2 font-heading text-xs flex items-center gap-1.5"
+              className="mk-btn mk-btn-primary"
             >
-              LAUNCH PROTOCOL <ChevronRight size={14} />
+              Launch protocol
+              <ChevronRight size={15} strokeWidth={2.5} />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-6 relative depth-stage" data-testid="hero-section">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-4">
-            <span className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] border border-avaira-primary/30 px-3 py-1 bg-avaira-primary/5">
-              TRUST & ACCOUNTABILITY // FOR ALL AI AGENTS
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden pb-16 pt-20 sm:pt-28" data-testid="hero-section">
+        <div className="mk-grid-bg absolute inset-0 -z-20" />
+        <div className="mk-glow -z-10 h-[420px] w-[560px] -translate-x-1/2 left-1/2 top-[-160px] mk-glow-violet" />
+        <div className="mk-glow -z-10 h-[320px] w-[380px] left-[8%] top-[40px] mk-glow-sky opacity-40" />
+        <div className="mk-glow -z-10 h-[300px] w-[360px] right-[6%] top-[10px] mk-glow-rose opacity-35" />
+
+        <div className="mk-container">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="mk-pill mx-auto">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-avaira-primary/12 text-avaira-primary">
+                <ShieldCheck size={12} strokeWidth={2.4} />
+              </span>
+              Open standards · ERC-8004 · x402 · EIP-712
             </span>
+
+            <h1 className="mk-display mt-6 text-4xl sm:text-5xl lg:text-6xl">
+              The trust layer for{" "}
+              <span className="text-avaira-primary">autonomous agents</span>
+            </h1>
+
+            <p className="mk-lede mx-auto mt-6 max-w-2xl">
+              Rate, clear and insure every agent action before it executes. AVAIRA gives your agents a
+              public reputation score, a tamper-evident audit trail, and automatic consequences for bad
+              behaviour — enforced, not audited.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <button
+                data-testid="hero-launch-btn"
+                onClick={goToProtocol}
+                className="mk-btn mk-btn-primary mk-btn-lg w-full sm:w-auto"
+              >
+                Launch the protocol
+                <ArrowRight size={16} strokeWidth={2.5} />
+              </button>
+              <button
+                data-testid="hero-login-btn"
+                onClick={() => navigate("/login")}
+                className="mk-btn mk-btn-secondary mk-btn-lg w-full sm:w-auto"
+              >
+                <LogIn size={15} />
+                Sign in
+              </button>
+            </div>
+
+            <p className="mt-5 font-mono text-[11px] tracking-[0.14em] text-avaira-dim uppercase">
+              &lt;200ms finality · 0.5% protocol fee · AAA–D scoring
+            </p>
           </div>
-          <h1 className="font-heading font-bold text-4xl sm:text-5xl lg:text-6xl text-foreground uppercase tracking-tight leading-[1.1] max-w-4xl">
-            Add Trust to Any AI Agent in{" "}
-            <span className="text-avaira-primary" style={{ textShadow: '0 0 30px rgba(232,68,68,0.3)' }}>3 Lines of Python</span>
-          </h1>
-          <p className="font-body text-base sm:text-lg text-avaira-muted mt-6 max-w-2xl leading-relaxed">
-            High-Performance. Software-Defined. Enterprise-Ready. Avaira gives your agents a public reputation score, a tamper-evident audit trail, and automatic consequences for bad behavior.
-          </p>
-          <div className="flex items-center gap-4 mt-8">
-            <button
-              data-testid="hero-launch-btn"
-              onClick={goToProtocol}
-              className="cyber-btn bg-avaira-primary text-white px-6 py-3 font-heading text-sm flex items-center gap-2"
-            >
-              LAUNCH PROTOCOL <ArrowRight size={16} />
-            </button>
-            <button
-              data-testid="hero-login-btn"
-              onClick={() => navigate('/login')}
-              className="font-mono text-xs text-avaira-muted border border-avaira-border px-6 py-3 hover:border-avaira-primary hover:text-avaira-primary transition-colors flex items-center gap-2"
-            >
-              <LogIn size={14} /> SIGN IN
-            </button>
-          </div>
-          <div className="grid grid-cols-3 gap-4 mt-16 max-w-xl">
-            <div className="depth-mini-panel">
-              <p className="font-heading font-bold text-2xl text-avaira-primary">{'<'}200ms</p>
-              <p className="font-mono text-[10px] text-avaira-dim uppercase tracking-wider mt-1">Finality</p>
-            </div>
-            <div className="depth-mini-panel">
-              <p className="font-heading font-bold text-2xl text-avaira-green">0.5%</p>
-              <p className="font-mono text-[10px] text-avaira-dim uppercase tracking-wider mt-1">Protocol Fee</p>
-            </div>
-            <div className="depth-mini-panel">
-              <p className="font-heading font-bold text-2xl text-avaira-purple">AAA-D</p>
-              <p className="font-mono text-[10px] text-avaira-dim uppercase tracking-wider mt-1">Agent Scoring</p>
-            </div>
+
+          <div className="relative mx-auto mt-14 max-w-4xl">
+            <WindowFrame>
+              <MockConsole />
+            </WindowFrame>
+            <p className="mt-4 text-center text-[13px] text-avaira-muted">
+              Every execution passes the gate before it touches capital.
+            </p>
           </div>
         </div>
-        {/* Grid bg effect */}
-        <div className="absolute inset-0 -z-10" style={{ backgroundImage: 'linear-gradient(rgba(232,68,68,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(232,68,68,0.03) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
       </section>
 
-      {/* Three Pillars */}
-      <section id="pillars" className="py-20 px-6 border-t border-avaira-border" data-testid="pillars-section">
-        <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] mb-3">THE PROTOCOL</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-foreground uppercase tracking-tight mb-12">
-            Three Functions. One Protocol.
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* ── Pillars ───────────────────────────────────────────── */}
+      <section id="pillars" className="mk-section" data-testid="pillars-section">
+        <div className="mk-container mk-container-wide">
+          <SectionHead
+            eyebrow="The protocol"
+            title="Three functions. One protocol."
+            lede="Rating agencies, clearing houses and insurers exist because capital needs trust. Agents need all three, in the same request path."
+          />
+          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
             {PILLARS.map((p) => (
-              <div key={p.title} className="cyber-card corner-cut p-6 group" data-testid={`pillar-${p.title.toLowerCase()}`}>
-                <div className="p-3 border w-fit mb-4" style={{ borderColor: `${p.color}40`, background: `${p.color}10` }}>
-                  <p.icon size={20} style={{ color: p.color }} strokeWidth={1.5} />
+              <div key={p.title} className="mk-card p-6" data-testid={`pillar-${p.title.toLowerCase()}`}>
+                <div
+                  className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{ background: "rgb(var(--accent) / 0.10)", color: p.color }}
+                >
+                  <p.icon size={19} strokeWidth={1.75} />
                 </div>
-                <h3 className="font-heading font-bold text-xl uppercase tracking-tight" style={{ color: p.color }}>{p.title}</h3>
-                <p className="font-mono text-[10px] text-avaira-dim uppercase tracking-widest mt-0.5">{p.subtitle}</p>
-                <p className="font-body text-sm text-avaira-muted mt-3 leading-relaxed">{p.desc}</p>
-                <div className="mt-4 pt-3 border-t border-avaira-border">
-                  <span className="font-mono text-[10px] text-avaira-dim">COMPARABLE: </span>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-lg font-semibold tracking-tight text-foreground">{p.title}</h3>
+                  <span className="text-[13px] text-avaira-muted">{p.subtitle}</span>
+                </div>
+                <p className="mt-3 text-[14px] leading-relaxed text-avaira-muted">{p.desc}</p>
+                <div className="mt-5 flex items-center justify-between border-t border-avaira-border pt-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-avaira-dim">Comparable</span>
                   <span className="font-mono text-xs" style={{ color: p.color }}>{p.stat}</span>
                 </div>
               </div>
@@ -158,68 +260,182 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How it Works */}
-      <section className="py-20 px-6 border-t border-avaira-border bg-avaira-card" data-testid="how-it-works-section">
-        <div className="max-w-5xl mx-auto">
-          <p className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] mb-3">EXECUTION FLOW</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white uppercase tracking-tight mb-10" style={{ textShadow: '0 0 18px rgba(255,255,255,0.12)' }}>
-            How Every Transaction is Secured
-          </h2>
-          <div className="execution-flow-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {[
-              { step: "01", label: "REGISTER", desc: "Agent stakes collateral" },
-              { step: "02", label: "DECLARE", desc: "Submit mission intent" },
-              { step: "03", label: "VALIDATE", desc: "Risk envelope check" },
-              { step: "04", label: "PERMIT", desc: "EIP-712 signed" },
-              { step: "05", label: "EXECUTE", desc: "Verified Execution" },
-              { step: "06", label: "SETTLE", desc: "Fees split 85/10/5" },
-            ].map((s) => (
-              <div key={s.step} className="execution-step-card p-3 border border-avaira-border bg-avaira-bg/90 relative group" data-testid={`step-${s.step}`}>
-                <span className="execution-step-number font-heading font-bold text-3xl transition-colors">{s.step}</span>
-                <p className="font-heading font-bold text-sm text-white uppercase tracking-tight mt-1">{s.label}</p>
-                <p className="font-mono text-xs text-[#d6d9e0] mt-0.5 leading-relaxed">{s.desc}</p>
+      {/* ── Execution gate ────────────────────────────────────── */}
+      <section id="execution" className="mk-section" data-testid="how-it-works-section">
+        <div className="mk-container mk-container-wide">
+          <div className="grid items-start gap-12 lg:grid-cols-2">
+            <div>
+              <SectionHead
+                eyebrow="Execution flow"
+                title="Nothing executes until the gate says so."
+                lede="Six deterministic steps sit between your agent’s intent and the settlement layer. A single disagreement stops the action and starts the consequences."
+              />
+              <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+                {STEPS.map((s) => (
+                  <div
+                    key={s.step}
+                    className="execution-step-card p-4"
+                    data-testid={`step-${s.step}`}
+                  >
+                    <span className="execution-step-number">{s.step}</span>
+                    <p className="mt-2 text-[13px] font-semibold tracking-tight text-foreground">{s.label}</p>
+                    <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-avaira-muted">{s.desc}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="execution-alert-panel mt-6 p-4 border border-avaira-red/35">
-            <p className="font-heading font-bold text-sm text-avaira-red uppercase tracking-tight flex items-center gap-2">
-              <Zap size={14} /> Deviation Detected?
-            </p>
-            <p className="font-mono text-sm text-[#ffb8c6] mt-1">
-              Agent instantly frozen. Collateral slashed. Insurance pool compensates backers. All within {'<'}200ms.
-            </p>
+
+              <div className="execution-alert-panel mt-4 p-4">
+                <p className="flex items-center gap-2 text-[13px] font-semibold text-avaira-red">
+                  <Zap size={14} strokeWidth={2.2} />
+                  Deviation detected?
+                </p>
+                <p className="mt-1 text-[13px] leading-relaxed text-avaira-muted">
+                  Agent instantly frozen. Collateral slashed. Insurance pool compensates backers. All
+                  within 200ms.
+                </p>
+              </div>
+            </div>
+
+            <div className="lg:pt-16">
+              <WindowFrame url="app.avaira.xyz/executions">
+                <MockGate />
+              </WindowFrame>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {[["Prover", "Interval arithmetic"], ["Policy", "OPA Rego"], ["Receipt", "Merkle root"]].map(([k, v]) => (
+                  <div key={k} className="mk-card-flat px-3 py-2.5">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-avaira-dim">{k}</p>
+                    <p className="mt-0.5 text-[12px] text-avaira-muted">{v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Five Moats */}
-      <section id="moats" className="py-20 px-6 border-t border-avaira-border" data-testid="moats-section">
-        <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] mb-3">DEFENSIBILITY</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-foreground uppercase tracking-tight mb-10">
-            Five Moats. Unkillable.
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* ── Registry ──────────────────────────────────────────── */}
+      <section className="mk-section mk-section-tight">
+        <div className="mk-container mk-container-wide grid items-center gap-12 lg:grid-cols-2">
+          <div className="order-2 lg:order-1">
+            <WindowFrame url="app.avaira.xyz/agents">
+              <MockRegistry />
+            </WindowFrame>
+          </div>
+          <div className="order-1 lg:order-2">
+            <SectionHead
+              eyebrow="Agent registry"
+              title="One screen for every agent you run."
+              lede="Scores, risk envelopes, coverage and status — the same objects the contracts enforce, visible before an incident rather than in a post-mortem."
+            />
+            <ul className="mk-hairline-list mt-8">
+              {[
+                ["Avaira Score", "Deterministic AAA–D rating grounded in settled payments."],
+                ["Risk envelopes", "Spend ceilings and allowed actions per agent, per mission."],
+                ["Status control", "Active, paused or frozen — reversible by operators, not by prompts."],
+                ["Trust heatmap", "Fourteen days of behaviour at a glance."],
+              ].map(([title, desc]) => (
+                <li key={title} className="flex gap-3 py-4">
+                  <span className="mk-tick mt-0.5"><Check size={11} strokeWidth={3.2} /></span>
+                  <div>
+                    <p className="text-[14px] font-semibold tracking-tight text-foreground">{title}</p>
+                    <p className="mt-0.5 text-[13px] text-avaira-muted">{desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Moats ─────────────────────────────────────────────── */}
+      <section id="moats" className="mk-section" data-testid="moats-section">
+        <div className="mk-container mk-container-wide">
+          <SectionHead
+            eyebrow="Defensibility"
+            title="Why it compounds."
+            lede="Each settled execution makes the risk models sharper, the scores more accurate, and the network harder to replace."
+          />
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {MOATS.map((m, i) => (
-              <div key={m.title} className="p-4 border border-avaira-border bg-avaira-card hover:border-avaira-primary/30 transition-colors" data-testid={`moat-${i}`}>
-                <m.icon size={18} className="text-avaira-primary mb-3" strokeWidth={1.5} />
-                <h3 className="font-heading font-bold text-sm text-foreground uppercase tracking-tight">{m.title}</h3>
-                <p className="font-mono text-[10px] text-avaira-muted mt-2 leading-relaxed">{m.desc}</p>
+              <div key={m.title} className="mk-card p-5" data-testid={`moat-${i}`}>
+                <m.icon size={18} strokeWidth={1.75} className="mb-4 text-avaira-primary" />
+                <h3 className="text-[14px] font-semibold tracking-tight text-foreground">{m.title}</h3>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-avaira-muted">{m.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Standards + differentiators */}
+          <div className="mt-16 grid gap-12 lg:grid-cols-2">
+            <div>
+              <p className="mk-eyebrow mb-3">Interoperable by default</p>
+              <h3 className="mk-display text-xl">Built on standards you already trust.</h3>
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {STANDARDS.map((s) => (
+                  <div key={s.name} className="mk-card-flat flex items-start gap-3 p-4">
+                    <s.icon size={16} strokeWidth={1.75} className="mt-0.5 flex-none text-avaira-primary" />
+                    <div>
+                      <p className="font-mono text-[12px] text-foreground">{s.name}</p>
+                      <p className="mt-0.5 text-[12px] leading-relaxed text-avaira-muted">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mk-eyebrow mb-3">Not another dashboard</p>
+              <h3 className="mk-display text-xl">Observability is not enforcement.</h3>
+              <div className="mk-hairline-list mt-6">
+                {DIFFERENTIATORS.map((d) => (
+                  <div key={d.title} className="flex gap-4 py-4">
+                    <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-avaira-primary/10 text-avaira-primary">
+                      <d.icon size={15} strokeWidth={1.9} />
+                    </span>
+                    <div>
+                      <p className="text-[14px] font-semibold tracking-tight text-foreground">{d.title}</p>
+                      <p className="mt-0.5 text-[13px] text-avaira-muted">{d.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Ownership ─────────────────────────────────────────── */}
+      <section className="mk-section mk-section-tight">
+        <div className="mk-container mk-container-wide">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="mk-eyebrow mb-3">No lock-in</p>
+            <h2 className="mk-display text-2xl sm:text-3xl">Your agent stays yours.</h2>
+            <p className="mk-lede mx-auto mt-4 max-w-xl">
+              AVAIRA is infrastructure that sits beside your agent, not a platform your agent has to be
+              rewritten for.
+            </p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {OWNERSHIP.map((o) => (
+              <div key={o.title} className="mk-card-block border-l pl-5">
+                <p className="text-[14px] font-semibold tracking-tight text-foreground">{o.title}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-avaira-muted">{o.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Revenue */}
-      <section id="revenue" className="py-20 px-6 border-t border-avaira-border bg-avaira-card" data-testid="revenue-section">
-        <div className="max-w-5xl mx-auto">
-          <p className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] mb-3">REVENUE ARCHITECTURE</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-foreground uppercase tracking-tight mb-10">
-            Four Revenue Streams From Day 1
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full data-table">
+      {/* ── Revenue ───────────────────────────────────────────── */}
+      <section id="revenue" className="mk-section" data-testid="revenue-section">
+        <div className="mk-container mk-container-wide">
+          <SectionHead
+            eyebrow="Revenue architecture"
+            title="Four revenue streams from day one."
+            lede="Every stream is anchored to a settled execution, so growth tracks the volume of authorised work rather than seat count."
+          />
+          <div className="mk-card mt-10 overflow-x-auto">
+            <table className="data-table">
               <thead>
                 <tr>
                   <th>Stream</th>
@@ -229,108 +445,230 @@ export default function Landing() {
                 </tr>
               </thead>
               <tbody>
-                {REVENUE.map(r => (
+                {REVENUE.map((r) => (
                   <tr key={r.name}>
-                    <td className="text-foreground font-semibold">{r.name}</td>
-                    <td className="text-avaira-muted">{r.desc}</td>
-                    <td className="text-right text-avaira-yellow">{r.year1}</td>
-                    <td className="text-right text-avaira-green">{r.year5}</td>
+                    <td className="font-medium text-foreground">{r.name}</td>
+                    <td>{r.desc}</td>
+                    <td className="text-right font-mono text-avaira-yellow">{r.year1}</td>
+                    <td className="text-right font-mono text-avaira-green">{r.year5}</td>
                   </tr>
                 ))}
-                <tr className="border-t-2 border-avaira-primary/30">
-                  <td className="text-avaira-primary font-bold">TOTAL</td>
-                  <td></td>
-                  <td className="text-right text-avaira-primary font-bold">$4M</td>
-                  <td className="text-right text-avaira-primary font-bold">$770M</td>
+                <tr>
+                  <td className="font-semibold text-avaira-primary">Total</td>
+                  <td />
+                  <td className="text-right font-mono font-semibold text-avaira-primary">$4M</td>
+                  <td className="text-right font-mono font-semibold text-avaira-primary">$770M</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div className="mt-6 p-4 border border-avaira-primary/20 bg-avaira-primary/5">
-            <p className="font-mono text-xs text-avaira-muted">
-              At 10x revenue multiple (standard for high-growth SaaS with network effects): <span className="text-avaira-primary font-bold">$7.7B valuation by Year 5</span>
-            </p>
-          </div>
+          <p className="mt-4 text-[13px] text-avaira-muted">
+            At a 10× revenue multiple — standard for high-growth SaaS with network effects —{" "}
+            <span className="font-medium text-foreground">$7.7B valuation by year five</span>.
+          </p>
         </div>
       </section>
 
-      {/* SDK */}
-      <section id="sdk" className="py-20 px-6 border-t border-avaira-border" data-testid="sdk-section">
-        <div className="max-w-5xl mx-auto">
-          <p className="font-mono text-[10px] text-avaira-primary tracking-[0.3em] mb-3">DEVELOPER EXPERIENCE</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-foreground uppercase tracking-tight mb-3">
-            4 Function Calls. That's It.
-          </h2>
-          <p className="font-body text-base text-avaira-muted mb-8 max-w-xl">
-            If integration takes more than 10 minutes, the product has failed.
-          </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-black border border-avaira-border p-5 overflow-x-auto">
-              <div className="flex items-center gap-2 mb-3">
-                <Code size={14} className="text-avaira-primary" />
-                <span className="font-mono text-[10px] text-avaira-dim uppercase tracking-widest">TypeScript</span>
+      {/* ── Pricing ───────────────────────────────────────────── */}
+      <section id="pricing" className="mk-section">
+        <div className="mk-container mk-container-wide">
+          <SectionHead
+            align="center"
+            eyebrow="Pricing"
+            title="Start free. Pay when your agents are in production."
+            lede="One price per tier. No per-seat maths, no usage cliff on the gate itself."
+          />
+          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+            {TIERS.map((t) => (
+              <div
+                key={t.name}
+                className={`mk-card flex flex-col p-6 ${t.featured ? "border-avaira-primary/45 shadow-mk" : ""}`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[15px] font-semibold tracking-tight text-foreground">{t.name}</p>
+                  {t.featured && (
+                    <span className="rounded-full bg-avaira-primary/12 px-2.5 py-1 text-[11px] font-medium text-avaira-primary">
+                      Most popular
+                    </span>
+                  )}
+                </div>
+                <div className="mt-4 flex items-baseline gap-1.5">
+                  <span className="text-3xl font-semibold tracking-tight text-foreground">{t.price}</span>
+                  <span className="text-[13px] text-avaira-muted">{t.cadence}</span>
+                </div>
+                <p className="mt-2 text-[13px] text-avaira-muted">{t.desc}</p>
+                <ul className="mt-6 space-y-2.5">
+                  {t.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5">
+                      <span className="mk-tick mt-0.5"><Check size={11} strokeWidth={3.2} /></span>
+                      <span className="text-[13px] text-avaira-muted">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={goToProtocol}
+                  className={`mk-btn mt-7 w-full ${t.featured ? "mk-btn-primary" : "mk-btn-secondary"}`}
+                >
+                  {t.cta}
+                </button>
               </div>
-              <pre className="font-mono text-xs text-avaira-green whitespace-pre leading-relaxed">{SDK_CODE}</pre>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-[12.5px] text-avaira-muted">
+            Testnet deployments are free. Cancel or downgrade at any time — the audit trail stays yours.
+          </p>
+        </div>
+      </section>
+
+      {/* ── SDK ───────────────────────────────────────────────── */}
+      <section id="sdk" className="mk-section" data-testid="sdk-section">
+        <div className="mk-container mk-container-wide">
+          <SectionHead
+            eyebrow="Developer experience"
+            title="Four function calls. That’s it."
+            lede="If integration takes more than ten minutes, the product has failed."
+          />
+          <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="mk-window">
+              <div className="mk-window-bar">
+                <Code size={13} className="text-avaira-primary" />
+                <span className="font-mono text-[11px] text-avaira-muted">agent.py</span>
+              </div>
+              <pre className="overflow-x-auto p-5 font-mono text-[12px] leading-relaxed text-avaira-muted">
+                {SDK_CODE}
+              </pre>
             </div>
-            <div className="space-y-3">
-              {["register", "declareIntent", "execute", "settle"].map((fn, i) => (
-                <div key={fn} className="p-3 border border-avaira-border hover:border-avaira-primary/30 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <span className="font-heading font-bold text-sm text-avaira-primary">0{i + 1}</span>
-                    <span className="font-mono text-sm text-foreground">.{fn}()</span>
+
+            <div className="mk-hairline-list">
+              {SDK_CALLS.map(([fn, desc], i) => (
+                <div key={fn} className="py-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-[11px] text-avaira-dim">0{i + 1}</span>
+                    <span className="font-mono text-[13px] text-foreground">.{fn}()</span>
                   </div>
-                  <p className="font-mono text-[10px] text-avaira-dim mt-1">
-                    {fn === "register" && "Register agent with collateral and risk envelope"}
-                    {fn === "declareIntent" && "Declare mission intent before executing"}
-                    {fn === "execute" && "Execute through AVAIRA's enforcement layer"}
-                    {fn === "settle" && "Settle mission with 85/10/5 fee split"}
-                  </p>
+                  <p className="mt-1 pl-8 text-[13px] text-avaira-muted">{desc}</p>
                 </div>
               ))}
+              <div className="pt-5">
+                <a
+                  href="https://github.com/ranaalyan1/avaira.xyz"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mk-btn mk-btn-secondary"
+                >
+                  <Github size={15} />
+                  Read the SDK docs
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6 border-t border-avaira-border bg-avaira-card" data-testid="cta-section">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-foreground uppercase tracking-tight">
-            Build It. Own the Position. <span className="text-avaira-primary">Never Let Go.</span>
+      {/* ── FAQ ───────────────────────────────────────────────── */}
+      <section id="faq" className="mk-section">
+        <div className="mk-container">
+          <SectionHead align="center" eyebrow="Support" title="Frequently asked questions" />
+          <div className="mx-auto mt-10 max-w-3xl">
+            {FAQ.map(([q, a]) => (
+              <details key={q} className="mk-faq-item">
+                <summary>{q}</summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-t border-avaira-border" data-testid="cta-section">
+        <div className="mk-glow -z-10 h-[360px] w-[520px] left-1/2 top-[-120px] -translate-x-1/2 mk-glow-violet" />
+        <div className="mk-container py-24 text-center">
+          <h2 className="mk-display mx-auto max-w-2xl text-3xl sm:text-4xl">
+            Give your agents the trust layer they deserve.
           </h2>
-          <p className="font-body text-base text-avaira-muted mt-4 max-w-xl mx-auto">
-            The reason this becomes a billion-dollar company is not because the technology is revolutionary.
-            It's because the position is irreplaceable.
+          <p className="mk-lede mx-auto mt-5 max-w-xl">
+            Add accountability in three lines of Python. Keep the audit trail, the score and the
+            consequences — without rewriting your agent.
           </p>
-          <button
-            data-testid="cta-launch-btn"
-            onClick={goToProtocol}
-            className="cyber-btn bg-avaira-primary text-white px-8 py-3 font-heading text-sm mt-8 inline-flex items-center gap-2"
-          >
-            LAUNCH AVAIRA PROTOCOL <ArrowRight size={16} />
-          </button>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button
+              data-testid="cta-launch-btn"
+              onClick={goToProtocol}
+              className="mk-btn mk-btn-primary mk-btn-lg w-full sm:w-auto"
+            >
+              Launch AVAIRA protocol
+              <ArrowRight size={16} strokeWidth={2.5} />
+            </button>
+            <a
+              href="https://github.com/ranaalyan1/avaira.xyz"
+              target="_blank"
+              rel="noreferrer"
+              className="mk-btn mk-btn-secondary mk-btn-lg w-full sm:w-auto"
+            >
+              <Github size={15} />
+              View on GitHub
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-14 px-6 border-t border-avaira-border bg-avaira-card/70">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <p className="font-heading font-bold text-lg text-avaira-primary uppercase tracking-tight">AVAIRA</p>
-              <p className="font-mono text-xs text-avaira-dim tracking-wide mt-1">Execution Control Protocol</p>
+      {/* ── Footer ────────────────────────────────────────────── */}
+      <footer className="border-t border-avaira-border bg-avaira-surface">
+        <div className="mk-container mk-container-wide py-14">
+          <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <img src="/logo.png" alt="AVAIRA" className="h-7 w-7 rounded-md" />
+                <span className="text-[14px] font-semibold tracking-tight text-foreground">AVAIRA</span>
+              </div>
+              <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-avaira-muted">
+                Real-time accountability and pre-execution control for autonomous AI agents. Enforcement
+                before execution, not audit after damage.
+              </p>
+              <div className="mt-5 flex items-center gap-2">
+                <span className="status-dot active" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-avaira-muted">
+                  Protocol online
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-center sm:justify-end gap-4 font-mono text-xs text-avaira-muted">
-              <a href="#pillars" className="hover:text-avaira-primary transition-colors">Protocol</a>
-              <a href="#moats" className="hover:text-avaira-primary transition-colors">Moats</a>
-              <a href="#revenue" className="hover:text-avaira-primary transition-colors">Revenue</a>
-              <a href="#sdk" className="hover:text-avaira-primary transition-colors">SDK</a>
+
+            <div className="mk-footer-col">
+              <h4>Protocol</h4>
+              <a href="#pillars">Rate</a>
+              <a href="#pillars">Clear</a>
+              <a href="#pillars">Insure</a>
+              <a href="#execution">Execution flow</a>
+              <a href="#revenue">Revenue</a>
+            </div>
+
+            <div className="mk-footer-col">
+              <h4>Developers</h4>
+              <a href="#sdk">SDK reference</a>
+              <a href="/sdk">Console docs</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz" target="_blank" rel="noreferrer">GitHub</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz/tree/main/contracts" target="_blank" rel="noreferrer">Contracts</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz/tree/main/verification" target="_blank" rel="noreferrer">Verification reports</a>
+            </div>
+
+            <div className="mk-footer-col">
+              <h4>Company</h4>
+              <a href="#pricing">Pricing</a>
+              <a href="#faq">FAQ</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md" target="_blank" rel="noreferrer">Security</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">Changelog</a>
+              <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/LICENSE" target="_blank" rel="noreferrer">License</a>
             </div>
           </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-avaira-border to-transparent" />
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-center sm:text-left">
-            <p className="font-mono text-xs text-avaira-dim">© {new Date().getFullYear()} AVAIRA. All rights reserved.</p>
-            <p className="font-mono text-xs text-avaira-dim">Built for autonomous agent trust and settlement.</p>
+
+          <div className="mt-12 flex flex-col gap-3 border-t border-avaira-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-mono text-[11px] text-avaira-dim">
+              © {new Date().getFullYear()} AVAIRA. All rights reserved.
+            </p>
+            <p className="font-mono text-[11px] text-avaira-dim">
+              Execution control protocol · v2.0-core
+            </p>
           </div>
         </div>
       </footer>

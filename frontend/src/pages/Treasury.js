@@ -5,8 +5,10 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis
 
 import { API } from "@/lib/api";
 
+import { DARK } from "@/lib/palette";
+
 const STREAM_ICONS = { zap: Zap, shield: Shield, scissors: Scissors, database: Database };
-const STREAM_COLORS = ['#00F0FF', '#7000FF', '#FFD300', '#39FF14'];
+const STREAM_COLORS = [DARK.info, DARK.violet, DARK.warning, DARK.success];
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -61,8 +63,8 @@ export default function Treasury() {
     <div className="page-shell animate-slide-in" data-testid="treasury-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Treasury</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">FEE COLLECTION & DISTRIBUTION</p>
+          <h1 className="page-title">Treasury</h1>
+          <p className="page-subtitle">Fee collection and distribution</p>
         </div>
         <button data-testid="refresh-treasury-btn" onClick={fetchData} className="p-2 border border-avaira-border text-avaira-muted hover:text-avaira-primary hover:border-avaira-primary transition-colors">
           <RefreshCw size={14} />
@@ -72,7 +74,7 @@ export default function Treasury() {
       {loading && !stats ? (
         <div className="cyber-card p-12 text-center mb-6">
           <Wallet size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="font-heading text-lg text-avaira-muted uppercase">Loading Treasury</p>
+          <p className="text-[15px] font-medium text-avaira-muted">Loading Treasury</p>
           <p className="font-mono text-xs text-avaira-dim mt-1">Fetching fee flows, splits, and recent transactions</p>
         </div>
       ) : null}
@@ -118,7 +120,7 @@ export default function Treasury() {
       {/* 4 Revenue Streams */}
       {revenueStreams && (
         <div className="mb-6">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Revenue Streams</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Revenue Streams</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {revenueStreams.streams.map((stream, i) => {
               const Icon = STREAM_ICONS[stream.icon] || Zap;
@@ -145,14 +147,14 @@ export default function Treasury() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fee Split Pie */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Fee Split</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Fee Split</h2>
           {splitData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={splitData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value" stroke="none">
-                    <Cell fill="#00F0FF" />
-                    <Cell fill="#7000FF" />
+                    <Cell fill={DARK.info} />
+                    <Cell fill={DARK.violet} />
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
@@ -160,7 +162,7 @@ export default function Treasury() {
               <div className="flex justify-center gap-6 mt-2">
                 {splitData.map((d, i) => (
                   <div key={d.name} className="flex items-center gap-1.5">
-                    <div className="w-2 h-2" style={{ background: i === 0 ? '#00F0FF' : '#7000FF' }} />
+                    <div className="w-2 h-2" style={{ background: i === 0 ? DARK.info : DARK.violet }} />
                     <span className="font-mono text-[10px] text-avaira-muted">{d.name}</span>
                   </div>
                 ))}
@@ -175,16 +177,16 @@ export default function Treasury() {
 
         {/* Fee Bar Chart */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Fee History</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Fee History</h2>
           {barData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis dataKey="name" tick={{ fill: '#858585', fontSize: 9, fontFamily: 'JetBrains Mono' }} />
-                <YAxis tick={{ fill: '#858585', fontSize: 9, fontFamily: 'JetBrains Mono' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={DARK.hairline} />
+                <XAxis dataKey="name" tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
+                <YAxis tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="trust" name="TrustPool" fill="#00F0FF" stackId="a" />
-                <Bar dataKey="revenue" name="Revenue" fill="#7000FF" stackId="a" />
+                <Bar dataKey="trust" name="TrustPool" fill={DARK.info} stackId="a" />
+                <Bar dataKey="revenue" name="Revenue" fill={DARK.violet} stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -196,7 +198,7 @@ export default function Treasury() {
 
         {/* Transaction List */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Recent Transactions</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Recent Transactions</h2>
           {transactions.length === 0 ? (
             <p className="font-mono text-xs text-avaira-dim text-center py-8">NO TRANSACTIONS</p>
           ) : (

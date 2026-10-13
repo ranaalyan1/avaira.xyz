@@ -2,33 +2,130 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Two themes, one component layer.
+
+  Default (:root)  → dark console: AVAI RA's dense operator surfaces
+                     (Dashboard, Registry, Execution Flow, Treasury, ...).
+  .theme-marketing → light marketing surfaces (landing, login, 404), following
+                     the reference design: white canvas, hairline dividers,
+                     indigo accent, pastel glows.
+
+  Every colour is stored as space-separated RGB channels so Tailwind's
+  opacity modifiers work: rgb(var(--accent) / <alpha-value>).
+*/
+
 @layer base {
     :root {
-        --background: 0 0% 2%;
-        --foreground: 0 0% 97%;
-        --card: 0 0% 7%;
-        --card-foreground: 0 0% 97%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 97%;
-        --primary: 0 76% 59%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 270 100% 50%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 78%;
-        --accent: 0 0% 10%;
-        --accent-foreground: 0 0% 92%;
-        --destructive: 348 100% 50%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 26%;
-        --input: 0 0% 16%;
-        --ring: 0 76% 59%;
-        --chart-1: 0 76% 59%;
-        --chart-2: 105 100% 54%;
-        --chart-3: 270 100% 50%;
-        --chart-4: 48 100% 50%;
-        --chart-5: 348 100% 50%;
-        --radius: 0.125rem;
+        /* Dark console surfaces (blue-tinted neutrals, never dead grey) */
+        --surface-app: 8 9 12;          /* #08090C */
+        --surface-card: 16 18 24;       /* #101218 */
+        --surface-raised: 22 25 32;     /* #161920 */
+        --surface-inset: 12 14 18;      /* #0C0E12 */
+
+        --text-primary: 236 239 244;    /* #ECEFF4 */
+        --text-secondary: 168 176 191;  /* #A8B0BF */
+        --text-muted: 111 121 135;      /* #6F7987 */
+
+        --accent: 110 107 242;          /* #6E6BF2 indigo */
+        --accent-hover: 130 127 255;
+        --violet: 154 107 255;
+        --success: 52 211 153;
+        --warning: 245 181 68;
+        --danger: 244 91 105;
+        --info: 96 165 250;
+
+        --hairline: 34 37 46;           /* #22252E */
+        --hairline-strong: 52 56 68;    /* #343844 */
+
+        --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --shadow-panel-hover: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+
+        /* Pastel atmosphere for marketing glows (blurred blobs, never on text) */
+        --glow-violet: 199 197 255;
+        --glow-sky: 207 228 255;
+        --glow-rose: 255 217 228;
+
+        /* shadcn/ui tokens (radix components in components/ui) */
+        --background: 8 9 12;
+        --foreground: 236 239 244;
+        --card: 16 18 24;
+        --card-foreground: 236 239 244;
+        --popover: 18 20 26;
+        --popover-foreground: 236 239 244;
+        --primary: 110 107 242;
+        --primary-foreground: 255 255 255;
+        --secondary: 30 33 42;
+        --secondary-foreground: 236 239 244;
+        --muted: 24 27 34;
+        --muted-foreground: 168 176 191;
+        --accent-ui: 26 29 38;
+        --accent-ui-foreground: 236 239 244;
+        --destructive: 244 91 105;
+        --destructive-foreground: 255 255 255;
+        --border-ui: 34 37 46;
+        --input: 40 44 54;
+        --ring: 110 107 242;
+
+        --chart-1: 110 107 242;
+        --chart-2: 52 211 153;
+        --chart-3: 154 107 255;
+        --chart-4: 245 181 68;
+        --chart-5: 244 91 105;
+
+        --radius: 0.625rem;
+    }
+
+    /* Light marketing scope: applied on the landing / login / 404 wrappers. */
+    .theme-marketing {
+        --surface-app: 255 255 255;
+        --surface-card: 255 255 255;
+        --surface-raised: 250 250 251;  /* #FAFAFB */
+        --surface-inset: 245 246 248;
+
+        --text-primary: 22 24 29;       /* #16181D */
+        --text-secondary: 91 96 104;    /* #5B6068 */
+        --text-muted: 133 139 148;      /* #858B94 */
+
+        --accent: 91 91 214;            /* #5B5BD6 */
+        --accent-hover: 74 74 196;
+        --violet: 124 92 240;
+        --success: 22 163 74;
+        --warning: 180 123 4;
+        --danger: 214 45 60;
+        --info: 37 99 235;
+
+        --hairline: 232 233 236;        /* #E8E9EC */
+        --hairline-strong: 213 216 221;
+
+        --shadow-panel: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -16px rgba(16, 24, 40, 0.14);
+        --shadow-panel-hover: 0 2px 4px rgba(16, 24, 40, 0.05), 0 24px 48px -24px rgba(16, 24, 40, 0.22);
+
+        --glow-violet: 199 197 255;
+        --glow-sky: 207 228 255;
+        --glow-rose: 255 217 228;
+
+        --background: 255 255 255;
+        --foreground: 22 24 29;
+        --card: 255 255 255;
+        --card-foreground: 22 24 29;
+        --popover: 255 255 255;
+        --popover-foreground: 22 24 29;
+        --primary: 91 91 214;
+        --primary-foreground: 255 255 255;
+        --secondary: 245 246 248;
+        --secondary-foreground: 22 24 29;
+        --muted: 245 246 248;
+        --muted-foreground: 91 96 104;
+        --accent-ui: 245 246 248;
+        --accent-ui-foreground: 22 24 29;
+        --destructive: 214 45 60;
+        --destructive-foreground: 255 255 255;
+        --border-ui: 232 233 236;
+        --input: 224 226 231;
+        --ring: 91 91 214;
+
+        color-scheme: light;
     }
 }
 
@@ -36,20 +133,34 @@
     * {
         @apply border-border;
     }
+
+    html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+    }
+
     body {
         @apply bg-avaira-bg text-foreground font-body;
-        font-size: 17px;
-        line-height: 1.65;
+        font-size: 16px;
+        line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
 
-    p {
-        color: hsl(var(--muted-foreground));
+    /* In the light scope, inherit the page's own text colour instead of the
+       console's secondary grey, which would be too dark for marketing copy. */
+    .theme-marketing p {
+        color: rgb(var(--text-secondary));
     }
 
     h1, h2, h3, h4 {
         letter-spacing: -0.02em;
+        color: rgb(var(--text-primary));
+    }
+
+    :focus-visible {
+        outline: 2px solid rgb(var(--ring));
+        outline-offset: 2px;
     }
 }
 
@@ -67,11 +178,23 @@
     }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0A0A0A; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #E84444; }
+/* Scrollbar — themed through the same tokens, so it flips with the scope. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgb(var(--surface-app)); }
+::-webkit-scrollbar-thumb {
+    background: rgb(var(--hairline-strong));
+    border-radius: 999px;
+    border: 2px solid rgb(var(--surface-app));
+}
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--accent)); }
 
-/* Selection */
-::selection { background: rgba(232, 68, 68, 0.2); color: #E84444; }
+::selection { background: rgb(var(--accent) / 0.22); color: rgb(var(--text-primary)); }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

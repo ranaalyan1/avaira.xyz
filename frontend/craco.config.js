@@ -23,6 +23,16 @@ if (config.enableHealthCheck) {
 }
 
 let webpackConfig = {
+  // Jest resolves the `@/…` alias through the same mapping as webpack, so tests
+  // can import modules the way application code does (jsconfig.json declares it
+  // for the editor, this declares it for the test runner).
+  jest: {
+    configure: {
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
+  },
   eslint: {
     configure: {
       extends: ["plugin:react-hooks/recommended"],

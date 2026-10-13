@@ -1,139 +1,136 @@
 {
   "identity": {
     "name": "AVAIRA",
-    "archetype": "The Vigilant Guardian (Cyberpunk/SecOps)",
+    "archetype": "The Vigilant Guardian — institutional trust infrastructure",
     "mission": "Enforce absolute control over AI execution with cryptographic precision.",
-    "emotional_tone": "Authoritative, High-Tech, Paranoid, Secure, 'Code is Law'",
-    "aesthetic": "Dark Cyberpunk, Terminal, High-Density Data, Neon-Noir",
-    "target_audience": "Blockchain Architects, Security Engineers, DeFi Operators"
+    "emotional_tone": "Composed, exact, credible. Institutional confidence without theatre.",
+    "two_surfaces": {
+      "marketing": "Light. White canvas, hairline dividers, generous whitespace, indigo calls to action, pastel glows. Sells the protocol.",
+      "console": "Dark. Blueprint-tinted neutrals, dense telemetry, mono data, same indigo accent. Runs the protocol."
+    },
+    "target_audience": "Blockchain architects, security engineers, DeFi operators, underwriters"
   },
   "design_principles": [
-    "Density is Information: Don't hide data behind clicks. Show the pulse of the network.",
-    "Visibility is Trust: Visualize the invisible (signatures, hash validations).",
-    "Function over Form: Aesthetically pleasing, but strictly functional. No decoration without purpose.",
-    "The Terminal Aesthetic: The user is an operator, not a consumer. Command lines and raw data are beautiful."
+    "Density is Information: don't hide data behind clicks. Show the pulse of the network.",
+    "Visibility is Trust: visualise the invisible (signatures, hash validations).",
+    "Enforcement over decoration: the UI states what the contracts will do, not what might happen.",
+    "One system, two surfaces: the same tokens serve the light site and the dark console — no per-component theming."
   ],
-  "typography": {
-    "headings": {
-      "family": "Rajdhani, sans-serif",
-      "weights": ["600", "700"],
-      "tracking": "tracking-tight",
-      "case": "uppercase",
-      "install_url": "https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap"
+  "tokens": {
+    "storage": "Space-separated RGB channels in CSS variables so Tailwind opacity modifiers keep working: `rgb(var(--accent) / <alpha-value>)`.",
+    "definition_site": "src/index.css — `:root` (dark console) and `.theme-marketing` (light)",
+    "tailwind_mapping": "frontend/tailwind.config.js (`avaira.*` namespace + shadcn/ui vars)",
+    "js_mirror": "frontend/src/lib/palette.js (Recharts, SVG fills, imperative consumers)",
+    "dark": {
+      "surface_app": "#08090C",
+      "surface_card": "#101218",
+      "surface_raised": "#161920",
+      "text_primary": "#ECEFF4",
+      "text_secondary": "#A8B0BF",
+      "text_muted": "#6F7987",
+      "accent": "#6E6BF2",
+      "accent_hover": "#827FFF",
+      "violet": "#9A6BFF",
+      "success": "#34D399",
+      "warning": "#F5B544",
+      "danger": "#F45B69",
+      "info": "#60A5FA",
+      "hairline": "#22252E",
+      "hairline_strong": "#343844"
     },
-    "body": {
-      "family": "Inter, sans-serif",
-      "weights": ["400", "500"],
-      "tracking": "tracking-normal"
-    },
-    "data_code": {
-      "family": "JetBrains Mono, monospace",
-      "weights": ["400"],
-      "install_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+    "light": {
+      "surface_app": "#FFFFFF",
+      "surface_card": "#FFFFFF",
+      "surface_raised": "#FAFAFB",
+      "text_primary": "#16181D",
+      "text_secondary": "#5B6068",
+      "text_muted": "#858B94",
+      "accent": "#5B5BD6",
+      "accent_hover": "#4A4AC4",
+      "violet": "#7C5CF0",
+      "success": "#16A34A",
+      "warning": "#B47B04",
+      "danger": "#D62D3C",
+      "info": "#2563EB",
+      "hairline": "#E8E9EC",
+      "hairline_strong": "#D5D8DD"
     }
   },
   "colors": {
-    "theme": "dark",
-    "background": {
-      "app": "#050505",
-      "card": "#0A0A0A",
-      "surface": "#121212"
+    "rule": "Red means danger only — frozen agents, slashed collateral, blocked intents, destructive actions. Everything else (navigation, primary buttons, links, focus rings, charts) uses the indigo accent.",
+    "status_mapping": {
+      "settled_completed_active_approved": "--success",
+      "pending_review_paused_warning": "--warning",
+      "frozen_banned_suspended_blocked": "--danger",
+      "telemetry_series": "--info / --accent / --violet"
     },
-    "primary": {
-      "default": "#00F0FF",
-      "glow": "0 0 10px #00F0FF, 0 0 20px #00F0FF"
-    },
-    "secondary": {
-      "default": "#7000FF",
-      "glow": "0 0 10px #7000FF"
-    },
-    "accent": {
-      "success": "#39FF14",
-      "warning": "#FFD300",
-      "danger": "#FF003C",
-      "neutral": "#333333"
-    },
-    "text": {
-      "primary": "#E0E0E0",
-      "secondary": "#858585",
-      "muted": "#404040",
-      "inverse": "#000000"
-    },
-    "border": {
-      "default": "#333333",
-      "active": "#00F0FF"
+    "grade_mapping": {
+      "note": "Both Avaira Score ladders are mapped in lib/palette.js: A+ … D (core/reputation.py) and AAA … CCC (registry UI).",
+      "A+": "--success",
+      "AAA": "--success",
+      "AA": "--accent",
+      "B+/BBB/BB": "--warning",
+      "C/D/CCC": "--danger"
     }
+  },
+  "typography": {
+    "family_all": "Inter, system-ui, sans-serif",
+    "family_mono": "JetBrains Mono (machine data only: addresses, hashes, amounts, numeric columns, uppercase micro-labels)",
+    "case": "Sentence case for headings, buttons and labels. Uppercase is reserved for small tracked-out mono micro-labels (nav group headings, table headers).",
+    "headings": {
+      "weight": "600",
+      "tracking": "-0.02em (console) to -0.035em (marketing display)"
+    },
+    "install_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
   },
   "layout_strategy": {
-    "grid_system": "Bento Grid (Mode B - High Density)",
-    "container_padding": "p-6 md:p-8",
-    "gap": "gap-4 md:gap-6",
-    "border_radius": {
-      "outer": "rounded-none",
-      "inner": "rounded-sm"
-    },
-    "surfaces": "Retro-Futurism / Grid Borders",
-    "notes": "Use sharp edges. No soft roundness. 1px borders are mandatory for containment."
+    "container": ".mk-container (1080px) / .mk-container-wide (1200px) for marketing; .app-main-container (1320px) for the console",
+    "rhythm": "Marketing sections use .mk-section with 1px hairline separators and 5.5rem vertical padding; console pages use .page-shell with a hairline .page-header.",
+    "border_radius": "One --radius token (0.625rem) for every card, button, input and table in both surfaces.",
+    "notes": "Containment is 1px hairlines, not heavy borders or glow. Whitespace carries hierarchy on the marketing surface; density and mono alignment carry it in the console."
   },
   "component_styling": {
-    "card": {
-      "base": "bg-black/40 backdrop-blur-md border border-white/10",
-      "hover": "hover:border-primary/50 transition-colors duration-300",
-      "notes": "Add a 'corner cut' visual using CSS clip-path or pseudo-elements if possible for the 'Tech' look."
-    },
-    "button": {
-      "primary": "bg-primary text-black font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all clip-path-slant",
-      "secondary": "border border-primary/50 text-primary hover:bg-primary/10 uppercase tracking-wider",
-      "destructive": "border border-destructive text-destructive hover:bg-destructive/10"
-    },
-    "input": {
-      "base": "bg-black border-white/20 focus:border-primary text-white font-mono rounded-none",
-      "placeholder": "text-white/30"
-    },
-    "badge": {
-      "base": "font-mono uppercase text-xs tracking-wider border rounded-none px-2 py-0.5",
-      "success": "border-green-500/50 text-green-400 bg-green-500/10",
-      "warning": "border-yellow-500/50 text-yellow-400 bg-yellow-500/10",
-      "error": "border-red-500/50 text-red-400 bg-red-500/10",
-      "outline": "border-white/20 text-white/60"
-    }
+    "card_console": ".cyber-card — surface-card at 72% opacity, 1px hairline, --shadow-panel, hover lifts to accent border",
+    "card_marketing": ".mk-card / .mk-card-flat / .mk-card-block — white surface, 1px hairline, 14px radius, soft shadow",
+    "button_console": ".cyber-btn — indigo fill, white text, --radius, translateY(-1px) on hover",
+    "button_marketing": ".mk-btn with .mk-btn-primary / .mk-btn-secondary / .mk-btn-lg",
+    "input": "surface-inset background, hairline-strong border, focus ring `0 0 0 3px rgb(var(--accent) / 0.18)`",
+    "badge": "mono, 10-11px, rounded, colour from the status mapping",
+    "table": ".data-table — sticky mono micro-label headers on surface-raised, hairline rows, right-aligned numbers"
   },
   "visual_enhancers": {
-    "scanlines": "Overlay a pointer-events-none fixed inset-0 z-50 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay",
-    "glow_effects": "Use drop-shadow-[0_0_8px_rgba(0,240,255,0.3)] for active elements.",
-    "ascii_art": "Use ASCII representations for loaders or empty states.",
-    "tracing_beam": "Animate borders on active cards using framer-motion layoutId.",
-    "micro_interactions": "Text scramble effect on hover for key metrics."
-  },
-  "assets": {
-    "icons": "Lucide React (Default) - Use sharp, thin stroke icons (stroke-width={1.5})",
-    "3d_library": "Use simple CSS 3D transforms or lightweight Canvas if needed. Avoid heavy R3F unless for Hero.",
-    "image_style": "If images are needed, apply a duotone filter (Black & Cyan) via CSS: grayscale(100%) sepia(100%) hue-rotate(130deg) saturate(300%)"
+    "allowed": [
+      "Pastel glow blobs (.mk-glow) behind hero and CTA content on the marketing surface",
+      "Fine grid background (.mk-grid-bg) with a radial mask at the top of marketing pages",
+      "Product mockups as pure CSS in .mk-window frames — no bitmap screenshots",
+      "Subtle slide-in/rise-in entrance animation with the .stagger-N delays"
+    ],
+    "disallowed": [
+      "Neon glows, scanlines, glitch text, 3D card tilt (removed from the previous system)",
+      "Gradients over text",
+      "Literal hex values in components — only lib/palette.js and the marketing mock frames carry hex"
+    ]
   },
   "page_specific_rules": {
-    "dashboard": "Use 'Grid Borders' style. Every cell has a right and bottom border. Remove border for last items.",
-    "execution_flow": "Use a timeline visualization with 'connecting lines' that light up.",
-    "agent_registry": "Card-based grid. Each card looks like a 'Character Sheet' or 'ID Card'.",
-    "treasury": "Data-heavy. Use tables with mono-spaced numbers. Right-align all financial data."
+    "landing": "Light scope. Centered hero with one primary CTA, product window mock, hairline-separated feature sections, single pricing block, FAQ accordion, multi-column footer.",
+    "login": "Light scope, single card, OAuth buttons at full width.",
+    "dashboard": "Stat tiles on a 12-column grid, telemetry charts using CHART_COLORS, activity feed with status pills.",
+    "execution_flow": "Vertical lifecycle rail with .timeline-line/.timeline-dot; blocked executions render in --danger.",
+    "agent_registry": "Card grid; each agent card carries a grade badge coloured by gradeColor() and a freeze state that switches to --danger.",
+    "treasury": "Data-heavy. Mono, right-aligned financial columns; stacks use --info and --violet."
   },
   "accessibility": {
-    "contrast": "Ensure text is #E0E0E0 or lighter on black backgrounds.",
-    "focus_states": "High contrast Cyan outline for keyboard focus.",
-    "reduced_motion": "Disable glitch effects and scanning lines if prefers-reduced-motion is true."
+    "contrast": "Body text is --text-secondary or stronger on its surface in both scopes.",
+    "focus_states": "Visible 2px ring (--ring) on every focusable element via :focus-visible.",
+    "reduced_motion": "index.css disables animations and transitions under prefers-reduced-motion.",
+    "testids": "Every interactive element keeps a data-testid; src/pages/design.smoke.test.js fails the build if a documented hook disappears."
   },
-  "universal_guidelines": [
-    "Do not use gradients for backgrounds. Use solid black or very subtle noise.",
-    "Do not center text unless it's a massive hero headline. Left align is the standard for data.",
-    "Use 'data-testid' on all interactive elements.",
-    "Don't use rounded corners > 4px. Prefer 0px or 2px.",
-    "Always tint greys with a hint of blue (#0F1115) to avoid 'dead' grey."
-  ],
   "instructions_to_main_agent": [
-    "1. INSTALL FONTS: Add the Google Fonts links for Rajdhani and JetBrains Mono to public/index.html immediately.",
-    "2. CONFIGURE TAILWIND: Update tailwind.config.js to include the custom colors (primary: #00F0FF, etc) and fonts.",
-    "3. GLOBAL CSS: Add the 'scanline' overlay class to index.css.",
-    "4. COMPONENT OVERRIDES: When using Shadcn, immediately strip the 'radius' classes and replace with 'rounded-none' or 'rounded-sm'.",
-    "5. CHARTS: Use Recharts with custom tooltips (black bg, cyan border). Hide grid lines or make them very subtle (#333).",
-    "6. TABLES: Use dense padding. Font-mono for all values."
+    "1. TOKENS: add or change colours in src/index.css only (both scopes), then mirror in tailwind.config.js if a new Tailwind name is needed.",
+    "2. JS CONSUMERS: read colours from src/lib/palette.js for Recharts, SVG and inline styles.",
+    "3. SCOPE: wrap marketing routes in `.theme-marketing`; console routes inherit the dark default.",
+    "4. VERIFY: `cd frontend && CI=false npm run build && npx craco test --watchAll=false`.",
+    "5. PRE-RENDER: keep the inline style block in public/index.html in sync with the light tokens.",
+    "6. SCREENSHOTS: re-run verify_frontend_v2.py after visual changes to refresh verification/*.png."
   ]
 }

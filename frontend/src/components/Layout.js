@@ -1,18 +1,33 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, Code, Menu, X, Users, BookOpen, LogOut } from "lucide-react";
+import {
+  LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, BookOpen,
+  Menu, X, Users, LogOut, ChevronRight, Search,
+} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/App";
 
-const NAV_ITEMS = [
-  { path: "/dashboard", label: "DASHBOARD", icon: LayoutDashboard },
-  { path: "/agents", label: "AGENT REGISTRY", icon: UserCheck },
-  { path: "/executions", label: "EXECUTION FLOW", icon: Workflow },
-  { path: "/underwriters", label: "UNDERWRITERS", icon: Users },
-  { path: "/freeze", label: "FREEZE / SLASH", icon: ShieldOff },
-  { path: "/treasury", label: "TREASURY", icon: Wallet },
-  { path: "/reputation", label: "REPUTATION", icon: TrendingUp },
-  { path: "/sdk", label: "SDK DOCS", icon: BookOpen },
+const NAV_GROUPS = [
+  {
+    label: "Monitor",
+    items: [
+      { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { path: "/agents", label: "Agent registry", icon: UserCheck },
+      { path: "/executions", label: "Execution flow", icon: Workflow },
+      { path: "/reputation", label: "Reputation", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "Control",
+    items: [
+      { path: "/underwriters", label: "Underwriters", icon: Users },
+      { path: "/freeze", label: "Freeze / slash", icon: ShieldOff },
+      { path: "/treasury", label: "Treasury", icon: Wallet },
+      { path: "/sdk", label: "SDK docs", icon: BookOpen },
+    ],
+  },
 ];
+
+const NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
 const PAGE_META = {
   "/dashboard": "Protocol telemetry and live state",
@@ -38,96 +53,126 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen" data-testid="app-layout">
+    <div className="flex min-h-screen bg-avaira-bg" data-testid="app-layout">
       {/* Mobile toggle */}
       <button
         data-testid="mobile-menu-toggle"
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 border border-avaira-border bg-avaira-card"
+        aria-label="Toggle navigation"
+        className="fixed left-4 top-3.5 z-50 rounded-lg border border-avaira-border bg-avaira-card p-2 lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {mobileOpen ? <X size={20} className="text-avaira-primary" /> : <Menu size={20} className="text-avaira-primary" />}
+        {mobileOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
 
       {/* Sidebar */}
       <aside
         data-testid="sidebar"
-        className={`fixed inset-y-0 left-0 z-40 w-56 bg-avaira-card border-r border-avaira-border flex flex-col transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-[236px] flex-col border-r border-avaira-border bg-avaira-card/70 backdrop-blur-xl transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
       >
         {/* Logo */}
-        <div className="p-5 border-b border-avaira-border flex items-center gap-3">
-          <img src="/logo.png" alt="AVAIRA" className="w-10 h-10" data-testid="sidebar-logo" />
-          <div>
-            <h1 className="font-heading font-bold text-2xl tracking-tight text-avaira-primary uppercase" data-testid="app-logo">
+        <div className="flex items-center gap-2.5 px-4 py-4">
+          <img src="/logo.png" alt="AVAIRA" className="h-8 w-8 rounded-lg" data-testid="sidebar-logo" />
+          <div className="min-w-0">
+            <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground" data-testid="app-logo">
               AVAIRA
             </h1>
-            <p className="font-mono text-[8px] text-avaira-muted tracking-widest">EXECUTION CONTROL</p>
+            <p className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-avaira-dim">
+              Execution control
+            </p>
           </div>
         </div>
 
+        <div className="px-3 pb-2">
+          <button className="flex w-full items-center gap-2 rounded-lg border border-avaira-border bg-avaira-inset px-2.5 py-1.5 text-left text-[12px] text-avaira-dim transition-colors hover:border-avaira-primary/40 hover:text-avaira-muted">
+            <Search size={13} />
+            <span className="flex-1">Search</span>
+            <span className="font-mono text-[10px] tracking-wider">⌘K</span>
+          </button>
+        </div>
+
         {/* Nav */}
-        <nav className="flex-1 py-4 overflow-y-auto" data-testid="main-nav">
-          {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                data-testid={`nav-${item.path.slice(1)}`}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-xs font-mono tracking-wider transition-all duration-200 border-l-2 ${
-                  isActive
-                    ? "border-avaira-primary text-avaira-primary bg-avaira-primary/5"
-                    : "border-transparent text-avaira-muted hover:text-foreground hover:border-avaira-border hover:bg-white/[0.02]"
-                }`}
-              >
-                <item.icon size={16} strokeWidth={1.5} />
-                {item.label}
-              </NavLink>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto px-3 py-2" data-testid="main-nav">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="mb-4">
+              <p className="px-2.5 pb-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-avaira-dim">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      data-testid={`nav-${item.path.slice(1)}`}
+                      onClick={() => setMobileOpen(false)}
+                      className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                        isActive
+                          ? "bg-avaira-primary/12 text-avaira-primary"
+                          : "text-avaira-muted hover:bg-avaira-surface hover:text-foreground"
+                      }`}
+                    >
+                      <item.icon size={15} strokeWidth={1.9} />
+                      <span className="truncate">{item.label}</span>
+                      {isActive && <ChevronRight size={13} className="ml-auto opacity-70" />}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* User / Footer */}
+        {/* Footer: session + health */}
         <div className="border-t border-avaira-border">
           {user && (
-            <div className="p-4 border-b border-avaira-border">
-              <div className="flex items-center gap-2">
+            <div className="border-b border-avaira-border p-3">
+              <div className="flex items-center gap-2.5">
                 {user.picture ? (
-                  <img src={user.picture} alt="" className="w-6 h-6 rounded-full" />
+                  <img src={user.picture} alt="" className="h-7 w-7 rounded-full" />
                 ) : (
-                  <div className="w-6 h-6 bg-avaira-primary/20 flex items-center justify-center">
-                    <span className="font-mono text-[10px] text-avaira-primary">{user.name?.[0] || '?'}</span>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-avaira-primary/15">
+                    <span className="text-[11px] font-medium text-avaira-primary">{user.name?.[0] || '?'}</span>
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-mono text-[10px] text-foreground truncate">{user.name}</p>
-                  <p className="font-mono text-[8px] text-avaira-dim truncate">{user.email}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12px] font-medium text-foreground">{user.name}</p>
+                  <p className="truncate font-mono text-[9px] text-avaira-dim">{user.email}</p>
                 </div>
-                <button data-testid="logout-btn" onClick={handleLogout} className="p-1 text-avaira-dim hover:text-avaira-primary transition-colors">
-                  <LogOut size={12} />
+                <button
+                  data-testid="logout-btn"
+                  onClick={handleLogout}
+                  aria-label="Sign out"
+                  className="rounded-md p-1.5 text-avaira-dim transition-colors hover:bg-avaira-surface hover:text-avaira-red"
+                >
+                  <LogOut size={13} />
                 </button>
               </div>
             </div>
           )}
-          <div className="p-4">
+          <div className="p-3">
             <div className="flex items-center gap-2">
               <span className="status-dot active" />
-              <span className="font-mono text-[10px] text-avaira-green tracking-wider">PROTOCOL ONLINE</span>
+              <span className="text-[11px] font-medium text-avaira-muted">Protocol online</span>
             </div>
-            <p className="font-mono text-[9px] text-avaira-dim mt-1">TRUST & ACCOUNTABILITY ENGINE</p>
+            <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-avaira-dim">
+              Trust &amp; accountability engine
+            </p>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="app-main-surface flex-1 lg:ml-56 min-h-screen" data-testid="main-content">
+      {/* Main content */}
+      <main className="app-main-surface min-h-screen flex-1 lg:ml-[236px]" data-testid="main-content">
         <div className="app-main-container">
-          <header className="app-topbar px-4 sm:px-6 md:px-8 py-3 mt-16 lg:mt-0 pl-16 sm:pl-6 md:pl-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
-              <p className="font-heading font-bold text-sm text-foreground uppercase tracking-tight">
-                {currentNav?.label || "CONTROL PANEL"}
+          <header className="app-topbar px-4 py-3 pl-16 sm:px-6 lg:pl-6 md:px-8">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[14px] font-semibold tracking-tight text-foreground">
+                {currentNav?.label || "Control panel"}
               </p>
-              <p className="font-mono text-[10px] text-avaira-dim uppercase tracking-wider">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-avaira-dim">
                 {PAGE_META[location.pathname] || "Execution control operations"}
               </p>
             </div>
@@ -136,17 +181,19 @@ export default function Layout() {
             <Outlet />
           </div>
         </div>
-        <footer className="px-6 md:px-8 py-4 border-t border-avaira-border">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <p className="font-mono text-[10px] text-avaira-dim">AVAIRA Protocol | v2.0-core</p>
-            <p className="font-mono text-[10px] text-avaira-dim">Real-time trust and automated consequences</p>
+        <footer className="border-t border-avaira-border px-6 py-4 md:px-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-mono text-[10px] text-avaira-dim">AVAIRA Protocol · v2.0-core</p>
+            <p className="font-mono text-[10px] text-avaira-dim">
+              Real-time trust and automated consequences
+            </p>
           </div>
         </footer>
       </main>
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/60 z-30 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
     </div>
   );

@@ -7,7 +7,8 @@ import { useAuth } from "@/App";
 
 import { API } from "@/lib/api";
 
-const GRADE_COLORS = { AAA: '#39FF14', AA: '#00F0FF', A: '#00F0FF', BBB: '#FFD300', BB: '#FFD300', B: '#FF8C00', CCC: '#FF003C', D: '#FF003C' };
+
+import { DARK, gradeColor } from "@/lib/palette";
 
 export default function Underwriters() {
   const { user } = useAuth();
@@ -105,8 +106,8 @@ export default function Underwriters() {
     <div className="page-shell animate-slide-in" data-testid="underwriters-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Underwriter Marketplace</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">{underwriters.length} UNDERWRITERS / {missions.length} MISSIONS</p>
+          <h1 className="page-title">Underwriter Marketplace</h1>
+          <p className="page-subtitle">{underwriters.length} underwriters · {missions.length} missions</p>
         </div>
         <div className="flex items-center gap-2">
           <button data-testid="refresh-uw-btn" onClick={fetchData} className="p-2 border border-avaira-border text-avaira-muted hover:text-avaira-primary hover:border-avaira-primary transition-colors">
@@ -119,7 +120,7 @@ export default function Underwriters() {
               </button>
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
-              <DialogHeader><DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Create Mission</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Declare a new mission for an agent to execute</DialogDescription></DialogHeader>
+              <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Create Mission</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Declare a new mission for an agent to execute</DialogDescription></DialogHeader>
               <form onSubmit={handleCreateMission} className="space-y-3 mt-2" data-testid="create-mission-form">
                 <div>
                   <label className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest block mb-1">Agent</label>
@@ -161,7 +162,7 @@ export default function Underwriters() {
               </button>
             </DialogTrigger>
             <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
-              <DialogHeader><DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Register Underwriter</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Stake capital to underwrite agent missions</DialogDescription></DialogHeader>
+              <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Register Underwriter</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Stake capital to underwrite agent missions</DialogDescription></DialogHeader>
               <form onSubmit={handleRegisterUW} className="space-y-3 mt-2" data-testid="register-uw-form">
                 <div>
                   <label className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest block mb-1">Name</label>
@@ -202,7 +203,7 @@ export default function Underwriters() {
         {/* Mission Marketplace */}
         <div className="lg:col-span-2 space-y-4">
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-primary mb-3 flex items-center gap-2">
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-primary mb-3 flex items-center gap-2">
               <Zap size={14} /> Open Missions
             </h2>
             {openMissions.length === 0 ? (
@@ -213,8 +214,8 @@ export default function Underwriters() {
                   <div key={m.id} className="p-3 border border-avaira-border hover:border-avaira-primary/30 transition-colors" data-testid={`mission-${m.id}`}>
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <span className="font-heading font-bold text-sm text-foreground uppercase">{m.agent_name}</span>
-                        <span className="font-mono text-[10px] ml-2 px-1.5 py-0.5 border" style={{ borderColor: (GRADE_COLORS[m.agent_grade] || '#858585') + '50', color: GRADE_COLORS[m.agent_grade] || '#858585' }}>{m.agent_grade}</span>
+                        <span className="text-sm font-semibold tracking-tight text-foreground">{m.agent_name}</span>
+                        <span className="font-mono text-[10px] ml-2 px-1.5 py-0.5 border" style={{ borderColor: gradeColor(m.agent_grade) + '50', color: gradeColor(m.agent_grade) }}>{m.agent_grade}</span>
                       </div>
                       <span className={`font-mono text-[10px] px-1.5 py-0.5 border ${m.risk_level === 'high' ? 'border-red-500/30 text-red-400' : m.risk_level === 'medium' ? 'border-yellow-500/30 text-yellow-400' : 'border-green-500/30 text-green-400'}`}>{m.risk_level.toUpperCase()}</span>
                     </div>
@@ -254,7 +255,7 @@ export default function Underwriters() {
           {/* Settled Missions */}
           {settledMissions.length > 0 && (
             <div className="cyber-card p-4">
-              <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Settled Missions</h2>
+              <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Settled Missions</h2>
               <table className="w-full data-table">
                 <thead>
                   <tr><th>Agent</th><th>Description</th><th className="text-right">Value</th><th>Result</th><th>Time</th></tr>
@@ -277,7 +278,7 @@ export default function Underwriters() {
 
         {/* Underwriter List */}
         <div className="cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3 flex items-center gap-2">
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
             <Users size={14} className="text-avaira-primary" /> Underwriters
           </h2>
           {underwriters.length === 0 ? (
@@ -287,7 +288,7 @@ export default function Underwriters() {
               {underwriters.map(uw => (
                 <div key={uw.id} className="p-3 border border-avaira-border" data-testid={`uw-card-${uw.id}`}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-heading font-bold text-sm text-foreground uppercase">{uw.name}</span>
+                    <span className="text-sm font-semibold tracking-tight text-foreground">{uw.name}</span>
                     <span className="font-mono text-[10px] text-avaira-green">{uw.total_earnings.toFixed(4)} earned</span>
                   </div>
                   <div className="space-y-0.5 font-mono text-[10px]">
@@ -305,7 +306,7 @@ export default function Underwriters() {
       {/* Stake Dialog */}
       <Dialog open={stakeOpen} onOpenChange={setStakeOpen}>
         <DialogContent className="bg-avaira-card border-avaira-border rounded-none max-w-md">
-          <DialogHeader><DialogTitle className="font-heading font-bold text-lg text-foreground uppercase tracking-tight">Stake on Mission</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Back this mission with your capital</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Stake on Mission</DialogTitle><DialogDescription className="font-mono text-[10px] text-avaira-dim">Back this mission with your capital</DialogDescription></DialogHeader>
           {selectedMission && (
             <form onSubmit={handleStake} className="space-y-3 mt-2" data-testid="stake-form">
               <p className="font-mono text-xs text-avaira-muted">{selectedMission.agent_name}: {selectedMission.description}</p>

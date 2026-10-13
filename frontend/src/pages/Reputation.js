@@ -5,6 +5,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 import { API } from "@/lib/api";
 
+import { DARK } from "@/lib/palette";
+
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
@@ -17,10 +19,10 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const getRepColor = (score) => {
-  if (score >= 100) return '#39FF14';
-  if (score >= 80) return '#00F0FF';
-  if (score >= 50) return '#FFD300';
-  return '#FF003C';
+  if (score >= 100) return DARK.success;
+  if (score >= 80) return DARK.info;
+  if (score >= 50) return DARK.warning;
+  return DARK.danger;
 };
 
 export default function Reputation() {
@@ -56,8 +58,8 @@ export default function Reputation() {
     <div className="page-shell animate-slide-in" data-testid="reputation-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title font-heading font-bold text-foreground uppercase tracking-tight">Reputation Engine</h1>
-          <p className="page-subtitle font-mono text-xs text-avaira-muted mt-1">AGENT TRUST SCORES</p>
+          <h1 className="page-title">Reputation Engine</h1>
+          <p className="page-subtitle">Agent trust scores</p>
         </div>
         <button data-testid="refresh-reputation-btn" onClick={fetchData} className="p-2 border border-avaira-border text-avaira-muted hover:text-avaira-primary hover:border-avaira-primary transition-colors">
           <RefreshCw size={14} />
@@ -67,7 +69,7 @@ export default function Reputation() {
       {loading && leaderboard.length === 0 && history.length === 0 ? (
         <div className="cyber-card p-12 text-center mb-4">
           <TrendingUp size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="font-heading text-lg text-avaira-muted uppercase">Loading Reputation Data</p>
+          <p className="text-[15px] font-medium text-avaira-muted">Loading reputation data</p>
           <p className="font-mono text-xs text-avaira-dim mt-1">Fetching leaderboard scores and change history</p>
         </div>
       ) : null}
@@ -75,7 +77,7 @@ export default function Reputation() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Leaderboard */}
         <div className="lg:col-span-2 cyber-card p-4">
-          <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3 flex items-center gap-2">
+          <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
             <Trophy size={14} className="text-avaira-yellow" /> Leaderboard
           </h2>
           {leaderboard.length === 0 ? (
@@ -110,7 +112,7 @@ export default function Reputation() {
                           </span>
                         </td>
                         <td className="text-right text-foreground">{agent.total_executions}</td>
-                        <td className="text-right" style={{ color: rate !== '-' && parseInt(rate) >= 80 ? '#39FF14' : rate !== '-' && parseInt(rate) >= 50 ? '#FFD300' : rate === '-' ? '#858585' : '#FF003C' }}>
+                        <td className="text-right" style={{ color: rate !== '-' && parseInt(rate) >= 80 ? DARK.success : rate !== '-' && parseInt(rate) >= 50 ? DARK.warning : rate === '-' ? DARK.textMuted : DARK.danger }}>
                           {rate}{rate !== '-' ? '%' : ''}
                         </td>
                         <td className="text-right text-avaira-primary">{agent.collateral_remaining.toFixed(2)}</td>
@@ -127,13 +129,13 @@ export default function Reputation() {
         <div className="space-y-4">
           {/* Bar Chart */}
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Score Distribution</h2>
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Score distribution</h2>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                  <XAxis type="number" domain={[0, 200]} tick={{ fill: '#858585', fontSize: 9, fontFamily: 'JetBrains Mono' }} />
-                  <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#858585', fontSize: 9, fontFamily: 'JetBrains Mono' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={DARK.hairline} horizontal={false} />
+                  <XAxis type="number" domain={[0, 200]} tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
+                  <YAxis dataKey="name" type="category" width={80} tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="score" name="Reputation" radius={[0, 2, 2, 0]}>
                     {chartData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
@@ -147,9 +149,9 @@ export default function Reputation() {
             )}
           </div>
 
-          {/* Recent Changes */}
+          {/* Recent changes */}
           <div className="cyber-card p-4">
-            <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted mb-3">Recent Changes</h2>
+            <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Recent changes</h2>
             {history.length === 0 ? (
               <p className="font-mono text-xs text-avaira-dim text-center py-6">NO HISTORY</p>
             ) : (
@@ -161,7 +163,7 @@ export default function Reputation() {
                       <p className="font-mono text-xs text-foreground truncate">{h.agent_name}</p>
                       <p className="font-mono text-[10px] text-avaira-dim truncate">{h.reason}</p>
                     </div>
-                    <span className="font-mono text-xs font-bold" style={{ color: h.delta > 0 ? '#39FF14' : '#FF003C' }}>
+                    <span className="font-mono text-xs font-bold" style={{ color: h.delta > 0 ? DARK.success : DARK.danger }}>
                       {h.delta > 0 ? '+' : ''}{h.delta}
                     </span>
                   </div>

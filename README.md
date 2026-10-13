@@ -339,7 +339,11 @@ All metrics are measured from real Foundry test and benchmark runs stored in [`c
 
 ## 🖥️ Protocol Control Center & Dashboard
 
-The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/)) provides real-time visibility into agent telemetry, risk envelopes, execution lifecycles, underwriter pools, slashing events, and reputation heatmaps:
+The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/)) provides real-time visibility into agent telemetry, risk envelopes, execution lifecycles, underwriter pools, slashing events, and reputation heatmaps.
+
+**Design system.** AVAIRA renders two surfaces from one component layer: a **light marketing site** (white canvas, hairline dividers, indigo calls to action, pastel glows) and a **dark operator console** (blueprint-tinted neutrals, dense mono telemetry) — the same split developer tools use for `site` versus `app`. Colours live as RGB-channel CSS variables in [`frontend/src/index.css`](frontend/src/index.css) (`:root` = console, `.theme-marketing` = marketing), mirrored in [`frontend/src/lib/palette.js`](frontend/src/lib/palette.js) for charts and mirrored back into the pre-render in `frontend/public/index.html`. **Red is reserved for danger** (frozen agents, slashed collateral, blocked intents); indigo carries every other primary action. See [`docs/design-system.md`](docs/design-system.md) for the tokens and the rules, and `frontend/src/pages/design.smoke.test.js` for the executable half of the contract.
+
+> The screenshots below were captured with the previous dark/cyberpunk styling. Regenerate them with `python3 verify_frontend_v2.py` against a running dev server (`npm start` in `frontend/`) after launching the new design.
 
 <div align="center">
 <table>

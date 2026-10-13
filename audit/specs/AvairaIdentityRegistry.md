@@ -21,90 +21,90 @@
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `—` | `AGENT_WALLET_KEY()` → (string) | view | — |
-| `—` | `acceptOwnership()` | nonpayable | — |
-| `—` | `activeAgents()` → (uint256) | view | — |
-| `—` | `agentRegistry()` → (string) | view | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `agentWalletNonce(uint256)` → (uint256) | view | — |
-| `—` | `approve(address,uint256)` | nonpayable | — |
-| `—` | `balanceOf(address)` → (uint256) | view | — |
-| `—` | `banAgent(uint256,string)` | nonpayable | @notice Terminal ban: forfeits the registration bond to the treasury. @dev Callable by the owner or the configured `enforcer` (AvairaStakeRegistry). The ERC-721 identity is retained so that onchain history stays audit… |
-| `—` | `banOperator(address)` | nonpayable | @notice Bans an entire operator address from minting new Avaira identities. @dev Used when BAN-severity slashing shows the operator, not just one agent, is malicious. |
-| `—` | `bannedOperators(address)` → (bool) | view | — |
-| `—` | `bondPaid(uint256)` → (uint256) | view | — |
-| `—` | `eip712Domain()` → (bytes1,string,string,uint256,address,bytes32,uint256[]) | view | — |
-| `—` | `enforcer()` → (address) | view | — |
-| `—` | `escrowedRefunds()` → (uint256) | view | @notice Native MON escrowed for refunds that could not be pushed to their recipient. |
-| `—` | `exitAgent(uint256)` | nonpayable | @notice Voluntary exit: burns the identity and refunds the registration bond. @dev Stakes held in `AvairaStakeRegistry` must be withdrawn separately. |
-| `—` | `getAgentWallet(uint256)` → (address) | view | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `getApproved(uint256)` → (address) | view | — |
-| `—` | `getMetadata(uint256,string)` → (bytes) | view | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `getMetadataKeys(uint256)` → (string[]) | view | @notice Enumerates the metadata keys written for `agentId`. |
-| `—` | `hashAgentWalletSet(uint256,address,uint256,uint256)` → (bytes32) | view | @notice EIP-712 digest an agent wallet must sign to be bound to `agentId`. |
-| `—` | `isActive(uint256)` → (bool) | view | @inheritdoc IAvairaIdentityRegistry |
-| `—` | `isApprovedForAll(address,address)` → (bool) | view | — |
-| `—` | `isBanned(uint256)` → (bool) | view | @inheritdoc IAvairaIdentityRegistry |
-| `—` | `name()` → (string) | view | — |
-| `—` | `nextAgentId()` → (uint256) | view | — |
-| `—` | `owner()` → (address) | view | — |
-| `—` | `ownerOf(uint256)` → (address) | view | — |
-| `—` | `pendingOwner()` → (address) | view | — |
-| `—` | `pendingWithdrawals(address)` → (uint256) | view | — |
-| `—` | `register(string,tuple[])` → (uint256) | payable | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `register(string)` → (uint256) | payable | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `registrationBond()` → (uint256) | view | — |
-| `—` | `renounceOwnership()` | nonpayable | — |
-| `—` | `safeTransferFrom(address,address,uint256)` | nonpayable | — |
-| `—` | `safeTransferFrom(address,address,uint256,bytes)` | nonpayable | — |
-| `—` | `setAgentURI(uint256,string)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `setAgentWallet(uint256,address,uint256,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry @dev `signature` is an EIP-712 `AgentWalletSet` authorisation produced by `newWallet`. EOAs are verified with `ecrecover`, contract wallets (e.g. Privy passkey smart accounts) with… |
-| `—` | `setApprovalForAll(address,bool)` | nonpayable | — |
-| `—` | `setEnforcer(address)` | nonpayable | @param newEnforcer The AvairaStakeRegistry that propagates BAN outcomes. Zero is rejected: with no enforcer a BAN at the stake layer could never reach the identity, and the terminal state would silently stop being ter… |
-| `—` | `setMetadata(uint256,string,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `setRegistrationBond(uint256)` | nonpayable | — |
-| `—` | `setTreasury(address)` | nonpayable | — |
-| `—` | `statusOf(uint256)` → (uint8) | view | @inheritdoc IAvairaIdentityRegistry |
-| `—` | `supportsInterface(bytes4)` → (bool) | view | — |
-| `—` | `symbol()` → (string) | view | — |
-| `—` | `tokenURI(uint256)` → (string) | view | @inheritdoc ERC721URIStorage |
-| `—` | `totalBonds()` → (uint256) | view | @notice Total native MON held as registration bonds. |
-| `—` | `transferFrom(address,address,uint256)` | nonpayable | — |
-| `—` | `transferOwnership(address)` | nonpayable | — |
-| `—` | `treasury()` → (address) | view | — |
-| `—` | `unsetAgentWallet(uint256)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
-| `—` | `withdraw()` | nonpayable | @notice Withdraws a refund that could not be pushed to the recipient. @dev If the push fails again (e.g. the recipient is a contract that rejects native value in this code path) the credit is re-escrowed instead of re… |
+| `0xc5df39af` | `AGENT_WALLET_KEY()` → (string) | view | — |
+| `0x79ba5097` | `acceptOwnership()` | nonpayable | — |
+| `0xae4eeaaf` | `activeAgents()` → (uint256) | view | — |
+| `0x0d1cfcae` | `agentRegistry()` → (string) | view | @inheritdoc IERC8004IdentityRegistry |
+| `0x114f7da5` | `agentWalletNonce(uint256)` → (uint256) | view | — |
+| `0x095ea7b3` | `approve(address,uint256)` | nonpayable | — |
+| `0x70a08231` | `balanceOf(address)` → (uint256) | view | — |
+| `0x07940aa9` | `banAgent(uint256,string)` | nonpayable | @notice Terminal ban: forfeits the registration bond to the treasury. @dev Callable by the owner or the configured `enforcer` (AvairaStakeRegistry). The ERC-721 identity is retained so that onchain history stays audit… |
+| `0x9e49998c` | `banOperator(address)` | nonpayable | @notice Bans an entire operator address from minting new Avaira identities. @dev Used when BAN-severity slashing shows the operator, not just one agent, is malicious. |
+| `0xa59489bc` | `bannedOperators(address)` → (bool) | view | — |
+| `0x2abbd7e6` | `bondPaid(uint256)` → (uint256) | view | — |
+| `0x84b0196e` | `eip712Domain()` → (bytes1,string,string,uint256,address,bytes32,uint256[]) | view | — |
+| `0x0d14a0e2` | `enforcer()` → (address) | view | — |
+| `0x393e2e4b` | `escrowedRefunds()` → (uint256) | view | @notice Native MON escrowed for refunds that could not be pushed to their recipient. |
+| `0x2aa43faf` | `exitAgent(uint256)` | nonpayable | @notice Voluntary exit: burns the identity and refunds the registration bond. @dev Stakes held in `AvairaStakeRegistry` must be withdrawn separately. |
+| `0x00339509` | `getAgentWallet(uint256)` → (address) | view | @inheritdoc IERC8004IdentityRegistry |
+| `0x081812fc` | `getApproved(uint256)` → (address) | view | — |
+| `0xcb4799f2` | `getMetadata(uint256,string)` → (bytes) | view | @inheritdoc IERC8004IdentityRegistry |
+| `0x2b679e30` | `getMetadataKeys(uint256)` → (string[]) | view | @notice Enumerates the metadata keys written for `agentId`. |
+| `0xd46e019a` | `hashAgentWalletSet(uint256,address,uint256,uint256)` → (bytes32) | view | @notice EIP-712 digest an agent wallet must sign to be bound to `agentId`. |
+| `0x82afd23b` | `isActive(uint256)` → (bool) | view | @inheritdoc IAvairaIdentityRegistry |
+| `0xe985e9c5` | `isApprovedForAll(address,address)` → (bool) | view | — |
+| `0xc57a9c56` | `isBanned(uint256)` → (bool) | view | @inheritdoc IAvairaIdentityRegistry |
+| `0x06fdde03` | `name()` → (string) | view | — |
+| `0x30efc498` | `nextAgentId()` → (uint256) | view | — |
+| `0x8da5cb5b` | `owner()` → (address) | view | — |
+| `0x6352211e` | `ownerOf(uint256)` → (address) | view | — |
+| `0xe30c3978` | `pendingOwner()` → (address) | view | — |
+| `0xf3f43703` | `pendingWithdrawals(address)` → (uint256) | view | — |
+| `0xf03a52d5` | `register(string,tuple[])` → (uint256) | payable | @inheritdoc IERC8004IdentityRegistry |
+| `0xf2c298be` | `register(string)` → (uint256) | payable | @inheritdoc IERC8004IdentityRegistry |
+| `0x373b9dbd` | `registrationBond()` → (uint256) | view | — |
+| `0x715018a6` | `renounceOwnership()` | nonpayable | — |
+| `0x42842e0e` | `safeTransferFrom(address,address,uint256)` | nonpayable | — |
+| `0xb88d4fde` | `safeTransferFrom(address,address,uint256,bytes)` | nonpayable | — |
+| `0x0af28bd3` | `setAgentURI(uint256,string)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
+| `0x2d1ef5ae` | `setAgentWallet(uint256,address,uint256,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry @dev `signature` is an EIP-712 `AgentWalletSet` authorisation produced by `newWallet`. EOAs are verified with `ecrecover`, contract wallets (e.g. Privy passkey smart accounts) with… |
+| `0xa22cb465` | `setApprovalForAll(address,bool)` | nonpayable | — |
+| `0xcb6e3ef7` | `setEnforcer(address)` | nonpayable | @param newEnforcer The AvairaStakeRegistry that propagates BAN outcomes. Zero is rejected: with no enforcer a BAN at the stake layer could never reach the identity, and the terminal state would silently stop being ter… |
+| `0x466648da` | `setMetadata(uint256,string,bytes)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
+| `0x2b8add56` | `setRegistrationBond(uint256)` | nonpayable | — |
+| `0xf0f44260` | `setTreasury(address)` | nonpayable | — |
+| `0xad35efd4` | `statusOf(uint256)` → (uint8) | view | @inheritdoc IAvairaIdentityRegistry |
+| `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
+| `0x95d89b41` | `symbol()` → (string) | view | — |
+| `0xc87b56dd` | `tokenURI(uint256)` → (string) | view | @inheritdoc ERC721URIStorage |
+| `0xf263c470` | `totalBonds()` → (uint256) | view | @notice Total native MON held as registration bonds. |
+| `0x23b872dd` | `transferFrom(address,address,uint256)` | nonpayable | — |
+| `0xf2fde38b` | `transferOwnership(address)` | nonpayable | — |
+| `0x61d027b3` | `treasury()` → (address) | view | — |
+| `0x3fddcf19` | `unsetAgentWallet(uint256)` | nonpayable | @inheritdoc IERC8004IdentityRegistry |
+| `0x3ccfd60b` | `withdraw()` | nonpayable | @notice Withdraws a refund that could not be pushed to the recipient. @dev If the push fails again (e.g. the recipient is a contract that rejects native value in this code path) the credit is re-escrowed instead of re… |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `—` | `AgentIsBanned(uint256)` | `?:?` | — |
-| `—` | `AgentIsNotRegistered(uint256)` | `?:?` | — |
-| `—` | `ERC721IncorrectOwner(address,uint256,address)` | `?:?` | — |
-| `—` | `ERC721InsufficientApproval(address,uint256)` | `?:?` | — |
-| `—` | `ERC721InvalidApprover(address)` | `?:?` | — |
-| `—` | `ERC721InvalidOperator(address)` | `?:?` | — |
-| `—` | `ERC721InvalidOwner(address)` | `?:?` | — |
-| `—` | `ERC721InvalidReceiver(address)` | `?:?` | — |
-| `—` | `ERC721InvalidSender(address)` | `?:?` | — |
-| `—` | `ERC721NonexistentToken(uint256)` | `?:?` | — |
-| `—` | `InsufficientBond(uint256,uint256)` | `?:?` | — |
-| `—` | `InvalidAgentWalletSignature(address,uint256)` | `?:?` | — |
-| `—` | `InvalidMetadataKey()` | `?:?` | — |
-| `—` | `InvalidShortString()` | `?:?` | — |
-| `—` | `InvalidURI()` | `?:?` | — |
-| `—` | `MetadataTooLarge()` | `?:?` | — |
-| `—` | `NotAgentOwnerOrApproved(uint256)` | `?:?` | — |
-| `—` | `NotAuthorized(address)` | `?:?` | — |
-| `—` | `OperatorIsBanned(address)` | `?:?` | — |
-| `—` | `OwnableInvalidOwner(address)` | `?:?` | — |
-| `—` | `OwnableUnauthorizedAccount(address)` | `?:?` | — |
-| `—` | `ReentrancyGuardReentrantCall()` | `?:?` | — |
-| `—` | `ReservedMetadataKey()` | `?:?` | — |
-| `—` | `SignatureExpired(uint256)` | `?:?` | — |
-| `—` | `StringTooLong(string)` | `?:?` | — |
-| `—` | `StringsInsufficientHexLength(uint256,uint256)` | `?:?` | — |
-| `—` | `WalletUnchanged()` | `?:?` | — |
+| `0x56172fd6` | `AgentIsBanned(uint256)` | `AvairaIntentVault:40` | — |
+| `0x83043b6d` | `AgentIsNotRegistered(uint256)` | `AvairaStakeRegistry:33` | — |
+| `0x64283d7b` | `ERC721IncorrectOwner(address,uint256,address)` | `AvairaIdentityRegistry:0` | — |
+| `0x177e802f` | `ERC721InsufficientApproval(address,uint256)` | `AvairaIdentityRegistry:0` | — |
+| `0xa9fbf51f` | `ERC721InvalidApprover(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x5b08ba18` | `ERC721InvalidOperator(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x89c62b64` | `ERC721InvalidOwner(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x64a0ae92` | `ERC721InvalidReceiver(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x73c6ac6e` | `ERC721InvalidSender(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x7e273289` | `ERC721NonexistentToken(uint256)` | `AvairaIdentityRegistry:0` | — |
+| `0x44d4caf7` | `InsufficientBond(uint256,uint256)` | `AvairaIdentityRegistry:37` | — |
+| `0x14cc9103` | `InvalidAgentWalletSignature(address,uint256)` | `AvairaIdentityRegistry:47` | — |
+| `0x86ea3abb` | `InvalidMetadataKey()` | `AvairaIdentityRegistry:39` | — |
+| `0xb3512b0c` | `InvalidShortString()` | `AvairaIdentityRegistry:0` | — |
+| `0x3ba01911` | `InvalidURI()` | `AvairaIdentityRegistry:38` | — |
+| `0xa197fa01` | `MetadataTooLarge()` | `AvairaIdentityRegistry:41` | — |
+| `0xfe5fcca0` | `NotAgentOwnerOrApproved(uint256)` | `AvairaIdentityRegistry:42` | — |
+| `0x4a0bfec1` | `NotAuthorized(address)` | `AvairaIdentityRegistry:49` | — |
+| `0xd7c94638` | `OperatorIsBanned(address)` | `AvairaIdentityRegistry:45` | — |
+| `0x1e4fbdf7` | `OwnableInvalidOwner(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x118cdaa7` | `OwnableUnauthorizedAccount(address)` | `AvairaIdentityRegistry:0` | — |
+| `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
+| `0xd3356558` | `ReservedMetadataKey()` | `AvairaIdentityRegistry:40` | — |
+| `0xcd21db4f` | `SignatureExpired(uint256)` | `AvairaIdentityRegistry:46` | — |
+| `0x305a27a9` | `StringTooLong(string)` | `AvairaIdentityRegistry:0` | — |
+| `0xe22e27eb` | `StringsInsufficientHexLength(uint256,uint256)` | `AvairaIdentityRegistry:0` | — |
+| `0x5d8e8dea` | `WalletUnchanged()` | `AvairaIdentityRegistry:48` | — |
 
 ## Events
 

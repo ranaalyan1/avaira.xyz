@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -447,3 +448,32 @@ def test_splice_is_reversible_and_keeps_surrounding_text():
     assert "stale" not in updated
     # re-splicing the same section is a no-op — this is what --check relies on
     assert gen_deploy_section.splice(updated, fresh) == updated
+
+
+# --- specs generator: a degraded interpreter must not certify the specs ---------------
+
+def test_specs_check_refuses_to_certify_without_keccak(monkeypatch, capsys):
+    """Without eth_utils every selector renders as an em-dash.
+
+    Before this guard, `--check` compared those dashes against committed dashes and
+    reported "specs fresh" — which is how 8 specs with no selectors were once committed.
+    """
+    import tools.gen_contract_specs as specs
+
+    monkeypatch.setattr(specs, "_KECCAK", False, raising=False)
+    assert specs.keccak4("BPS()") == "—", "fixture must simulate the missing backend"
+
+    monkeypatch.setattr(sys, "argv", ["gen_contract_specs.py", "--check"])
+    rc = specs.main()
+
+    assert rc != 0, "a run that cannot compute selectors must not exit 0"
+    assert "cannot verify specs" in capsys.readouterr().err
+
+
+def test_specs_check_accepts_a_real_backend():
+    """The guard must not fire when keccak is available and the specs are current."""
+    import tools.gen_contract_specs as specs
+
+    if specs.keccak4("BPS()") == "—":
+        pytest.skip("eth_utils unavailable in this interpreter")
+    assert specs.keccak4("BPS()") == "0x249d39e9"  # independently recomputed keccak

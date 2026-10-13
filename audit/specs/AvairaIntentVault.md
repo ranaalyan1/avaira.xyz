@@ -21,60 +21,60 @@
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `—` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
-| `—` | `allowedActionsOf(uint256,bytes32)` → (string[]) | view | @notice Actions the agent committed to for `intentHash`. |
-| `—` | `attestOutcome(uint256,bytes32,bytes32,bytes32)` | nonpayable | @inheritdoc IAvairaIntentVault |
-| `—` | `challengeDeviation(uint256,bytes32,(uint256, bytes32, string, uint256, uint256),bytes32[])` | nonpayable | @inheritdoc IAvairaIntentVault @dev Flow: verify the leaf against the root the agent itself anchored, then check the leaf against the envelope the agent itself committed. A valid proof slashes the agent (SUSPENSION by… |
-| `—` | `challengeWindow()` → (uint64) | view | — |
-| `—` | `challengerBond()` → (uint256) | view | — |
-| `—` | `checkGate(uint256,bytes32,bytes32)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
-| `—` | `checkGate(uint256,bytes32)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
-| `—` | `checkGate(uint256)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
-| `—` | `commitIntent(uint256,bytes32,(uint256, string[], uint64))` | nonpayable | @inheritdoc IAvairaIntentVault @dev `intentHash` MUST commit to the full plan *and* the envelope, and MUST be unique per attempt (include a nonce), because one intent = one execution. |
-| `—` | `getIntent(uint256,bytes32)` → ((uint256, bytes32, uint256, uint64, uint64, uint64, bytes32, bytes32, bool, bool, bool, address)) | view | @notice Full intent record. |
-| `—` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
-| `—` | `grantRole(bytes32,address)` | nonpayable | — |
-| `—` | `hasRole(bytes32,address)` → (bool) | view | — |
-| `—` | `identityRegistry()` → (address) | view | — |
-| `—` | `isChallengeOpen(uint256,bytes32)` → (bool) | view | @notice True when an outcome can still be challenged. |
-| `—` | `recordGateDecision(uint256,bytes32,bool,uint8,uint32)` | nonpayable | @notice Optional onchain trace of a gate decision (the view path stays free). @dev Only the agent's own operator may record, so the audit trail cannot be poisoned. |
-| `—` | `renounceRole(bytes32,address)` | nonpayable | — |
-| `—` | `revokeRole(bytes32,address)` | nonpayable | — |
-| `—` | `setChallengeWindow(uint64)` | nonpayable | — |
-| `—` | `setChallengerBond(uint256)` | nonpayable | — |
-| `—` | `setStakeRegistry(address)` | nonpayable | — |
-| `—` | `setTreasury(address)` | nonpayable | — |
-| `—` | `stakeRegistry()` → (address) | view | — |
-| `—` | `stakeToken()` → (address) | view | — |
-| `—` | `supportsInterface(bytes4)` → (bool) | view | — |
-| `—` | `treasury()` → (address) | view | — |
+| `0xa217fddf` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
+| `0xcd8c27da` | `allowedActionsOf(uint256,bytes32)` → (string[]) | view | @notice Actions the agent committed to for `intentHash`. |
+| `0xa17f9809` | `attestOutcome(uint256,bytes32,bytes32,bytes32)` | nonpayable | @inheritdoc IAvairaIntentVault |
+| `0xac08c923` | `challengeDeviation(uint256,bytes32,(uint256, bytes32, string, uint256, uint256),bytes32[])` | nonpayable | @inheritdoc IAvairaIntentVault @dev Flow: verify the leaf against the root the agent itself anchored, then check the leaf against the envelope the agent itself committed. A valid proof slashes the agent (SUSPENSION by… |
+| `0x861a1412` | `challengeWindow()` → (uint64) | view | — |
+| `0x68ccdc86` | `challengerBond()` → (uint256) | view | — |
+| `0x2b3892b2` | `checkGate(uint256,bytes32,bytes32)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
+| `0x45974922` | `checkGate(uint256,bytes32)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
+| `0xe93e3e2c` | `checkGate(uint256)` → (bool,uint8,uint8) | view | @inheritdoc IAvairaIntentVault @dev Free `view` call — the SDK never waits for a transaction to gate an action. |
+| `0xa63b854b` | `commitIntent(uint256,bytes32,(uint256, string[], uint64))` | nonpayable | @inheritdoc IAvairaIntentVault @dev `intentHash` MUST commit to the full plan *and* the envelope, and MUST be unique per attempt (include a nonce), because one intent = one execution. |
+| `0x6dd0f624` | `getIntent(uint256,bytes32)` → ((uint256, bytes32, uint256, uint64, uint64, uint64, bytes32, bytes32, bool, bool, bool, address)) | view | @notice Full intent record. |
+| `0x248a9ca3` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
+| `0x2f2ff15d` | `grantRole(bytes32,address)` | nonpayable | — |
+| `0x91d14854` | `hasRole(bytes32,address)` → (bool) | view | — |
+| `0x134e18f4` | `identityRegistry()` → (address) | view | — |
+| `0x17c8a7ce` | `isChallengeOpen(uint256,bytes32)` → (bool) | view | @notice True when an outcome can still be challenged. |
+| `0x7b981f6d` | `recordGateDecision(uint256,bytes32,bool,uint8,uint32)` | nonpayable | @notice Optional onchain trace of a gate decision (the view path stays free). @dev Only the agent's own operator may record, so the audit trail cannot be poisoned. |
+| `0x36568abe` | `renounceRole(bytes32,address)` | nonpayable | — |
+| `0xd547741f` | `revokeRole(bytes32,address)` | nonpayable | — |
+| `0xda75c01e` | `setChallengeWindow(uint64)` | nonpayable | — |
+| `0x60fe465d` | `setChallengerBond(uint256)` | nonpayable | — |
+| `0xe3b05f2f` | `setStakeRegistry(address)` | nonpayable | — |
+| `0xf0f44260` | `setTreasury(address)` | nonpayable | — |
+| `0x68304835` | `stakeRegistry()` → (address) | view | — |
+| `0x51ed6a30` | `stakeToken()` → (address) | view | — |
+| `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
+| `0x61d027b3` | `treasury()` → (address) | view | — |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `—` | `AccessControlBadConfirmation()` | `?:?` | — |
-| `—` | `AccessControlUnauthorizedAccount(address,bytes32)` | `?:?` | — |
-| `—` | `ActionTooLong(uint256)` | `?:?` | — |
-| `—` | `AgentIsBanned(uint256)` | `?:?` | — |
-| `—` | `AlreadyChallenged(uint256,bytes32)` | `?:?` | — |
-| `—` | `ChallengeWindowClosed(uint64)` | `?:?` | — |
-| `—` | `ChallengeWindowOpen(uint64)` | `?:?` | — |
-| `—` | `ChallengeWindowTooLarge(uint64,uint64)` | `?:?` | @notice The challenge window would push `attestOutcome`'s deadline past `type(uint64).max`. |
-| `—` | `EnvelopeExpired(uint64)` | `?:?` | — |
-| `—` | `EnvelopeMismatch(bytes32,bytes32)` | `?:?` | — |
-| `—` | `IntentAlreadyCommitted(uint256,bytes32)` | `?:?` | — |
-| `—` | `InvalidMerkleProof()` | `?:?` | — |
-| `—` | `LeafMismatch()` | `?:?` | — |
-| `—` | `NoDeviation()` | `?:?` | — |
-| `—` | `NotAgentOperator(uint256,address)` | `?:?` | — |
-| `—` | `OutcomeAlreadyAttested(uint256,bytes32)` | `?:?` | — |
-| `—` | `OutcomeNotAttested(uint256,bytes32)` | `?:?` | — |
-| `—` | `ReentrancyGuardReentrantCall()` | `?:?` | — |
-| `—` | `SafeERC20FailedOperation(address)` | `?:?` | — |
-| `—` | `TooManyActions(uint256)` | `?:?` | — |
-| `—` | `UnknownIntent(uint256,bytes32)` | `?:?` | — |
-| `—` | `ZeroAddress()` | `?:?` | — |
+| `0x6697b232` | `AccessControlBadConfirmation()` | `AvairaIntentVault:0` | — |
+| `0xe2517d3f` | `AccessControlUnauthorizedAccount(address,bytes32)` | `AvairaIntentVault:0` | — |
+| `0x5d9dcfdb` | `ActionTooLong(uint256)` | `AvairaIntentVault:45` | — |
+| `0x56172fd6` | `AgentIsBanned(uint256)` | `AvairaIntentVault:40` | — |
+| `0xc3baf2f7` | `AlreadyChallenged(uint256,bytes32)` | `AvairaIntentVault:51` | — |
+| `0x7080c4c8` | `ChallengeWindowClosed(uint64)` | `AvairaIntentVault:49` | — |
+| `0x9db52e49` | `ChallengeWindowOpen(uint64)` | `AvairaIntentVault:50` | — |
+| `0xe361f212` | `ChallengeWindowTooLarge(uint64,uint64)` | `AvairaIntentVault:58` | @notice The challenge window would push `attestOutcome`'s deadline past `type(uint64).max`. |
+| `0xdee1b640` | `EnvelopeExpired(uint64)` | `AvairaIntentVault:43` | — |
+| `0x1e520454` | `EnvelopeMismatch(bytes32,bytes32)` | `AvairaIntentVault:55` | — |
+| `0x9de40b55` | `IntentAlreadyCommitted(uint256,bytes32)` | `AvairaIntentVault:42` | — |
+| `0xb05e92fa` | `InvalidMerkleProof()` | `AvairaIntentVault:53` | — |
+| `0x57457fd7` | `LeafMismatch()` | `AvairaIntentVault:52` | — |
+| `0x7e65ca74` | `NoDeviation()` | `AvairaIntentVault:54` | — |
+| `0x4b03c457` | `NotAgentOperator(uint256,address)` | `AvairaIntentVault:41` | — |
+| `0x85b8a7aa` | `OutcomeAlreadyAttested(uint256,bytes32)` | `AvairaIntentVault:47` | — |
+| `0xee7288c5` | `OutcomeNotAttested(uint256,bytes32)` | `AvairaIntentVault:48` | — |
+| `0x3ee5aeb5` | `ReentrancyGuardReentrantCall()` | `AvairaIntentVault:0` | — |
+| `0x5274afe7` | `SafeERC20FailedOperation(address)` | `AvairaIntentVault:0` | — |
+| `0x20709488` | `TooManyActions(uint256)` | `AvairaIntentVault:44` | — |
+| `0x1484ae18` | `UnknownIntent(uint256,bytes32)` | `AvairaIntentVault:46` | — |
+| `0xd92e233d` | `ZeroAddress()` | `AvairaIntentVault:56` | — |
 
 ## Events
 

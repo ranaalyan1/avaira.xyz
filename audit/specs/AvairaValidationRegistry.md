@@ -21,46 +21,46 @@
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `—` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
-| `—` | `TAG_HARD_FINAL()` → (string) | view | — |
-| `—` | `TAG_KIMI_ADVERSARIAL()` → (string) | view | — |
-| `—` | `VALIDATOR_ADMIN_ROLE()` → (bytes32) | view | — |
-| `—` | `getAgentValidations(uint256)` → (bytes32[]) | view | @inheritdoc IERC8004ValidationRegistry |
-| `—` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
-| `—` | `getSummary(uint256,address[],string)` → (uint64,uint8) | view | @inheritdoc IERC8004ValidationRegistry @dev Averages the latest response of each supplied validator, optionally filtered by tag. |
-| `—` | `getValidationResponses(bytes32)` → (tuple[]) | view | @notice Every response recorded for `requestHash`, oldest first. |
-| `—` | `getValidationStatus(bytes32)` → (address,uint256,uint8,string,bytes32,string,uint256) | view | @inheritdoc IERC8004ValidationRegistry |
-| `—` | `grantRole(bytes32,address)` | nonpayable | — |
-| `—` | `hasRole(bytes32,address)` → (bool) | view | — |
-| `—` | `identityRegistry()` → (address) | view | — |
-| `—` | `isValidator(address)` → (bool) | view | — |
-| `—` | `latestResponse(bytes32)` → (uint8) | view | @notice Latest response value for `requestHash` (0 when unanswered). |
-| `—` | `registerValidator(address,string)` | nonpayable | — |
-| `—` | `removeValidator(address)` | nonpayable | — |
-| `—` | `renounceRole(bytes32,address)` | nonpayable | — |
-| `—` | `revokeRole(bytes32,address)` | nonpayable | — |
-| `—` | `supportsInterface(bytes4)` → (bool) | view | — |
-| `—` | `validationRequest(address,uint256,string,bytes32)` | nonpayable | @inheritdoc IERC8004ValidationRegistry @dev Callable by the agent's owner or an approved operator. |
-| `—` | `validationResponse(bytes32,uint8,string,bytes32,string)` | nonpayable | @inheritdoc IERC8004ValidationRegistry @dev Only the validator named in the request may answer; `response` is 0–100. |
-| `—` | `validatorMetadataURI(address)` → (string) | view | — |
-| `—` | `validators()` → (address[]) | view | @notice Every registered validator address. |
+| `0xa217fddf` | `DEFAULT_ADMIN_ROLE()` → (bytes32) | view | — |
+| `0xb2ec8ad4` | `TAG_HARD_FINAL()` → (string) | view | — |
+| `0x2783dbcc` | `TAG_KIMI_ADVERSARIAL()` → (string) | view | — |
+| `0x386924de` | `VALIDATOR_ADMIN_ROLE()` → (bytes32) | view | — |
+| `0x8d5d0c2d` | `getAgentValidations(uint256)` → (bytes32[]) | view | @inheritdoc IERC8004ValidationRegistry |
+| `0x248a9ca3` | `getRoleAdmin(bytes32)` → (bytes32) | view | — |
+| `0x1b7cabd6` | `getSummary(uint256,address[],string)` → (uint64,uint8) | view | @inheritdoc IERC8004ValidationRegistry @dev Averages the latest response of each supplied validator, optionally filtered by tag. |
+| `0x23ed7893` | `getValidationResponses(bytes32)` → (tuple[]) | view | @notice Every response recorded for `requestHash`, oldest first. |
+| `0xff2febfc` | `getValidationStatus(bytes32)` → (address,uint256,uint8,string,bytes32,string,uint256) | view | @inheritdoc IERC8004ValidationRegistry |
+| `0x2f2ff15d` | `grantRole(bytes32,address)` | nonpayable | — |
+| `0x91d14854` | `hasRole(bytes32,address)` → (bool) | view | — |
+| `0x134e18f4` | `identityRegistry()` → (address) | view | — |
+| `0xfacd743b` | `isValidator(address)` → (bool) | view | — |
+| `0x392a1b3f` | `latestResponse(bytes32)` → (uint8) | view | @notice Latest response value for `requestHash` (0 when unanswered). |
+| `0x75c0f6b2` | `registerValidator(address,string)` | nonpayable | — |
+| `0x40a141ff` | `removeValidator(address)` | nonpayable | — |
+| `0x36568abe` | `renounceRole(bytes32,address)` | nonpayable | — |
+| `0xd547741f` | `revokeRole(bytes32,address)` | nonpayable | — |
+| `0x01ffc9a7` | `supportsInterface(bytes4)` → (bool) | view | — |
+| `0xaaf400c4` | `validationRequest(address,uint256,string,bytes32)` | nonpayable | @inheritdoc IERC8004ValidationRegistry @dev Callable by the agent's owner or an approved operator. |
+| `0x3d659a96` | `validationResponse(bytes32,uint8,string,bytes32,string)` | nonpayable | @inheritdoc IERC8004ValidationRegistry @dev Only the validator named in the request may answer; `response` is 0–100. |
+| `0x08527f28` | `validatorMetadataURI(address)` → (string) | view | — |
+| `0xca1e7819` | `validators()` → (address[]) | view | @notice Every registered validator address. |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `—` | `AccessControlBadConfirmation()` | `?:?` | — |
-| `—` | `AccessControlUnauthorizedAccount(address,bytes32)` | `?:?` | — |
-| `—` | `LengthMismatch()` | `?:?` | — |
-| `—` | `NotAssignedValidator(address,bytes32)` | `?:?` | — |
-| `—` | `NotRequestingAgent(address,uint256)` | `?:?` | — |
-| `—` | `RequestAlreadyExists(bytes32)` | `?:?` | — |
-| `—` | `RequestFinalised(bytes32)` | `?:?` | — |
-| `—` | `ResponseOutOfRange(uint8)` | `?:?` | — |
-| `—` | `UnknownRequest(bytes32)` | `?:?` | — |
-| `—` | `ValidatorAlreadyRegistered(address)` | `?:?` | — |
-| `—` | `ValidatorNotRegistered(address)` | `?:?` | — |
-| `—` | `ZeroAddress()` | `?:?` | — |
+| `0x6697b232` | `AccessControlBadConfirmation()` | `AvairaIntentVault:0` | — |
+| `0xe2517d3f` | `AccessControlUnauthorizedAccount(address,bytes32)` | `AvairaIntentVault:0` | — |
+| `0xff633a38` | `LengthMismatch()` | `AvairaReputationRegistry:52` | — |
+| `0xe5b8bfcf` | `NotAssignedValidator(address,bytes32)` | `AvairaValidationRegistry:28` | — |
+| `0x38870d8d` | `NotRequestingAgent(address,uint256)` | `AvairaValidationRegistry:27` | — |
+| `0xedee945a` | `RequestAlreadyExists(bytes32)` | `AvairaValidationRegistry:25` | — |
+| `0xf98e17b8` | `RequestFinalised(bytes32)` | `AvairaValidationRegistry:30` | — |
+| `0xe3a69ed6` | `ResponseOutOfRange(uint8)` | `AvairaValidationRegistry:29` | — |
+| `0x7bbe34c9` | `UnknownRequest(bytes32)` | `AvairaValidationRegistry:26` | — |
+| `0xb1982713` | `ValidatorAlreadyRegistered(address)` | `AvairaValidationRegistry:24` | — |
+| `0x4049c7c6` | `ValidatorNotRegistered(address)` | `AvairaValidationRegistry:23` | — |
+| `0xd92e233d` | `ZeroAddress()` | `AvairaIntentVault:56` | — |
 
 ## Events
 

@@ -35,5 +35,5 @@ layout every SDK must reproduce (`INV-CANON-01`, `PARITY.md`).
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `—` | `InvalidProofLength()` | `?:?` | — |
+| `0x4dc5f6a4` | `InvalidProofLength()` | `MerkleLib:12` | — |
 

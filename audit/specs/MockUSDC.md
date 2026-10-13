@@ -21,41 +21,41 @@
 
 | selector | signature | mutability | NatSpec |
 | --- | --- | --- | --- |
-| `—` | `DOMAIN_SEPARATOR()` → (bytes32) | view | — |
-| `—` | `RECEIVE_WITH_AUTHORIZATION_TYPEHASH()` → (bytes32) | view | — |
-| `—` | `TRANSFER_WITH_AUTHORIZATION_TYPEHASH()` → (bytes32) | view | — |
-| `—` | `allowance(address,address)` → (uint256) | view | — |
-| `—` | `approve(address,uint256)` → (bool) | nonpayable | — |
-| `—` | `authorizationState(address,bytes32)` → (bool) | view | — |
-| `—` | `balanceOf(address)` → (uint256) | view | — |
-| `—` | `decimals()` → (uint8) | pure | — |
-| `—` | `eip712Domain()` → (bytes1,string,string,uint256,address,bytes32,uint256[]) | view | — |
-| `—` | `mint(address,uint256)` | nonpayable | @notice Test faucet; capped so a single call cannot drain a whale balance. |
-| `—` | `name()` → (string) | view | — |
-| `—` | `receiveWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)` | nonpayable | — |
-| `—` | `symbol()` → (string) | view | — |
-| `—` | `totalSupply()` → (uint256) | view | — |
-| `—` | `transfer(address,uint256)` → (bool) | nonpayable | — |
-| `—` | `transferFrom(address,address,uint256)` → (bool) | nonpayable | — |
-| `—` | `transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)` | nonpayable | — |
+| `0x3644e515` | `DOMAIN_SEPARATOR()` → (bytes32) | view | — |
+| `0x7f2eecc3` | `RECEIVE_WITH_AUTHORIZATION_TYPEHASH()` → (bytes32) | view | — |
+| `0xa0cc6a68` | `TRANSFER_WITH_AUTHORIZATION_TYPEHASH()` → (bytes32) | view | — |
+| `0xdd62ed3e` | `allowance(address,address)` → (uint256) | view | — |
+| `0x095ea7b3` | `approve(address,uint256)` → (bool) | nonpayable | — |
+| `0xe94a0102` | `authorizationState(address,bytes32)` → (bool) | view | — |
+| `0x70a08231` | `balanceOf(address)` → (uint256) | view | — |
+| `0x313ce567` | `decimals()` → (uint8) | pure | — |
+| `0x84b0196e` | `eip712Domain()` → (bytes1,string,string,uint256,address,bytes32,uint256[]) | view | — |
+| `0x40c10f19` | `mint(address,uint256)` | nonpayable | @notice Test faucet; capped so a single call cannot drain a whale balance. |
+| `0x06fdde03` | `name()` → (string) | view | — |
+| `0x88b7ab63` | `receiveWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)` | nonpayable | — |
+| `0x95d89b41` | `symbol()` → (string) | view | — |
+| `0x18160ddd` | `totalSupply()` → (uint256) | view | — |
+| `0xa9059cbb` | `transfer(address,uint256)` → (bool) | nonpayable | — |
+| `0x23b872dd` | `transferFrom(address,address,uint256)` → (bool) | nonpayable | — |
+| `0xcf092995` | `transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)` | nonpayable | — |
 
 ## Custom errors
 
 | selector | signature | declared | why it exists |
 | --- | --- | --- | --- |
-| `—` | `AuthorizationExpired()` | `?:?` | — |
-| `—` | `AuthorizationNonceAlreadyUsed()` | `?:?` | — |
-| `—` | `AuthorizationNotYetValid()` | `?:?` | — |
-| `—` | `CallerMustBePayee()` | `?:?` | — |
-| `—` | `ERC20InsufficientAllowance(address,uint256,uint256)` | `?:?` | — |
-| `—` | `ERC20InsufficientBalance(address,uint256,uint256)` | `?:?` | — |
-| `—` | `ERC20InvalidApprover(address)` | `?:?` | — |
-| `—` | `ERC20InvalidReceiver(address)` | `?:?` | — |
-| `—` | `ERC20InvalidSender(address)` | `?:?` | — |
-| `—` | `ERC20InvalidSpender(address)` | `?:?` | — |
-| `—` | `InvalidAuthorizationSignature()` | `?:?` | — |
-| `—` | `InvalidShortString()` | `?:?` | — |
-| `—` | `StringTooLong(string)` | `?:?` | — |
+| `0x0f05f5bf` | `AuthorizationExpired()` | `MockUSDC:23` | — |
+| `0x27e0b1e1` | `AuthorizationNonceAlreadyUsed()` | `MockUSDC:24` | — |
+| `0xdf8e4372` | `AuthorizationNotYetValid()` | `MockUSDC:22` | — |
+| `0x5454b17d` | `CallerMustBePayee()` | `MockUSDC:25` | — |
+| `0xfb8f41b2` | `ERC20InsufficientAllowance(address,uint256,uint256)` | `MockUSDC:0` | — |
+| `0xe450d38c` | `ERC20InsufficientBalance(address,uint256,uint256)` | `MockUSDC:0` | — |
+| `0xe602df05` | `ERC20InvalidApprover(address)` | `MockUSDC:0` | — |
+| `0xec442f05` | `ERC20InvalidReceiver(address)` | `MockUSDC:0` | — |
+| `0x96c6fd1e` | `ERC20InvalidSender(address)` | `MockUSDC:0` | — |
+| `0x94280d62` | `ERC20InvalidSpender(address)` | `MockUSDC:0` | — |
+| `0x391e7a64` | `InvalidAuthorizationSignature()` | `MockUSDC:26` | — |
+| `0xb3512b0c` | `InvalidShortString()` | `AvairaIdentityRegistry:0` | — |
+| `0x305a27a9` | `StringTooLong(string)` | `AvairaIdentityRegistry:0` | — |
 
 ## Events
 

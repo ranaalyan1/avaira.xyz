@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Avaira — deploy the full Monad-native stack, then verify every contract on the explorer.
+# Avaira — deploy the full Robinhood-native stack, then verify every contract on the explorer.
 #
 #   cd contracts && cp .env.example .env   # fill in DEPLOYER_PRIVATE_KEY
-#   make deploy-monad                      # or: ./scripts/deploy-monad.sh
+#   make deploy-robinhood                      # or: ./scripts/deploy-robinhood.sh
 #
 # Writes deployments/{chainId}.json, which the SDK, dashboard and README read.
 set -euo pipefail
@@ -16,9 +16,9 @@ if [[ -f .env ]]; then
   set +a
 fi
 
-# MONAD_DEPLOYER_KEY is accepted as an alias so the name used in the docs and the
+# ROBINHOOD_DEPLOYER_KEY is accepted as an alias so the name used in the docs and the
 # name used by other tooling both work; DEPLOYER_PRIVATE_KEY stays canonical.
-DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-${MONAD_DEPLOYER_KEY:-}}"
+DEPLOYER_PRIVATE_KEY="${DEPLOYER_PRIVATE_KEY:-${ROBINHOOD_DEPLOYER_KEY:-}}"
 export DEPLOYER_PRIVATE_KEY
 
 if [[ -z "$DEPLOYER_PRIVATE_KEY" ]]; then
@@ -26,16 +26,16 @@ if [[ -z "$DEPLOYER_PRIVATE_KEY" ]]; then
 ✗ no deployer key — nothing was broadcast.
 
   Three steps to a real deployment:
-    1. Fund a wallet at https://faucet.monad.xyz          (testnet MON)
+    1. Fund a wallet at https://faucet.testnet.chain.robinhood.com          (testnet MON)
     2. cd contracts && cp .env.example .env               then set DEPLOYER_PRIVATE_KEY=0x…
-    3. make deploy-monad                                  writes deployments/10143.json
+    3. make deploy-robinhood                                  writes deployments/46630.json
 
   No key yet? `make deploy-dry-run` proves the wiring in-process and spends nothing.
 MSG
   exit 1
 fi
 
-RPC="${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz}"
+RPC="${ROBINHOOD_TESTNET_RPC:-https://rpc.testnet.chain.robinhood.com}"
 CHAIN_ID=$(cast chain-id --rpc-url "$RPC")
 
 echo "── Avaira deploy ──────────────────────────────────────────"
@@ -48,7 +48,7 @@ echo "────────────────────────�
 # Sanity: refuse to broadcast an unfunded deploy.
 BALANCE_WEI=$(cast balance "$(cast wallet address --private-key "$DEPLOYER_PRIVATE_KEY")" --rpc-url "$RPC")
 if [[ "$BALANCE_WEI" == "0" ]]; then
-  echo "✗ deployer has 0 MON. Fund it first: https://testnet.monad.xyz (faucet)" >&2
+  echo "✗ deployer has 0 MON. Fund it first: https://faucet.testnet.chain.robinhood.com (faucet)" >&2
   exit 1
 fi
 
@@ -75,12 +75,12 @@ fi
 
 echo
 # Liveness first (is it deployed and wired?), then source verification (is it readable?).
-python3 "$REPO_ROOT/tools/verify_monad.py" --chain "$CHAIN_ID" || {
+python3 "$REPO_ROOT/tools/verify_robinhood.py" --chain "$CHAIN_ID" || {
   echo "! liveness check failed — the addresses in deployments/$CHAIN_ID.json are not all live" >&2
   exit 1
 }
 echo
-bash scripts/verify-monad.sh "$CHAIN_ID" || {
-  echo "! source verification failed — the deploy succeeded, re-run: make verify-monad-explorer" >&2
+bash scripts/verify-robinhood.sh "$CHAIN_ID" || {
+  echo "! source verification failed — the deploy succeeded, re-run: make verify-robinhood-explorer" >&2
   exit 1
 }

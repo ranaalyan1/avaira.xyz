@@ -1,7 +1,7 @@
 /**
  * The Avaira Score, in pure functions.
  *
- * Six weighted components, all derived from data a stranger can re-read from Monad:
+ * Six weighted components, all derived from data a stranger can re-read from Robinhood:
  *
  *   SuccessRate   30  share of committed intents that ended in an attested, undeviated outcome
  *   Consistency   20  stability of that success rate across time windows
@@ -187,7 +187,7 @@ export function computeComponents(inputs: ScoreInputs, nowSeconds: number): Comp
     points: WEIGHTS.ageOnNetwork * ageRatio,
     max: WEIGHTS.ageOnNetwork,
     raw: ageRatio,
-    detail: inputs.registeredAt === null ? "not registered" : `${ageDays.toFixed(1)} days on Monad`,
+    detail: inputs.registeredAt === null ? "not registered" : `${ageDays.toFixed(1)} days on Robinhood`,
   });
 
   /* ── AppealWinRate ───────────────────────────────────────────────────────── */

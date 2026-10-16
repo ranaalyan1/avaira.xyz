@@ -1,5 +1,5 @@
 /**
- * @avaira/sdk — accountability for the agent economy, enforced on Monad.
+ * @avaira/sdk — accountability for the agent economy, enforced on Robinhood.
  *
  * x402 lets agents pay. ERC-8004 lets agents be identified. Avaira makes agents
  * accountable in real time and turns that record into capital access.
@@ -8,9 +8,9 @@
  * import { Avaira, GateReason } from "@avaira/sdk";
  *
  * const avaira = new Avaira({
- *   rpcUrl: "https://testnet-rpc.monad.xyz",
- *   chainId: 10143,
- *   contracts: deployment,          // deployments/10143.json
+ *   rpcUrl: "https://rpc.testnet.chain.robinhood.com",
+ *   chainId: 46630,
+ *   contracts: deployment,          // deployments/46630.json
  *   privateKey: process.env.AVAIRA_PRIVATE_KEY,
  * });
  *
@@ -52,7 +52,7 @@ export type {
   RiskEnvelope,
   RunResult,
 } from "./types.js";
-export { monadMainnet, monadTestnet } from "./abi.js";
+export { robinhoodMainnet, robinhoodTestnet } from "./abi.js";
 export { loadDeployment, defaultRpcUrl } from "./deployment.js";
 export type { DeploymentManifest } from "./deployment.js";
 export {

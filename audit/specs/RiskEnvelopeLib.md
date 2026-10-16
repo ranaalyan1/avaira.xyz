@@ -10,7 +10,7 @@
 | | |
 | --- | --- |
 | source | `contracts/src/lib/AvairaTypes.sol` |
-| source sha256 | `b778b7f3c24fc3001fe6550316e47b44dcee7c8f0630d4e6f7000a79b5ae386b` |
+| source sha256 | `45956c9e2c4a755efe3b75f99f068a5d8c16699134cc5789a9336d8f9e500e0d` |
 | declared functions (internal — no ABI) | 3 |
 | events | 0 |
 | custom errors | 0 |

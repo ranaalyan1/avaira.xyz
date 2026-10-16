@@ -30,7 +30,7 @@ import {IAvairaStakeRegistry, IAvairaScoreReader, IEIP3009} from "../interfaces/
 ///
 ///      On top of that, `postAvairaScore` publishes the weighted Avaira Score
 ///      (0–100) computed offchain from objective settlement/validation data — never
-///      from raw feedback — and readable by any contract on Monad.
+///      from raw feedback — and readable by any contract on Robinhood.
 contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004ReputationRegistry, IAvairaScoreReader {
     /* --------------------------------- errors -------------------------------- */
 
@@ -131,7 +131,7 @@ contract AvairaReputationRegistry is AccessControl, ReentrancyGuard, IERC8004Rep
     IERC721 public immutable identityRegistry;
     IAvairaStakeRegistry public stakeRegistry;
 
-    /// @notice USDC (native on Monad) used for settlement-grounded feedback.
+    /// @notice USDC (native on Robinhood) used for settlement-grounded feedback.
     IERC20 public settlementToken;
 
     /// @notice Minimum settled payment that qualifies as grounding.

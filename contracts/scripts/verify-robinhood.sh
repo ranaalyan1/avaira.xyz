@@ -1,33 +1,33 @@
 #!/usr/bin/env bash
-# Avaira — verify every deployed contract on Monad.
+# Avaira — verify every deployed contract on Robinhood.
 #
-#   contracts/scripts/verify-monad.sh [chainId]
+#   contracts/scripts/verify-robinhood.sh [chainId]
 #
 # Reads deployments/{chainId}.json (written by Deploy.s.sol) and verifies each contract
-# with the correct constructor arguments. Monad has two public verification paths and we
-# try both: Sourcify (keyless, always available) and MonadScan/Blockscout (human-friendly
+# with the correct constructor arguments. Robinhood has two public verification paths and we
+# try both: Sourcify (keyless, always available) and RobinhoodScan/Blockscout (human-friendly
 # UI, needs no key either but rate-limits).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 source .env 2>/dev/null || true
 
-CHAIN_ID="${1:-10143}"
+CHAIN_ID="${1:-46630}"
 MANIFEST="deployments/${CHAIN_ID}.json"
-[ -f "$MANIFEST" ] || { echo "no manifest at $MANIFEST — run make deploy-monad first" >&2; exit 1; }
+[ -f "$MANIFEST" ] || { echo "no manifest at $MANIFEST — run make deploy-robinhood first" >&2; exit 1; }
 
 case "$CHAIN_ID" in
-  10143)
-    RPC_URL="${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz}"
-    EXPLORER="https://testnet.monadscan.com"
-    SOURCIFY="https://sourcify-api-monad.blockvision.org/"
-    BLOCKSCOUT="https://testnet.monadscan.com/api"
+  46630)
+    RPC_URL="${ROBINHOOD_TESTNET_RPC:-https://rpc.testnet.chain.robinhood.com}"
+    EXPLORER="https://explorer.testnet.chain.robinhood.com"
+    SOURCIFY="https://sourcify-api-robinhood.blockvision.org/"
+    BLOCKSCOUT="https://explorer.testnet.chain.robinhood.com/api"
     ;;
-  143)
-    RPC_URL="${MONAD_MAINNET_RPC:-https://rpc.monad.xyz}"
-    EXPLORER="https://monadscan.com"
-    SOURCIFY="https://sourcify-api-monad.blockvision.org/"
-    BLOCKSCOUT="https://monadscan.com/api"
+  4663)
+    RPC_URL="${ROBINHOOD_MAINNET_RPC:-https://rpc.mainnet.chain.robinhood.com}"
+    EXPLORER="https://robinhoodchain.blockscout.com"
+    SOURCIFY="https://sourcify-api-robinhood.blockvision.org/"
+    BLOCKSCOUT="https://robinhoodchain.blockscout.com/api"
     ;;
   *)
     echo "unknown chain id $CHAIN_ID" >&2; exit 1 ;;
@@ -69,10 +69,10 @@ verify() {
     if forge verify-contract "$address" "src/core/$name.sol:$name" \
         --chain "$CHAIN_ID" --verifier blockscout --verifier-url "$BLOCKSCOUT" \
         --constructor-args "$args" >/tmp/verify-$name.log 2>&1; then
-      echo "   ✓ verified on MonadScan (Blockscout)"
+      echo "   ✓ verified on RobinhoodScan (Blockscout)"
       ok=1
     else
-      echo "   ✗ MonadScan: $(tail -2 /tmp/verify-$name.log | tr '\n' ' ')"
+      echo "   ✗ RobinhoodScan: $(tail -2 /tmp/verify-$name.log | tr '\n' ' ')"
     fi
   fi
 

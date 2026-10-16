@@ -65,9 +65,9 @@ export interface ExecutedAction {
 }
 
 export interface AvairaConfig {
-  /** Monad RPC endpoint. */
+  /** Robinhood RPC endpoint. */
   rpcUrl: string;
-  /** Chain id (10143 testnet, 143 mainnet). */
+  /** Chain id (46630 testnet, 4663 mainnet). */
   chainId: number;
   /** Deployed contract addresses (see `deployments/{chainId}.json`). */
   contracts: {

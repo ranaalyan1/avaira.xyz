@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Deploy dry-run — prove `make deploy-monad` will wire correctly *before* funds move.
+"""Deploy dry-run — prove `make deploy-robinhood` will wire correctly *before* funds move.
 
-`make deploy-monad` broadcasts a real transaction with real MON. The one thing a
+`make deploy-robinhood` broadcasts a real transaction with real MON. The one thing a
 deployer wants to know beforehand is whether the six constructors and the
 cross-contract wiring in `contracts/script/Deploy.s.sol` still agree with each
 other — a mismatch there is discovered *after* paying gas, and the fix is another
@@ -23,8 +23,8 @@ Exit 0 = the deploy path is sound. Non-zero = do not spend MON yet.
     python3 tools/deploy_dry_run.py
     python3 tools/deploy_dry_run.py --json build/avaira/deploy-dry-run.json
 
-This is NOT a deployment and deliberately does not write `deployments/10143.json`
-— the addresses are ephemeral and exist only inside this process. `make verify-monad`
+This is NOT a deployment and deliberately does not write `deployments/46630.json`
+— the addresses are ephemeral and exist only inside this process. `make verify-robinhood`
 checks the real chain.
 """
 
@@ -166,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.quiet:
         print("── Avaira deploy dry-run (in-process py-evm) ──────────────")
         print(f"  deployer : {chain.deployer}")
-        print(f"  chain id : {chain.w3.eth.chain_id} (local; production target is 10143)")
+        print(f"  chain id : {chain.w3.eth.chain_id} (local; production target is 46630)")
         print()
         width = max(len(f.name) for f in findings)
         for f in findings:
@@ -182,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         print("    Fix contracts/script/Deploy.s.sol before spending MON.")
     else:
         print(f"  ✓ dry-run PASS — all {len(findings)} deployments and their wiring are correct.")
-        print("    The same sequence is what `make deploy-monad` broadcasts.")
+        print("    The same sequence is what `make deploy-robinhood` broadcasts.")
 
     if args.json:
         out = args.json if os.path.isabs(args.json) else os.path.join(REPO_ROOT, args.json)
@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
             "mode": "in-process-py-evm",
             "note": (
                 "Ephemeral local addresses — NOT a chain deployment. The real "
-                "manifest is deployments/10143.json, written by make deploy-monad."
+                "manifest is deployments/46630.json, written by make deploy-robinhood."
             ),
             "chainId": chain.w3.eth.chain_id,
             "deployer": chain.deployer,

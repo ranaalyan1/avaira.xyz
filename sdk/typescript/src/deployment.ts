@@ -46,7 +46,7 @@ function candidates(chainId: number, explicit?: string): string[] {
   return out;
 }
 
-export function loadDeployment(chainId = 10143, explicitPath?: string): DeploymentManifest {
+export function loadDeployment(chainId = 46630, explicitPath?: string): DeploymentManifest {
   for (const path of candidates(chainId, explicitPath)) {
     if (existsSync(path)) {
       const manifest = JSON.parse(readFileSync(path, "utf8")) as DeploymentManifest;
@@ -57,7 +57,7 @@ export function loadDeployment(chainId = 10143, explicitPath?: string): Deployme
     }
   }
   throw new Error(
-    `no deployment manifest for chain ${chainId}. Run \`make deploy-monad\` first, or point $AVAIRA_DEPLOYMENT at deployments/${chainId}.json`,
+    `no deployment manifest for chain ${chainId}. Run \`make deploy-robinhood\` first, or point $AVAIRA_DEPLOYMENT at deployments/${chainId}.json`,
   );
 }
 
@@ -65,10 +65,10 @@ export function loadDeployment(chainId = 10143, explicitPath?: string): Deployme
 export function defaultRpcUrl(chainId: number): string {
   if (process.env.AVAIRA_RPC_URL) return process.env.AVAIRA_RPC_URL;
   switch (chainId) {
-    case 10143:
-      return process.env.MONAD_TESTNET_RPC ?? "https://testnet-rpc.monad.xyz";
-    case 143:
-      return process.env.MONAD_MAINNET_RPC ?? "https://rpc.monad.xyz";
+    case 46630:
+      return process.env.ROBINHOOD_TESTNET_RPC ?? "https://rpc.testnet.chain.robinhood.com";
+    case 4663:
+      return process.env.ROBINHOOD_MAINNET_RPC ?? "https://rpc.mainnet.chain.robinhood.com";
     default:
       return "http://127.0.0.1:8545";
   }

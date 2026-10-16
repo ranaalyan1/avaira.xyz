@@ -1,7 +1,7 @@
 /**
  * Latency telemetry.
  *
- * The claim "Monad's 800ms finality makes a pre-execution gate possible" is worth
+ * The claim "Robinhood's 800ms finality makes a pre-execution gate possible" is worth
  * nothing without the measured number next to it. Every `run()` reports its timings
  * here, and the dashboard/README read them back from the metrics API.
  *

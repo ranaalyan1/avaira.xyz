@@ -18,7 +18,7 @@ import {MockUSDC} from "avaira/tokens/MockUSDC.sol";
 ///
 /// Usage:
 ///   forge script script/Deploy.s.sol:DeployAvaira \
-///     --rpc-url $MONAD_TESTNET_RPC --broadcast --slow \
+///     --rpc-url $ROBINHOOD_TESTNET_RPC --broadcast --slow \
 ///     --private-key $DEPLOYER_PRIVATE_KEY
 ///
 /// Environment (all optional except the RPC + key):

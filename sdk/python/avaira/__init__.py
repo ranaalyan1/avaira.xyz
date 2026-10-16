@@ -1,4 +1,4 @@
-"""Avaira v2 — accountability for the agent economy, enforced on Monad.
+"""Avaira v2 — accountability for the agent economy, enforced on Robinhood.
 
 x402 lets agents pay. ERC-8004 lets agents be identified. Avaira makes them accountable in
 real time: every action is committed before it happens, gated by stake and score, and

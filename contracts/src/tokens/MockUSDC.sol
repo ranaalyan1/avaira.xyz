@@ -8,7 +8,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 /// @title MockUSDC
 /// @notice 6-decimal USDC stand-in with EIP-3009 `transferWithAuthorization` /
 ///         `receiveWithAuthorization`, the settlement primitive x402 uses.
-/// @dev Monad ships native USDC with EIP-3009 support; this contract mirrors the
+/// @dev Robinhood ships native USDC with EIP-3009 support; this contract mirrors the
 ///      relevant surface so the grounding path can be exercised end to end in tests
 ///      and on testnet without depending on a bridged faucet.
 contract MockUSDC is ERC20, EIP712 {

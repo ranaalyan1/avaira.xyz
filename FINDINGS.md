@@ -146,7 +146,7 @@ reporter's reverts with `AlreadyChallenged(agentId,intentHash)`.
 
 **Why accepted.** First-upheld-wins is a *deliberate* anti-fabrication property: paying the
 confirmer is what makes an unsupported claim worthless. Fixing the race needs commit-reveal or a
-delayed payout queue (SP-03) — real, but a feature on the whistleblower path, and Monad's
+delayed payout queue (SP-03) — real, but a feature on the whistleblower path, and Robinhood's
 mempool exposure is the actual dependency. Documented in `THREAT_MODEL.md#T6` with the
 recommendation that bounties be paid from a queue if the market value of a bounty ever exceeds
 gas.
@@ -336,7 +336,7 @@ stores.
 **Decision (rule 4).** Rewriting this crate into a v2 core is not "adding a feature", but it *is*
 a rewrite of an artifact we do not currently ship to any customer on the first-run path, and the
 brief also assumes a **Move** artifact that does not exist in this repository (see
-`SCOPE_PROPOSALS.md#SP-04` — Monad is EVM-compatible and the contracts are Solidity 0.8.37).
+`SCOPE_PROPOSALS.md#SP-04` — Robinhood is EVM-compatible and the contracts are Solidity 0.8.37).
 So the parity suite reports the Rust artifact as **`skipped`, with the reason**, and never as
 passing; `tools/doctor.py` fails if any document claims 4-way parity. The honest claim today is:
 **three artifacts (Python, TypeScript, on-chain bytecode) are byte-identical on a fixed corpus.**

@@ -6,23 +6,23 @@
  */
 import { parseAbi, defineChain } from "viem";
 
-/** Monad testnet (chain id 10143). */
-export const monadTestnet = defineChain({
-  id: 10143,
-  name: "Monad Testnet",
-  nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
-  rpcUrls: { default: { http: ["https://testnet-rpc.monad.xyz"] } },
-  blockExplorers: { default: { name: "Monadscan", url: "https://testnet.monadscan.com" } },
+/** Robinhood testnet (chain id 46630). */
+export const robinhoodTestnet = defineChain({
+  id: 46630,
+  name: "Robinhood Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: ["https://rpc.testnet.chain.robinhood.com"] } },
+  blockExplorers: { default: { name: "Blockscout", url: "https://explorer.testnet.chain.robinhood.com" } },
   testnet: true,
 });
 
-/** Monad mainnet (chain id 143). */
-export const monadMainnet = defineChain({
-  id: 143,
-  name: "Monad",
-  nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.monad.xyz"] } },
-  blockExplorers: { default: { name: "Monadscan", url: "https://monadscan.com" } },
+/** Robinhood mainnet (chain id 4663). */
+export const robinhoodMainnet = defineChain({
+  id: 4663,
+  name: "Robinhood",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: ["https://rpc.mainnet.chain.robinhood.com"] } },
+  blockExplorers: { default: { name: "Blockscout", url: "https://robinhoodchain.blockscout.com" } },
 });
 
 export const INTENT_VAULT_ABI = parseAbi([
@@ -169,3 +169,7 @@ export const ERC20_ABI = parseAbi([
   "function balanceOf(address account) view returns (uint256)",
   "function decimals() view returns (uint8)",
 ]);
+
+// Backwards-compatible aliases (Monad → Robinhood migration).
+export const monadTestnet = robinhoodTestnet;
+export const monadMainnet = robinhoodMainnet;

@@ -18,7 +18,7 @@ an audit that stops at the Solidity boundary cannot check them.
 
 **Out of scope (declared, not hidden):** the USDC the market trades in is `MockUSDC` in every test
 we ran; the `Move` artifact named in the project brief **does not exist in this repository**
-(Monad is EVM-compatible; the contracts are Solidity — see `SCOPE_PROPOSALS.md#SP-04`);
+(Robinhood is EVM-compatible; the contracts are Solidity — see `SCOPE_PROPOSALS.md#SP-04`);
 `sdk/avaira-rust-core` is pre-v2 and is reported as `skipped` by the parity harness rather than
 as passing ([AV-014](../FINDINGS.md#av-014)).
 

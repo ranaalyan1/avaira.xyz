@@ -4,14 +4,14 @@
 
 * @title AvairaReputationRegistry
 * @notice ERC-8004 Reputation Registry whose feedback is *grounded*.
-* @dev The June 2026 Imperial College study "Can Trustless Agents Be Trusted?" (arXiv 2606.26028) crawled every live ERC-8004 deployment and found the reputation layer unusable as a trust signal: 59–90.6% of reviewers show coordinated Sybil behaviour, feedback is rarely tied to a verifiable interaction, and values are not commensurable. This contract fixes each of the three documented flaws at the protocol level: 1. **Sybil reviewers** — `giveFeedback` reverts unless the submitter is a staked reviewer (`isStakedReviewer`) with skin in the game. 2. **Ungrounded feedback** — the alternative path, `giveFeedbackWithPayment`, settles an EIP-3009 USDC payment *inside the same transaction* that records the feedback. A reviewer cannot post without either capital at risk or a real x402-style payment to the agent. 3. **Incommensurable values** — `tag1` must be one of the ERC-8004 standard tags, so values mean the same thing across every submission. On top of that, `postAvairaScore` publishes the weighted Avaira Score (0–100) computed offchain from objective settlement/validation data — never from raw feedback — and readable by any contract on Monad.
+* @dev The June 2026 Imperial College study "Can Trustless Agents Be Trusted?" (arXiv 2606.26028) crawled every live ERC-8004 deployment and found the reputation layer unusable as a trust signal: 59–90.6% of reviewers show coordinated Sybil behaviour, feedback is rarely tied to a verifiable interaction, and values are not commensurable. This contract fixes each of the three documented flaws at the protocol level: 1. **Sybil reviewers** — `giveFeedback` reverts unless the submitter is a staked reviewer (`isStakedReviewer`) with skin in the game. 2. **Ungrounded feedback** — the alternative path, `giveFeedbackWithPayment`, settles an EIP-3009 USDC payment *inside the same transaction* that records the feedback. A reviewer cannot post without either capital at risk or a real x402-style payment to the agent. 3. **Incommensurable values** — `tag1` must be one of the ERC-8004 standard tags, so values mean the same thing across every submission. On top of that, `postAvairaScore` publishes the weighted Avaira Score (0–100) computed offchain from objective settlement/validation data — never from raw feedback — and readable by any contract on Robinhood.
 
 ## At a glance
 
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaReputationRegistry.sol` |
-| source sha256 | `e583c05d83749f5ef74cba30c76c0862972ddc98f3548968d8de0d756a23bfd4` |
+| source sha256 | `f3a504f7d1ad05907fe6d009b57c5270ffb8c269e17972501732a191ac6f3519` |
 | external functions | 32 |
 | events | 9 |
 | custom errors | 21 |

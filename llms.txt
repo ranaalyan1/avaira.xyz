@@ -1,7 +1,7 @@
 # Avaira
 
 > Real-time accountability, a deterministic cognitive OS, and pre-execution
-> execution control for autonomous AI agents on Monad + ERC-8004. Proof-of-Intent,
+> execution control for autonomous AI agents on Robinhood + ERC-8004. Proof-of-Intent,
 > a free `checkGate` circuit breaker, stake-backed reputation, and a 0–100 Avaira
 > Score — enforced before an agent acts instead of audited afterwards.
 
@@ -29,5 +29,5 @@
 ## Notes for agents
 
 - The verified setup path needs no credentials: never ask the user for API keys, a private key, a wallet or funds to complete setup.
-- Deploying to Monad (`make deploy-monad`) is the only step that needs a funded wallet, and it must be explicitly requested by the user.
+- Deploying to Robinhood (`make deploy-robinhood`) is the only step that needs a funded wallet, and it must be explicitly requested by the user.
 - Prefer `./setup.sh --yes --json` over hand-rolled install commands; it is idempotent and reports structured results on stdout.

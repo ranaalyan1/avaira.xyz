@@ -4,9 +4,9 @@
  * The v1 SDK ran a local validator and trusted itself. v2 does not trust the agent, the
  * SDK, or the operator:
  *
- *   1. commitIntent  — keccak256 of the full plan + risk envelope, submitted to Monad
+ *   1. commitIntent  — keccak256 of the full plan + risk envelope, submitted to Robinhood
  *                      (fire-and-forget: we never block on a receipt)
- *   2. checkGate     — a free `eth_call` against the latest state. Monad's 400ms blocks
+ *   2. checkGate     — a free `eth_call` against the latest state. Robinhood's 400ms blocks
  *                      and 800ms finality are what make this a *pre-execution* gate
  *                      rather than a 12-second Ethereum stall.
  *   3. execute_fn    — only if the gate allows; every action is hash-chained locally
@@ -38,8 +38,8 @@ import {
   INTENT_VAULT_ABI,
   REPUTATION_REGISTRY_ABI,
   STAKE_REGISTRY_ABI,
-  monadMainnet,
-  monadTestnet,
+  robinhoodMainnet,
+  robinhoodTestnet,
 } from "./abi.js";
 import { MetricsReporter } from "./metrics.js";
 import { canonicalJson } from "./canonical.js";
@@ -77,7 +77,7 @@ export class Avaira {
 
   constructor(config: AvairaConfig) {
     this.config = config;
-    const chain = config.chainId === 143 ? monadMainnet : monadTestnet;
+    const chain = config.chainId === 4663 ? robinhoodMainnet : robinhoodTestnet;
     this.publicClient = createPublicClient({ chain, transport: http(config.rpcUrl) }) as PublicClient;
 
     if (config.privateKey) {

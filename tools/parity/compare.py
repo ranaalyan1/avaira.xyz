@@ -10,7 +10,7 @@ Artifacts compared, all against `tools/parity/corpus.json`:
     its own `tsx` so the check exercises the shipped module, not a copy of its maths.
   * **python** — `avaira` (`sdk/python/avaira/audit.py` + `client.hash_intent`) plus the same
     ABI/keccak primitives the SDK itself uses.
-  * **onchain** — `MerkleLib` / `RiskEnvelopeLib` *as compiled for Monad*, executed inside py-evm
+  * **onchain** — `MerkleLib` / `RiskEnvelopeLib` *as compiled for Robinhood*, executed inside py-evm
     through `contracts/test/harness/AvairaProbe.sol`. This is the fourth artifact and the one that
     actually matters: the leaf the SDK hashes must be the leaf the vault verifies.
   * **rust** — declared in the report as `skipped` unless `cargo` exists. It is never reported as
@@ -60,7 +60,7 @@ def python_outputs(corpus: dict) -> dict:
 
     client = Avaira(
         rpc_url="http://127.0.0.1:1",  # unreachable on purpose: if hashing needs a node, this fails
-        chain_id=10143,
+        chain_id=46630,
         contracts={
             "identityRegistry": "0x" + "00" * 19 + "01",
             "reputationRegistry": "0x" + "00" * 19 + "02",

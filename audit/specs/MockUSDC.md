@@ -4,14 +4,14 @@
 
 * @title MockUSDC
 * @notice 6-decimal USDC stand-in with EIP-3009 `transferWithAuthorization` / `receiveWithAuthorization`, the settlement primitive x402 uses.
-* @dev Monad ships native USDC with EIP-3009 support; this contract mirrors the relevant surface so the grounding path can be exercised end to end in tests and on testnet without depending on a bridged faucet.
+* @dev Robinhood ships native USDC with EIP-3009 support; this contract mirrors the relevant surface so the grounding path can be exercised end to end in tests and on testnet without depending on a bridged faucet.
 
 ## At a glance
 
 | | |
 | --- | --- |
 | source | `contracts/src/tokens/MockUSDC.sol` |
-| source sha256 | `560acb42049dd4f1df4265f4465ca6a157c9a162d0c8396781e64ff9f54a3e8e` |
+| source sha256 | `3fc772fa04a5603636bd9482457bce45ade1c82aa83624e1e5bfa96ecff3ce1b` |
 | external functions | 16 |
 | events | 5 |
 | custom errors | 13 |

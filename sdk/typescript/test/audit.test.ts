@@ -134,7 +134,7 @@ describe("Merkle root and proofs", () => {
 describe("envelope hashing (parity with RiskEnvelopeLib)", () => {
   const avaira = new Avaira({
     rpcUrl: "http://localhost:8545",
-    chainId: 10143,
+    chainId: 46630,
     contracts: {
       identityRegistry: "0x0000000000000000000000000000000000000001",
       reputationRegistry: "0x0000000000000000000000000000000000000002",

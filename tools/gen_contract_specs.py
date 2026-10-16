@@ -339,7 +339,7 @@ await avaira.prove(taskId)                                // audit-trail proof f
 ```
 
 ```python
-client = AvairaClient.from_deployment(chain_id=143)      # or load_manifest(...)
+client = AvairaClient.from_deployment(chain_id=4663)      # or load_manifest(...)
 client.hash_intent(agent_id, task, envelope_hash, nonce)
 client.commit_intent(agent_id, intent_hash, envelope)
 client.check_gate_for_intent(agent_id, intent_hash, envelope_hash)

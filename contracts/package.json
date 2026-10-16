@@ -2,13 +2,13 @@
   "name": "avaira-contracts",
   "version": "2.0.0",
   "private": true,
-  "description": "Avaira v2 — Monad-native accountability contracts (Foundry). This package.json exists only to vendor @openzeppelin/contracts for the solc remapping; the build, tests and deploys are Foundry (see Makefile).",
+  "description": "Avaira v2 — Robinhood-native accountability contracts (Foundry). This package.json exists only to vendor @openzeppelin/contracts for the solc remapping; the build, tests and deploys are Foundry (see Makefile).",
   "license": "MIT",
   "scripts": {
     "build": "forge build",
     "test": "forge test",
-    "deploy:monad": "bash scripts/deploy-monad.sh",
-    "verify:monad": "bash scripts/verify-monad.sh"
+    "deploy:robinhood": "bash scripts/deploy-robinhood.sh",
+    "verify:robinhood": "bash scripts/verify-robinhood.sh"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.2.0"

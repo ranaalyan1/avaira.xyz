@@ -1,4 +1,4 @@
-# Avaira — Monad-native accountability layer for the agent economy.
+# Avaira — Robinhood-native accountability layer for the agent economy.
 # Foundry project root (ERC-8004 registries, Proof-of-Intent gate, staking/slashing, score-gated credit).
 [profile.default]
 src = "src"
@@ -37,15 +37,15 @@ fuzz = { runs = 4096 }
 invariant = { runs = 512, depth = 128 }
 verbosity = 2
 
-# Monad endpoints. Both RPCs are public and need no key; override them in contracts/.env
-# for a private provider (Alchemy/QuickNode/Ankr all serve Monad).
+# Robinhood endpoints. Both RPCs are public and need no key; override them in contracts/.env
+# for a private provider (Alchemy/QuickNode/Ankr all serve Robinhood).
 [rpc_endpoints]
-monad_testnet = "${MONAD_TESTNET_RPC}"
-monad_mainnet = "${MONAD_MAINNET_RPC}"
+robinhood_testnet = "${ROBINHOOD_TESTNET_RPC}"
+robinhood_mainnet = "${ROBINHOOD_MAINNET_RPC}"
 localhost = "http://127.0.0.1:8545"
 
 # Verification. Sourcify (BlockVision) needs no API key and is the default path in
-# scripts/verify-monad.sh; Monadscan is used when MONADSCAN_API_KEY is present.
+# scripts/verify-robinhood.sh; Robinhoodscan is used when ROBINHOODSCAN_API_KEY is present.
 [etherscan]
-monad_testnet = { key = "${MONADSCAN_API_KEY}", chain = 10143 }
-monad_mainnet = { key = "${MONADSCAN_API_KEY}", chain = 143 }
+robinhood_testnet = { key = "${ROBINHOODSCAN_API_KEY}", chain = 46630 }
+robinhood_mainnet = { key = "${ROBINHOODSCAN_API_KEY}", chain = 4663 }

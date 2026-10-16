@@ -1,7 +1,7 @@
 /**
  * Grade-band parity: the scorer service and the chain must never disagree.
  *
- * `AvairaReputationRegistry.gradeOfScore` is what any contract on Monad reads;
+ * `AvairaReputationRegistry.gradeOfScore` is what any contract on Robinhood reads;
  * `gradeForScore` is what our API and dashboard render. They are two implementations of the
  * same promise, and the only thing keeping them honest is this test — so the expected table is
  * *parsed out of the Solidity source* rather than copied. Change the bands in the contract

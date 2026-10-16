@@ -122,7 +122,7 @@ def test_envelope_hash_matches_the_solidity_fixture(vectors):
 
     client = Avaira(
         rpc_url="http://127.0.0.1:1",  # never dialled: hashing is pure
-        chain_id=10143,
+        chain_id=46630,
         contracts={
             "identityRegistry": "0x0000000000000000000000000000000000000001",
             "reputationRegistry": "0x0000000000000000000000000000000000000002",

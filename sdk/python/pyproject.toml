@@ -1,7 +1,7 @@
 [project]
 name = "avaira"
 version = "2.0.0"
-description = "Avaira v2 — onchain accountability for AI agents on Monad: proof-of-intent, pre-execution gate, stake-backed reputation"
+description = "Avaira v2 — onchain accountability for AI agents on Robinhood: proof-of-intent, pre-execution gate, stake-backed reputation"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

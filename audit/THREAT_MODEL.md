@@ -128,7 +128,7 @@ registry, the SDK.
 
 | assumption | if it breaks | mitigation today |
 | --- | --- | --- |
-| Monad is EVM-equivalent with ~0.4 s blocks and fast finality | the "gate costs one round trip" claim (the product) degrades to a 12 s product | measured, not asserted: `make measure-monad`; the SDK benchmark publishes real numbers |
+| Robinhood is EVM-equivalent with ~0.4 s blocks and fast finality | the "gate costs one round trip" claim (the product) degrades to a 12 s product | measured, not asserted: `make measure-robinhood`; the SDK benchmark publishes real numbers |
 | `block.timestamp` is monotonic and roughly honest | `challengeEndsAt`, `suspendedUntil`, `deadline` all shift | Cancun `PREVRANDAO` is not used for anything; timing is only ever a *minimum*, never an exact target |
 | USDC is a standard 6-decimal ERC-20 | `safeTransferFrom` assumptions, fee-on-transfer rebases | `MockUSDC` is used in every test we ran — **G-01**: real-token behaviour (allowance races, pausable, permit differences) is untested here |
 | One canonical JSON encoding across languages | the audit trail splits in half (AV-013) | `tools/parity/` + tests in both SDKs and the scorer (AV-015) |
@@ -145,4 +145,4 @@ registry, the SDK.
 | G-03 | no timelock/multisig on admin roles | the blast radius in T3 is "the protocol stops or drains"; only bounds and asserts protect it |
 | G-04 | no report-rate instrumentation | if nobody challenges, the model's central mechanism is inert (T6) |
 | G-05 | Rust core is pre-v2 | it cannot produce a valid v2 commitment at all; parity is reported as `skipped` (AV-014), not passing |
-| G-06 | Move/Monad-native path in the brief does not exist | the repo is Solidity 0.8.37 on EVM; recorded so nobody audits a phantom artifact (SP-04) |
+| G-06 | Move/Robinhood-native path in the brief does not exist | the repo is Solidity 0.8.37 on EVM; recorded so nobody audits a phantom artifact (SP-04) |

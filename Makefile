@@ -1,4 +1,4 @@
-# Avaira — Monad-native accountability layer for the agent economy.
+# Avaira — Robinhood-native accountability layer for the agent economy.
 #
 #   make                 show this help
 #   make setup           one-command setup + verification of the core (~7s, no keys)
@@ -8,9 +8,9 @@
 #   make test            run every suite that is installed locally
 #   make demo            deterministic end-to-end lifecycle trace (--check in CI)
 #   make demo-os         the 4 deterministic proof artifacts (Cognitive OS)
-#   make deploy-monad    deploy the 6-contract stack to Monad testnet (needs funds)
+#   make deploy-robinhood    deploy the 6-contract stack to Robinhood testnet (needs funds)
 #   make verify-deploy   assert the deployed site is serving AVAIRA (URL=…)
-#   make verify-monad    assert the contracts are live on chain 10143
+#   make verify-robinhood    assert the contracts are live on chain 46630
 #   make deploy-dry-run  prove the deploy wiring in-process, spend nothing
 #   make submission-check build + tests + both deploy gates + submit checklist
 #
@@ -23,7 +23,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8402
-CHAIN_ID ?= 10143
+CHAIN_ID ?= 46630
 # Absolute so recipes that `cd` into a subdirectory still find the venv.
 VENV_PY := $(shell test -x .venv/bin/python && echo $(CURDIR)/.venv/bin/python || echo python3)
 PY := $(VENV_PY)
@@ -39,10 +39,10 @@ REPORTS := verification/reports
 .PHONY: help install install-verification test test-contracts test-sdk test-scorer test-python \
         setup setup-dev setup-full setup-check quickstart console gateway demo-os \
         test-core \
-        deploy-monad verify-monad benchmark gate-bench measure-monad \
+        deploy-robinhood verify-robinhood benchmark gate-bench measure-robinhood \
         fmt clean legacy-dev \
         compile check redteam fuzz fuzz-quick parity demo demo-check specs doctor verify verify-deploy \
-        deploy-dry-run verify-monad verify-monad-explorer verify-monad-sources merge-deploy-txs \
+        deploy-dry-run verify-robinhood verify-robinhood-explorer verify-robinhood-sources merge-deploy-txs \
         docs-deploy test-tools screenshots submission-check go-live
 
 help:
@@ -198,13 +198,13 @@ deploy-dry-run: compile
 # Contracts: is it actually deployed, and correctly wired? Reads
 # deployments/$(CHAIN_ID).json and asks the RPC. Exit 1 while undeployed — on
 # purpose: a missing deployment must be loud, not inferred from a green build.
-verify-monad:
-	$(PY) tools/verify_monad.py --chain $(CHAIN_ID)
+verify-robinhood:
+	$(PY) tools/verify_robinhood.py --chain $(CHAIN_ID)
 
 # Source verification on the explorers (needs Foundry; separate from liveness,
-# which is what verify-monad answers).
-verify-monad-explorer:
-	cd contracts && make verify-monad CHAIN_ID=$(CHAIN_ID)
+# which is what verify-robinhood answers).
+verify-robinhood-explorer:
+	cd contracts && make verify-robinhood CHAIN_ID=$(CHAIN_ID)
 
 # Fold forge's broadcast receipts (deploy tx hashes) into the manifest.
 merge-deploy-txs:
@@ -244,21 +244,21 @@ verify: compile
 	@$(MAKE) --no-print-directory doctor
 	@echo "✓ verify green"
 
-# ── Monad ───────────────────────────────────────────────────────────────────────
+# ── Robinhood ───────────────────────────────────────────────────────────────────────
 
-deploy-monad:
-	cd contracts && make deploy-monad
+deploy-robinhood:
+	cd contracts && make deploy-robinhood
 
 # (liveness lives in the deployment section above — this is the explorer path)
-verify-monad-sources: verify-monad-explorer
+verify-robinhood-sources: verify-robinhood-explorer
 
-# Real gas for every primitive (execution gas, identical on Monad).
+# Real gas for every primitive (execution gas, identical on Robinhood).
 benchmark:
 	cd contracts && make benchmark
 
-# Live gate latency against Monad: commit → checkGate → execute round trip.
-measure-monad:
-	cd sdk/typescript && npm run benchmark -- --rpc $${MONAD_TESTNET_RPC:-https://testnet-rpc.monad.xyz} --chain $(CHAIN_ID) --runs $${RUNS:-50}
+# Live gate latency against Robinhood: commit → checkGate → execute round trip.
+measure-robinhood:
+	cd sdk/typescript && npm run benchmark -- --rpc $${ROBINHOOD_TESTNET_RPC:-https://rpc.testnet.chain.robinhood.com} --chain $(CHAIN_ID) --runs $${RUNS:-50}
 
 # Same benchmark against a throwaway local chain — no faucet, no funds.
 gate-bench:
@@ -275,6 +275,13 @@ clean:
 	cd contracts && forge clean 2>/dev/null || true
 	rm -rf sdk/typescript/dist services/*/dist
 
-# The pre-Monad offchain product is still runnable; it is not part of the v2 path.
+# The pre-Robinhood offchain product is still runnable; it is not part of the v2 path.
 legacy-dev:
 	docker-compose up
+
+# Backwards-compatible aliases (Robinhood → Robinhood migration).
+deploy-robinhood: deploy-robinhood
+verify-robinhood: verify-robinhood
+verify-robinhood-explorer: verify-robinhood-explorer
+verify-robinhood-sources: verify-robinhood-sources
+measure-robinhood: measure-robinhood

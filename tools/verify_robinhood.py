@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Monad deployment liveness — the loud failure that an undeployed stack deserves.
+"""Robinhood deployment liveness — the loud failure that an undeployed stack deserves.
 
-`make deploy-monad` writes `deployments/{chainId}.json`. This is the check that
+`make deploy-robinhood` writes `deployments/{chainId}.json`. This is the check that
 runs *after* it, and the one a judge runs to confirm the submission is real:
 
-    python3 tools/verify_monad.py                 # chain 10143, from the manifest
-    python3 tools/verify_monad.py --chain 143
-    python3 tools/verify_monad.py --rpc https://testnet-rpc.monad.xyz --json report.json
+    python3 tools/verify_robinhood.py                 # chain 46630, from the manifest
+    python3 tools/verify_robinhood.py --chain 4663
+    python3 tools/verify_robinhood.py --rpc https://rpc.testnet.chain.robinhood.com --json report.json
 
 For every contract in the manifest it asserts three things:
 
@@ -45,16 +45,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-DEFAULT_CHAIN_ID = 10143
+DEFAULT_CHAIN_ID = 46630
 RPC_BY_CHAIN = {
-    10143: "https://testnet-rpc.monad.xyz",
-    143: "https://rpc.monad.xyz",
+    46630: "https://rpc.testnet.chain.robinhood.com",
+    4663: "https://rpc.mainnet.chain.robinhood.com",
 }
 EXPLORER_BY_CHAIN = {
-    10143: "https://testnet.monadscan.com",
-    143: "https://monadscan.com",
+    46630: "https://explorer.testnet.chain.robinhood.com",
+    4663: "https://robinhoodchain.blockscout.com",
 }
-RPC_ENV_BY_CHAIN = {10143: "MONAD_TESTNET_RPC", 143: "MONAD_MAINNET_RPC"}
+RPC_ENV_BY_CHAIN = {46630: "ROBINHOOD_TESTNET_RPC", 4663: "ROBINHOOD_MAINNET_RPC"}
 
 # keccak4(signature). Only addresses and integers — no strings, so no ABI decoder is
 # needed and the whole tool stays stdlib.
@@ -109,7 +109,7 @@ class Rpc:
         self._id += 1
         payload = json.dumps({"jsonrpc": "2.0", "id": self._id, "method": method, "params": params}).encode()
         req = urllib.request.Request(
-            self.url, data=payload, headers={"Content-Type": "application/json", "User-Agent": "avaira-verify-monad/1.0"}
+            self.url, data=payload, headers={"Content-Type": "application/json", "User-Agent": "avaira-verify-robinhood/1.0"}
         )
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
@@ -255,12 +255,12 @@ def instruction(chain_id: int) -> list[str]:
         f"deployments/{chain_id}.json does not exist — nothing is deployed on chain {chain_id} yet.",
         "",
         "  To deploy (three steps, needs a funded key):",
-        "    1. Fund a wallet at https://faucet.monad.xyz            (testnet MON)",
+        "    1. Fund a wallet at https://faucet.testnet.chain.robinhood.com            (testnet MON)",
         "    2. cd contracts && cp .env.example .env                  then set DEPLOYER_PRIVATE_KEY=0x…",
-        "         (MONAD_DEPLOYER_KEY is accepted as an alias)",
-        "    3. make deploy-monad                                     writes deployments/10143.json",
+        "         (ROBINHOOD_DEPLOYER_KEY is accepted as an alias)",
+        "    3. make deploy-robinhood                                     writes deployments/46630.json",
         "",
-        f"  Then re-run this check:  make verify-monad        explorer: {explorer}",
+        f"  Then re-run this check:  make verify-robinhood        explorer: {explorer}",
         "  No key handy?  make deploy-dry-run   proves the wiring locally, spends nothing.",
     ]
 

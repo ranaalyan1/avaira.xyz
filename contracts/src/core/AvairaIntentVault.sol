@@ -20,9 +20,9 @@ import {MerkleLib} from "../lib/MerkleLib.sol";
 ///
 /// @dev Latency is the whole point. `checkGate` is a `view` function: it needs no
 ///      transaction, no block, and no confirmation — it is a single `eth_call`
-///      against Monad's latest state. Commit is fire-and-forget, so the only thing
+///      against Robinhood's latest state. Commit is fire-and-forget, so the only thing
 ///      the agent waits for is one RPC round trip. Ethereum's 12s blocks make this
-///      gate a 12-second product; on Monad (400ms blocks, 800ms finality) it costs
+///      gate a 12-second product; on Robinhood (400ms blocks, 800ms finality) it costs
 ///      a few hundred milliseconds of client time — the SDK measures and publishes
 ///      the real number.
 ///

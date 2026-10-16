@@ -1,4 +1,4 @@
-"""Tests for the deployment gates: `tools/verify_monad.py` and the manifest merge.
+"""Tests for the deployment gates: `tools/verify_robinhood.py` and the manifest merge.
 
 These are the checks that are supposed to *fail loudly* when a deployment is
 missing or broken, so their failure modes are the product. Each verdict the tool
@@ -26,7 +26,7 @@ import sys  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
-import verify_monad  # noqa: E402  (tools/ is on sys.path)
+import verify_robinhood  # noqa: E402  (tools/ is on sys.path)
 
 
 # ── fixtures ────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ def addr(i: int) -> str:
     return "0x" + f"{i:040x}"
 
 
-CHAIN = 10143
+CHAIN = 46630
 IDENTITY, REPUTATION, VALIDATION, STAKE, VAULT, MARKET, USDC = (addr(i) for i in range(1, 8))
 
 MANIFEST = {
@@ -69,7 +69,7 @@ def word_uint(n: int) -> str:
 
 def sel(signature: str) -> str:
     """The 4-byte selector the tool will actually send for this signature."""
-    return verify_monad.SEL[signature]
+    return verify_robinhood.SEL[signature]
 
 
 def happy_calls() -> dict:
@@ -100,7 +100,7 @@ def happy_calls() -> dict:
 
 
 class _Node(BaseHTTPRequestHandler):
-    """A stub Monad node: answers the three methods verify_monad.py uses."""
+    """A stub Robinhood node: answers the three methods verify_robinhood.py uses."""
 
     chain_id = CHAIN
     code: dict = {}
@@ -147,13 +147,13 @@ def node():
 
 @pytest.fixture
 def manifest_file(tmp_path):
-    path = tmp_path / "10143.json"
+    path = tmp_path / "46630.json"
     path.write_text(json.dumps(MANIFEST))
     return path
 
 
 def run(node_url: str, manifest: Path, capsys) -> tuple[int, str]:
-    code = verify_monad.main(["--chain", str(CHAIN), "--rpc", node_url, "--manifest", str(manifest)])
+    code = verify_robinhood.main(["--chain", str(CHAIN), "--rpc", node_url, "--manifest", str(manifest)])
     return code, capsys.readouterr().out
 
 
@@ -166,8 +166,8 @@ def test_undeployed_is_loud_and_names_the_three_steps(tmp_path, capsys):
 
     assert code == 1
     assert "NOT DEPLOYED" in out
-    assert "faucet.monad.xyz" in out  # the human's next action
-    assert "make deploy-monad" in out
+    assert "faucet.testnet.chain.robinhood.com" in out  # the human's next action
+    assert "make deploy-robinhood" in out
     assert "make deploy-dry-run" in out  # the no-key alternative
 
 
@@ -182,13 +182,13 @@ def test_healthy_deployment_passes(node, manifest_file, capsys):
 def test_wrong_chain_is_reported_as_a_chain_mismatch(node, manifest_file, capsys):
     """Addresses from another chain prove nothing — say so instead of 'no bytecode'."""
     node_url, handler = node
-    handler.chain_id = 143
+    handler.chain_id = 4663
 
     code, out = run(node_url, manifest_file, capsys)
 
     assert code == 1
     assert "WRONG CHAIN" in out
-    assert "chain 143" in out
+    assert "chain 4663" in out
 
 
 def test_dead_address_fails_and_names_the_contract(node, manifest_file, capsys):
@@ -239,7 +239,7 @@ def test_unreachable_node_is_not_reported_as_undeployed(manifest_file, capsys):
 def test_report_is_valid_json_with_per_contract_detail(node, manifest_file, tmp_path, capsys):
     node_url, _ = node
     report = tmp_path / "report.json"
-    verify_monad.main(
+    verify_robinhood.main(
         ["--chain", str(CHAIN), "--rpc", node_url, "--manifest", str(manifest_file), "--json", str(report)]
     )
 
@@ -256,19 +256,19 @@ def test_report_is_valid_json_with_per_contract_detail(node, manifest_file, tmp_
 
 
 def test_selectors_are_four_byte_constants():
-    for sig, selector in verify_monad.SEL.items():
+    for sig, selector in verify_robinhood.SEL.items():
         assert selector.startswith("0x") and len(selector) == 10, f"{sig} → {selector}"
 
 
 def test_every_selector_used_by_build_checks_exists():
     """Guards the failure mode where a new check is added without its selector."""
-    used = {sig for _, _, getters in verify_monad.build_checks(MANIFEST) for sig in getters}
-    missing = sorted(used - set(verify_monad.SEL))
+    used = {sig for _, _, getters in verify_robinhood.build_checks(MANIFEST) for sig in getters}
+    missing = sorted(used - set(verify_robinhood.SEL))
     assert not missing, f"no selector for {missing}"
 
 
 def test_expectation_set_is_the_full_stack():
-    names = [name for name, _, _ in verify_monad.build_checks(MANIFEST)]
+    names = [name for name, _, _ in verify_robinhood.build_checks(MANIFEST)]
     assert names == [
         "MockUSDC",
         "AvairaIdentityRegistry",
@@ -359,7 +359,7 @@ def test_merge_is_additive_and_idempotent():
 
 
 def test_merge_cli_writes_the_manifest_and_check_agrees(tmp_path, capsys):
-    manifest_path = tmp_path / "10143.json"
+    manifest_path = tmp_path / "46630.json"
     manifest_path.write_text(json.dumps(MANIFEST))
     broadcast_path = tmp_path / "run-latest.json"
     broadcast_path.write_text(json.dumps(broadcast_fixture()))
@@ -382,7 +382,7 @@ def test_merge_cli_writes_the_manifest_and_check_agrees(tmp_path, capsys):
 
 
 def test_merge_cli_without_a_broadcast_record_explains_why(tmp_path, capsys):
-    manifest_path = tmp_path / "10143.json"
+    manifest_path = tmp_path / "46630.json"
     manifest_path.write_text(json.dumps(MANIFEST))
 
     code = merge_deploy_txs.main(
@@ -404,7 +404,7 @@ def test_not_deployed_section_publishes_no_address_and_gives_the_three_steps():
     assert section.startswith(gen_deploy_section.BEGIN), "BEGIN marker must be inside the rendered block"
     assert section.rstrip().endswith(gen_deploy_section.END)
     assert "Not deployed yet" in section
-    for step in ("faucet.monad.xyz", "DEPLOYER_PRIVATE_KEY", "make deploy-monad"):
+    for step in ("faucet.testnet.chain.robinhood.com", "DEPLOYER_PRIVATE_KEY", "make deploy-robinhood"):
         assert step in section
     assert "make deploy-dry-run" in section  # the no-key alternative
     # no placeholder addresses either — a zero address is as misleading as a wrong one
@@ -423,7 +423,7 @@ def test_deployed_section_links_every_address_and_tx():
 
     section = gen_deploy_section.render(CHAIN, manifest)
 
-    assert "Monad Testnet" in section and "10143" in section
+    assert "Robinhood Testnet" in section and "46630" in section
     for key, name, _ in gen_deploy_section.CONTRACTS:
         assert manifest[key] in section, f"{name} address is missing from the table"
         assert f"/address/{manifest[key]}" in section, f"{name} has no explorer link"

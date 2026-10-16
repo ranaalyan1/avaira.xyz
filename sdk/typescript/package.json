@@ -1,7 +1,7 @@
 {
   "name": "@avaira/sdk",
   "version": "2.0.0",
-  "description": "Avaira v2 \u2014 onchain accountability for AI agents on Monad. Proof-of-Intent, pre-execution gate, stake-backed reputation.",
+  "description": "Avaira v2 \u2014 onchain accountability for AI agents on Robinhood. Proof-of-Intent, pre-execution gate, stake-backed reputation.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,7 +35,7 @@
     "ai-agents",
     "erc-8004",
     "x402",
-    "monad",
+    "robinhood",
     "reputation",
     "accountability"
   ]

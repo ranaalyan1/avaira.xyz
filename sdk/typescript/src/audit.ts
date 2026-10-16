@@ -4,7 +4,7 @@
  * Preserved from the offchain Avaira runtime on purpose: the chain is a terrible place
  * for high-volume audit data (cost, throughput, privacy), and a great place for
  * commitments. So the trail stays local and append-only, and per run we anchor a single
- * 32-byte Merkle root plus the outcome hash on Monad.
+ * 32-byte Merkle root plus the outcome hash on Robinhood.
  *
  * The leaf encoding here is byte-for-byte identical to `MerkleLib.hashDeviationLeaf`,
  * so anyone can take a leaf from this trail, hand it to `challengeDeviation`, and prove

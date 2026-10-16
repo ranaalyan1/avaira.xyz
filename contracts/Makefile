@@ -1,12 +1,12 @@
-# Avaira contracts — Monad-native accountability layer for the agent economy.
+# Avaira contracts — Robinhood-native accountability layer for the agent economy.
 #
 #   make build          compile
 #   make test           run the Foundry suite (unit + fuzz + invariants)
 #   make coverage       branch coverage report (requires a native solc)
 #   make benchmark      measure gas for every primitive -> metrics/gas.json
-#   make deploy-monad   deploy + verify the whole stack on Monad testnet
-#   make verify-monad   re-run verification from deployments/{chainId}.json
-#   make measure-monad  measure real gate latency against Monad -> metrics/
+#   make deploy-robinhood   deploy + verify the whole stack on Robinhood testnet
+#   make verify-robinhood   re-run verification from deployments/{chainId}.json
+#   make measure-robinhood  measure real gate latency against Robinhood -> metrics/
 #   make gate-bench     same, against a local anvil chain (no faucet needed)
 #
 # `contracts/.env` is loaded automatically when present (see .env.example).
@@ -14,8 +14,8 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-RPC_TESTNET ?= https://testnet-rpc.monad.xyz
-CHAIN_ID    ?= 10143
+RPC_TESTNET ?= https://rpc.testnet.chain.robinhood.com
+CHAIN_ID    ?= 46630
 
 ifneq (,$(wildcard .env))
 include .env
@@ -23,7 +23,7 @@ export
 endif
 
 .PHONY: help build test test-ci snapshot coverage benchmark fmt lint clean \
-        deploy-monad verify-monad measure-monad gate-bench anvil sizes
+        deploy-robinhood verify-robinhood measure-robinhood gate-bench anvil sizes
 
 help:
 	@grep -E '^#   ' Makefile | sed 's/^#   /  /'
@@ -63,20 +63,24 @@ fmt:
 lint:
 	forge lint
 
-# ── Monad ───────────────────────────────────────────────────────────────────────
+# ── Robinhood ───────────────────────────────────────────────────────────────────────
 
-deploy-monad:
-	bash scripts/deploy-monad.sh
+deploy-robinhood:
+	bash scripts/deploy-robinhood.sh
 
-verify-monad:
-	bash scripts/verify-monad.sh $(CHAIN_ID)
+verify-robinhood:
+	bash scripts/verify-robinhood.sh $(CHAIN_ID)
 
-measure-monad:
-	bash scripts/measure-monad.sh $(RPC_TESTNET)
+measure-robinhood:
+	bash scripts/measure-robinhood.sh $(RPC_TESTNET)
 
 # Full-stack latency/throughput benchmark against a throwaway local chain.
 gate-bench:
 	bash scripts/gate-bench-local.sh
 
 anvil:
-	anvil --chain-id 10143 --block-time 0.4
+	anvil --chain-id 46630 --block-time 0.4
+
+deploy-robinhood: deploy-robinhood
+verify-robinhood: verify-robinhood
+measure-robinhood: measure-robinhood

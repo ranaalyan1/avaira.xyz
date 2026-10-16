@@ -26,7 +26,7 @@ import { canonicalJson, hashCanonical } from "../src/canonical.js";
 
 /** Values `ScoreInputs` can actually hold: ids, 6-decimal USDC strings, timestamps, rates, free text. */
 const VECTORS: unknown[] = [
-  { agentId: "1", chainId: 143, minScore: 60, stakeUsdc: "100000000" },
+  { agentId: "1", chainId: 4663, minScore: 60, stakeUsdc: "100000000" },
   { nested: { b: 1, a: [{ z: true, y: null }, 2] } },
   { "0": "zero key", "10": "ten", "9": "nine" }, // lexicographic order, not numeric
   { list: [{ b: 1, a: 2 }, { d: 3, c: 4 }] },

@@ -5,7 +5,7 @@ import {MetadataEntry, AgentStatus} from "../lib/AvairaTypes.sol";
 
 /// @title IERC8004 — Trustless Agents registries (ERC-8004)
 /// @notice Canonical interface surface for the three ERC-8004 registries as
-///         deployed by Avaira on Monad. Signatures follow the specification so
+///         deployed by Avaira on Robinhood. Signatures follow the specification so
 ///         that any ERC-8004 client can read Avaira's registries unchanged.
 /// @dev Reference: ERC-8004 "Trustless Agents" (MetaMask / EF / Google / Coinbase).
 

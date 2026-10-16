@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /// @title AvairaTypes
 /// @notice Shared value types for the Avaira onchain trust layer.
-/// @dev Avaira is a Monad-native accountability layer for the agent economy:
+/// @dev Avaira is a Robinhood-native accountability layer for the agent economy:
 ///      ERC-8004 registries (identity / reputation / validation) + a real-time
 ///      pre-execution gate (Proof-of-Intent) + stake/slash + score-gated credit.
 
@@ -39,7 +39,7 @@ enum SlashLevel {
 /// @notice The risk envelope an agent binds to a committed intent.
 /// @dev Committed onchain *before* execution and enforced by `checkGate`.
 ///      The gate is a `view` call, so it can be evaluated speculatively
-///      (Monad 400ms blocks) without waiting for full finality.
+///      (Robinhood 400ms blocks) without waiting for full finality.
 /// @param maxSpendUsd Maximum USD-denominated spend for the intent (6 decimals, USDC-style).
 /// @param allowedActions Action discriminators the agent is allowed to perform.
 /// @param deadline Unix timestamp after which the intent is void.

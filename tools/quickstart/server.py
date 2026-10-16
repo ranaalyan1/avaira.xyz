@@ -223,7 +223,7 @@ PAGE = """<!doctype html>
       <li><b>Guard a real agent:</b> <code>pip install -e sdk/python</code>, then wrap your execution function.</li>
       <li><b>Add the SDKs and scorer:</b> <code>./setup.sh --dev</code></li>
       <li><b>Run the Solidity suite:</b> <code>./setup.sh --full --with-foundry</code></li>
-      <li><b>Deploy to Monad testnet:</b> fund a wallet from <a href="https://testnet.monad.xyz" target="_blank" rel="noreferrer">the faucet</a>, fill <code>contracts/.env</code>, run <code>make deploy-monad</code>.</li>
+      <li><b>Deploy to Robinhood testnet:</b> fund a wallet from <a href="https://faucet.testnet.chain.robinhood.com" target="_blank" rel="noreferrer">the faucet</a>, fill <code>contracts/.env</code>, run <code>make deploy-robinhood</code>.</li>
     </ol>
     <div class="hint">Full docs: <code>SETUP.md</code> · agent instructions: <code>AGENTS.md</code></div>
   </div>

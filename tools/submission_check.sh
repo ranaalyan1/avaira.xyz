@@ -11,7 +11,7 @@
 #
 #   PASS  the check ran and succeeded
 #   TODO  the check ran and correctly reported "not deployed yet" — expected until
-#         a human does the one-click Vercel import / the funded Monad deploy.
+#         a human does the one-click Vercel import / the funded Robinhood deploy.
 #         Two TODOs (live URL, contract addresses) is a submittable state.
 #   FAIL  something is actually broken. Exit code 1.
 #   SKIP  a prerequisite is absent in this environment (no py-evm, no network)
@@ -97,13 +97,13 @@ case "$verdict" in
 esac
 
 # ── 5. gate: are the contracts on chain? ───────────────────────────────────────
-step "Monad gate"
-$PY tools/verify_monad.py --chain "${CHAIN_ID:-10143}" --json "$REPORTS/monad.json" >/tmp/avaira-monad.log 2>&1
-verdict=$($PY -c "import json;print(json.load(open('$REPORTS/monad.json')).get('verdict'))" 2>/dev/null || echo unknown)
+step "Robinhood gate"
+$PY tools/verify_robinhood.py --chain "${CHAIN_ID:-46630}" --json "$REPORTS/robinhood.json" >/tmp/avaira-robinhood.log 2>&1
+verdict=$($PY -c "import json;print(json.load(open('$REPORTS/robinhood.json')).get('verdict'))" 2>/dev/null || echo unknown)
 case "$verdict" in
-  PASS)         record PASS "monad contracts" "all 7 live and wired on chain ${CHAIN_ID:-10143}" ;;
-  not-deployed) record TODO "monad contracts" "deployments/${CHAIN_ID:-10143}.json absent — see the 3 steps printed above" ;;
-  *)            record FAIL "monad contracts" "$verdict — see /tmp/avaira-monad.log" ;;
+  PASS)         record PASS "robinhood contracts" "all 7 live and wired on chain ${CHAIN_ID:-46630}" ;;
+  not-deployed) record TODO "robinhood contracts" "deployments/${CHAIN_ID:-46630}.json absent — see the 3 steps printed above" ;;
+  *)            record FAIL "robinhood contracts" "$verdict — see /tmp/avaira-robinhood.log" ;;
 esac
 
 # ── 6. the README must not describe a deployment that does not exist ───────────
@@ -141,17 +141,17 @@ cat <<'CHECKLIST'
      Then:  make verify-deploy   → expect "✓ … is serving AVAIRA (11 checks)"
      Then:  make go-live         → flips the README from "not live yet" to the live badge
 
-  2. Monad — deploy the six contracts
-       • fund a wallet:  https://faucet.monad.xyz
+  2. Robinhood — deploy the six contracts
+       • fund a wallet:  https://faucet.testnet.chain.robinhood.com
        • cd contracts && cp .env.example .env   → set DEPLOYER_PRIVATE_KEY=0x…
-       • make deploy-monad                      → writes deployments/10143.json
-     Then:  make verify-monad    → expect all 7 live and correctly wired
+       • make deploy-robinhood                      → writes deployments/46630.json
+     Then:  make verify-robinhood    → expect all 7 live and correctly wired
 
   3. GitHub — repo Homepage field = the live URL (Settings → General)
 
   4. Record the demo
        landing → dark console → register/stake → a blocked agent turns RED →
-       slash tx on testnet.monadscan.com → score drops.
+       slash tx on explorer.testnet.chain.robinhood.com → score drops.
        Closing line: "In this console, red means exactly one thing: an agent just
        lost trust."
 

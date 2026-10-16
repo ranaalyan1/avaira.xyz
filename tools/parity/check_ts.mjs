@@ -24,7 +24,7 @@ const corpus = JSON.parse(fs.readFileSync(path.join(HERE, 'corpus.json'), 'utf8'
 
 const avaira = new Avaira({
   rpcUrl: 'http://127.0.0.1:1', // deliberately unreachable: hashing must stay offline
-  chainId: 10143,
+  chainId: 46630,
   contracts: {
     identityRegistry: '0x0000000000000000000000000000000000000001',
     reputationRegistry: '0x0000000000000000000000000000000000000002',

@@ -9,7 +9,7 @@ judge, an explorer link or a block explorer scan needs.
 
 This copies them in, additively:
 
-    deployments/10143.json
+    deployments/46630.json
       + "deployer":        "0x…"                       (from the broadcast `from`)
       + "deploymentTxs":   { "AvairaIdentityRegistry": "0x…", … }   (CREATE only)
       + "deploymentBlock": already written by the script
@@ -20,10 +20,10 @@ they disagree, the merge aborts rather than attaching a real-looking hash to the
 wrong contract. Addresses that the broadcast does not cover are listed in
 `deploymentTxsMissing`, so a partial merge is visible instead of implied.
 
-    python3 tools/merge_deploy_txs.py --chain 10143
-    python3 tools/merge_deploy_txs.py --chain 10143 --check   # verify only, write nothing
+    python3 tools/merge_deploy_txs.py --chain 46630
+    python3 tools/merge_deploy_txs.py --chain 46630 --check   # verify only, write nothing
 
-Called automatically by `contracts/scripts/deploy-monad.sh` right after the
+Called automatically by `contracts/scripts/deploy-robinhood.sh` right after the
 broadcast; run it by hand to repair an older manifest. Exit 0 = merged or already
 consistent, non-zero = a mismatch worth reading.
 """
@@ -98,7 +98,7 @@ def merge(manifest: dict, creates: dict[str, dict]) -> tuple[dict, list[str], li
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--chain", type=int, default=10143)
+    ap.add_argument("--chain", type=int, default=46630)
     ap.add_argument("--manifest", default=None)
     ap.add_argument("--broadcast", default=None)
     ap.add_argument("--check", action="store_true", help="report consistency without writing")
@@ -112,7 +112,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if not manifest_path.exists():
-        print(f"  ✗ no manifest at {manifest_path} — run make deploy-monad first", file=sys.stderr)
+        print(f"  ✗ no manifest at {manifest_path} — run make deploy-robinhood first", file=sys.stderr)
         return 1
     if not broadcast_path.exists():
         print(f"  ✗ no broadcast record at {broadcast_path}", file=sys.stderr)

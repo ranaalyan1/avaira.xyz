@@ -96,7 +96,7 @@ ask for Foundry.
 ```python
 from avaira import Avaira, RiskEnvelope
 
-avaira = Avaira.from_deployment(chain_id=10143, private_key=os.environ["AGENT_PRIVATE_KEY"])
+avaira = Avaira.from_deployment(chain_id=46630, private_key=os.environ["AGENT_PRIVATE_KEY"])
 
 result = avaira.run(
     agent_id=1,
@@ -123,8 +123,8 @@ only step that needs money, and only ever on request:
 
 ```bash
 cast wallet new                     # generate a deployer key
-# fund it at https://testnet.monad.xyz, then put the key in contracts/.env
-make deploy-monad                   # deploys + wires all 6 contracts, writes deployments/10143.json
+# fund it at https://faucet.testnet.chain.robinhood.com, then put the key in contracts/.env
+make deploy-robinhood                   # deploys + wires all 6 contracts, writes deployments/46630.json
 ```
 
 ### Control plane (optional, and heavier)

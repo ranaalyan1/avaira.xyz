@@ -16,7 +16,7 @@ import {AvairaFixture} from "../utils/AvairaFixture.sol";
 /// @title GasBenchmark
 /// @notice Measures the real gas cost of every Avaira primitive and writes
 ///         `contracts/metrics/gas.json` for the README, dashboard and submission.
-/// @dev Gas is EVM-intrinsic, so these numbers are exactly what Monad charges. Monad's
+/// @dev Gas is EVM-intrinsic, so these numbers are exactly what Robinhood charges. Robinhood's
 ///      published average transaction cost ($0.004–0.007) then converts them to USD.
 ///      Run with: `make benchmark`
 contract GasBenchmark is AvairaFixture {
@@ -164,7 +164,7 @@ contract GasBenchmark is AvairaFixture {
 
     function _log(Snapshot memory s) private pure {
         console2.log("");
-        console2.log("Avaira gas profile (EVM-intrinsic; identical on Monad)");
+        console2.log("Avaira gas profile (EVM-intrinsic; identical on Robinhood)");
         console2.log("----------------------------------------------------");
         console2.log("registerAgent        ", s.registerAgent);
         console2.log("setAgentWallet       ", s.setAgentWallet);

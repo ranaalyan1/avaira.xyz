@@ -39,8 +39,8 @@ parse it:
 
 | Never required, never ask the user for it | |
 | :--- | :--- |
-| API keys of any kind (OpenAI, Anthropic, Kimi, Privy, Monadscan) | the verified path uses none |
-| A wallet, private key, seed phrase or faucet funds | deploying to Monad is a separate, explicitly-requested step |
+| API keys of any kind (OpenAI, Anthropic, Kimi, Privy, Robinhoodscan) | the verified path uses none |
+| A wallet, private key, seed phrase or faucet funds | deploying to Robinhood is a separate, explicitly-requested step |
 | `sudo`, root, or system-wide installs | everything lands in the repo or `$HOME/.foundry` |
 | A database, Mongo, Redis, Docker, or a running backend | the core is offline and dependency-light |
 
@@ -78,7 +78,7 @@ streams the real transcripts. In a sandbox preview, expose port 8402.
 ## 5. Boundaries
 
 - Never commit `.env`, `.venv/`, `node_modules/`, or `deployments/*.json` you generated.
-- Never run `make deploy-monad`, `forge script ... --broadcast`, or anything that
+- Never run `make deploy-robinhood`, `forge script ... --broadcast`, or anything that
   signs a transaction unless the user explicitly asked to deploy and supplied a
   funded key.
 - Never edit `contracts/.env.example` or write real secrets into a committed file.
@@ -97,7 +97,7 @@ streams the real transcripts. In a sandbox preview, expose port 8402.
 | pip/npm download errors | re-run; if the network is closed, use `--offline` with pre-warmed deps |
 | `ModuleNotFoundError: avaira_os` | run from the repo root (`cd` to where `setup.sh` lives) |
 | proof artifacts do not all PASS | `./setup.sh --json` for the failing step, then `/tmp/avaira-setup.*` tail printed by the script |
-| Foundry tests want funds | they do not — `forge test` is local-only. Only `make deploy-monad` needs MON |
+| Foundry tests want funds | they do not — `forge test` is local-only. Only `make deploy-robinhood` needs MON |
 
 Expand the failing step verbatim and paste the last 20 lines of output rather
 than paraphrasing it.
@@ -105,7 +105,7 @@ than paraphrasing it.
 ## 7. What is in this repo (orientation)
 
 - `avaira_os/` — Cognitive OS v5.0 kernel: PLAN → PROVE → SIMULATE → EXECUTE. **No deps beyond pydantic.**
-- `contracts/` — 6 Solidity contracts for Monad + ERC-8004 (Foundry).
+- `contracts/` — 6 Solidity contracts for Robinhood + ERC-8004 (Foundry).
 - `sdk/typescript`, `sdk/python`, `services/scorer` — client SDKs and the 0–100 Avaira Score engine.
 - `tools/quickstart/server.py` — the stdlib Quickstart Console used by `--serve`.
 - `SETUP.md` — the same information written for humans, plus the advanced paths.

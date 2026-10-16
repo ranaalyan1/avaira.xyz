@@ -2,7 +2,7 @@
 
     from avaira import Avaira, RiskEnvelope
 
-    avaira = Avaira.from_deployment(chain_id=10143, private_key=os.environ["AGENT_KEY"])
+    avaira = Avaira.from_deployment(chain_id=46630, private_key=os.environ["AGENT_KEY"])
 
     result = avaira.run(
         agent_id,
@@ -131,14 +131,14 @@ class Avaira:
                 with candidate.open() as handle:
                     return json.load(handle)
         raise AvairaError(
-            f"no deployment manifest for chain {chain_id}. Deploy first (make deploy-monad), "
+            f"no deployment manifest for chain {chain_id}. Deploy first (make deploy-robinhood), "
             f"or point $AVAIRA_DEPLOYMENT at deployments/{chain_id}.json"
         )
 
     @classmethod
     def from_deployment(
         cls,
-        chain_id: int = 10143,
+        chain_id: int = 46630,
         private_key: str | None = None,
         rpc_url: str | None = None,
         manifest_path: str | Path | None = None,
@@ -146,10 +146,10 @@ class Avaira:
     ) -> "Avaira":
         manifest = cls.load_manifest(chain_id, manifest_path)
         default_rpc = (
-            "https://testnet-rpc.monad.xyz"
-            if chain_id == 10143
-            else "https://rpc.monad.xyz"
-            if chain_id == 143
+            "https://rpc.testnet.chain.robinhood.com"
+            if chain_id == 46630
+            else "https://rpc.mainnet.chain.robinhood.com"
+            if chain_id == 4663
             else "http://127.0.0.1:8545"
         )
         return cls(

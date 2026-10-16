@@ -18,11 +18,11 @@ import {
 
 const TS_SNIPPET = `import { Avaira, loadDeployment } from "@avaira/sdk";
 
-const deployment = loadDeployment(10143);           // Monad Testnet
+const deployment = loadDeployment(46630);           // Robinhood Testnet
 
 const avaira = new Avaira({
-  chainId: 10143,
-  rpcUrl: "https://testnet-rpc.monad.xyz",
+  chainId: 46630,
+  rpcUrl: "https://rpc.testnet.chain.robinhood.com",
   privateKey: process.env.AGENT_PRIVATE_KEY,
   contracts: deployment,
 });
@@ -71,7 +71,7 @@ const STANDARDS = [
   ["EIP-712", "typed, signed, single-use execution permits"],
   ["EIP-3009", "USDC proof-of-payment without an approval step"],
   ["OPA Rego", "policies as versioned, testable files"],
-  ["EVM", "Fuji addresses, Monad deployment script"],
+  ["EVM", "Fuji addresses, Robinhood deployment script"],
 ];
 
 const SURFACES = [

@@ -11,8 +11,8 @@ import {IAvairaStakeRegistry, IAvairaScoreReader} from "../interfaces/IAvaira.so
 import {AgentStatus, SlashLevel} from "../lib/AvairaTypes.sol";
 
 /// @title AvairaStakeRegistry
-/// @notice Staking, slashing and the composability interface any Monad protocol can gate on.
-/// @dev Capital is what makes accountability real. An agent locks USDC (native on Monad)
+/// @notice Staking, slashing and the composability interface any Robinhood protocol can gate on.
+/// @dev Capital is what makes accountability real. An agent locks USDC (native on Robinhood)
 ///      against its ERC-8004 identity; reputation alone never buys eligibility, because
 ///      `isEligible` requires stake **and** score **and** an un-slashed status.
 ///

@@ -4,14 +4,14 @@
 
 * @title AvairaIntentVault — Proof-of-Intent + the pre-execution gate
 * @notice The primitive that neither Assay Protocol (Base, post-hoc stake+score) nor Yelden's `AIAgentRegistry` (`isEligible()` lookups, Chainlink DON scoring) has: an agent must **commit the hash of its full plan and risk envelope before it acts**, the gate is evaluated **before execution**, and the outcome is anchored afterwards so any deviation is provable by anyone.
-* @dev Latency is the whole point. `checkGate` is a `view` function: it needs no transaction, no block, and no confirmation — it is a single `eth_call` against Monad's latest state. Commit is fire-and-forget, so the only thing the agent waits for is one RPC round trip. Ethereum's 12s blocks make this gate a 12-second product; on Monad (400ms blocks, 800ms finality) it costs a few hundred milliseconds of client time — the SDK measures and publishes the real number. Deviation is provable, not asserted: `attestOutcome` anchors a Merkle root of the agent's own hash-chained audit trail. Anyone holding a leaf that leaves the committed envelope (spend > maxSpendUsd, or an action outside allowedActions) can prove it against that root and trigger a slash, as long as they do it inside the challenge window.
+* @dev Latency is the whole point. `checkGate` is a `view` function: it needs no transaction, no block, and no confirmation — it is a single `eth_call` against Robinhood's latest state. Commit is fire-and-forget, so the only thing the agent waits for is one RPC round trip. Ethereum's 12s blocks make this gate a 12-second product; on Robinhood (400ms blocks, 800ms finality) it costs a few hundred milliseconds of client time — the SDK measures and publishes the real number. Deviation is provable, not asserted: `attestOutcome` anchors a Merkle root of the agent's own hash-chained audit trail. Anyone holding a leaf that leaves the committed envelope (spend > maxSpendUsd, or an action outside allowedActions) can prove it against that root and trigger a slash, as long as they do it inside the challenge window.
 
 ## At a glance
 
 | | |
 | --- | --- |
 | source | `contracts/src/core/AvairaIntentVault.sol` |
-| source sha256 | `681f72683ec0558509f8a19de4291e734ba19220e1481d002f8f37b3314cacca` |
+| source sha256 | `de9be0c6c78a6944656988ac6f429662a258c81131ab6ddb018f1c5a419e9e2f` |
 | external functions | 27 |
 | events | 12 |
 | custom errors | 22 |

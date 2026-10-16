@@ -54,7 +54,7 @@ Manual, and nothing in this repo can do it for you:
 - [ ] `treasury` is a receiving address you control and monitor
 - [ ] `minStake` / `minScore` / `challengeWindow` / `challengerBond` values are written down with their reasoning, and reviewed against SP-01/SP-03 (a bond > expected bounty means nobody reports)
 - [ ] admin = multisig with a 2-of-3-or-more threshold; the deploy key is revoked after step 10 (SP-05 is open: no timelock exists yet)
-- [ ] explorer verification submitted (`make verify-monad`), and `audit/specs/` regenerated from the deployed build
+- [ ] explorer verification submitted (`make verify-robinhood`), and `audit/specs/` regenerated from the deployed build
 - [ ] indexers subscribe to `OutcomeAttested`, `DeviationUpheld`, `ChallengeRejected`, `BanPropagationFailed`, `Slashed`, `GateChecked`
 - [ ] a human has read [`../FINDINGS.md`](../FINDINGS.md) and signed the accepted rows in [`RISK_REGISTER.md`](RISK_REGISTER.md)
 
@@ -70,4 +70,4 @@ Manual, and nothing in this repo can do it for you:
 | an agent cannot escape a slash by exiting early | **not true today** — R-01, SP-01 |
 | real USDC behaves as assumed | **untested** — R-07, SP-09 |
 | admin keys are governed | **not true today** — R-04, SP-05 |
-| gas/latency numbers in `metrics/` reflect Monad mainnet | **no** — testnet + local measurements; `make measure-monad` regenerates |
+| gas/latency numbers in `metrics/` reflect Robinhood mainnet | **no** — testnet + local measurements; `make measure-robinhood` regenerates |

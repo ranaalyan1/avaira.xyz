@@ -3,7 +3,7 @@ artifacts/
 cache/
 node_modules/
 
-# Foundry (v2 — Monad-native)
+# Foundry (v2 — Robinhood-native)
 out/
 cache/
 broadcast/

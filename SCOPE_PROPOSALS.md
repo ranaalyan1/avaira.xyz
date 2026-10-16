@@ -15,7 +15,7 @@ including the cost of **not** doing it.
 | SP-06 | Ship the scorer service entry point (or delete the targets that assume one) | `STATE.md` open items | S | scorer lead |
 | SP-07 | Sybil resistance for grounded feedback: reviewer-count decay, linkage heuristics | T5 / R-05 | M | scorer lead |
 | SP-08 | Report-rate instrumentation before mainnet (challenges per upheld deviation, bond economics) | T6 / R-09 / G-04 | S | data + protocol lead |
-| SP-09 | Fork-test against real USDC on a Monad mainnet fork | R-07 / G-01 | S | protocol lead |
+| SP-09 | Fork-test against real USDC on a Robinhood mainnet fork | R-07 / G-01 | S | protocol lead |
 | SP-10 | Unify the two canonical encoders behind an explicit version tag | R-11 / AV-015 | M | protocol lead |
 
 ---
@@ -72,8 +72,8 @@ whose weights sum to 0.8 (max score 80 of 100). It cannot produce a valid v2 com
 (b) delete it and ship no Rust SDK; (c) leave it and keep `skipped` in the report. Today we are at
 (c), which is honest but leaves a repo-wide "supported language" claim misleading.
 
-Separately: the project brief describes a **Move** artifact for Monad. It does not exist here — the
-protocol is Solidity 0.8.37 on the EVM (Monad is EVM-compatible), and `contracts/foundry.toml` plus
+Separately: the project brief describes a **Move** artifact for Robinhood. It does not exist here — the
+protocol is Solidity 0.8.37 on the EVM (Robinhood is EVM-compatible), and `contracts/foundry.toml` plus
 `tools/compile.mjs` are the only build paths. Either the brief is corrected or the artifact is
 written; the current docs must not imply a second implementation we don't have.
 

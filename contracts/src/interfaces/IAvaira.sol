@@ -17,7 +17,7 @@ enum GateReason {
     ENVELOPE_MISMATCH // 9 — the stored envelope does not match the committed hash
 }
 
-/// @notice Minimal EIP-3009 surface (native USDC on Monad exposes this).
+/// @notice Minimal EIP-3009 surface (native USDC on Robinhood exposes this).
 /// @dev Used as onchain, in-transaction proof that a reviewer actually paid the agent.
 interface IEIP3009 {
     function transferWithAuthorization(
@@ -43,7 +43,7 @@ interface IAvairaScoreReader {
 }
 
 /// @notice Avaira staking, slashing and eligibility surface (Component 5).
-/// @dev This is the composability interface: any Monad protocol can gate on
+/// @dev This is the composability interface: any Robinhood protocol can gate on
 ///      `isEligible` / `scoreOf` / `statusOf` in three lines.
 interface IAvairaStakeRegistry {
     event Staked(uint256 indexed agentId, address indexed staker, uint256 amount, uint256 totalStake);

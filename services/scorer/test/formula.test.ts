@@ -28,7 +28,7 @@ const NOW = 1_800_000_000; // fixed clock — nothing here may depend on wall ti
 function inputs(overrides: Partial<ScoreInputs> = {}): ScoreInputs {
   const base: ScoreInputs = {
     agentId: "1",
-    chainId: 10143,
+    chainId: 46630,
     registeredAt: NOW - 60 * DAY,
     status: 2, // ACTIVE
     stakeUsdc: "150000000", // 150 USDC

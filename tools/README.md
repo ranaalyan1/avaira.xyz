@@ -34,7 +34,7 @@ Two honest limits:
 * py-evm is ~100× slower than geth/anvil, so this harness measures **correctness**, never gas
   or wall-clock latency. Gas numbers come from `contracts/test/benchmark/GasBenchmark.t.sol`
   on a real toolchain, and latency claims come from `sdk/typescript`'s benchmark against an
-  actual Monad RPC.
+  actual Robinhood RPC.
 * A revert with no returndata is reported as "reverted without data". Custom errors decode
   fully; `require("string")` reverts decode as the string; `Panic` decodes to its code. The
   campaign treats any `Panic` as a violation, so an unexplained revert can never hide.

@@ -9,8 +9,17 @@ import { API } from "@/lib/api";
 
 
 import { DARK, gradeColor } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
+import { EmptyState, RowsSkeleton } from "@/components/ui/page-states";
 
 export default function Underwriters() {
+  useSeo({
+    title: "Underwriters",
+    description: "Open missions and underwriter positions.",
+    path: "/underwriters",
+    noindex: true,
+  });
+
   const { user } = useAuth();
   const isAdmin = !!user?.is_admin;
   const [underwriters, setUnderwriters] = useState([]);
@@ -23,6 +32,7 @@ export default function Underwriters() {
   const [uwForm, setUwForm] = useState({ name: "", capital_amount: "5.0" });
   const [missionForm, setMissionForm] = useState({ agent_id: "", description: "", target_value: "1.0", duration_hours: "24", risk_level: "medium" });
   const [stakeForm, setStakeForm] = useState({ underwriter_id: "", amount: "1.0" });
+  const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -35,6 +45,7 @@ export default function Underwriters() {
       setMissions(mRes.data);
       setAgents(aRes.data);
     } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -206,8 +217,15 @@ export default function Underwriters() {
             <h2 className="text-[13px] font-semibold tracking-tight text-avaira-primary mb-3 flex items-center gap-2">
               <Zap size={14} /> Open Missions
             </h2>
-            {openMissions.length === 0 ? (
-              <p className="font-mono text-xs text-avaira-dim text-center py-6">NO OPEN MISSIONS</p>
+            {loading && openMissions.length === 0 ? (
+              <RowsSkeleton rows={4} testid="missions-skeleton" />
+            ) : openMissions.length === 0 ? (
+              <EmptyState
+                icon={Zap}
+                title="No open missions"
+                body="Create a mission for a registered agent and underwriters can take a position on it."
+                testid="missions-empty"
+              />
             ) : (
               <div className="space-y-2">
                 {openMissions.map(m => (
@@ -281,8 +299,15 @@ export default function Underwriters() {
           <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
             <Users size={14} className="text-avaira-primary" /> Underwriters
           </h2>
-          {underwriters.length === 0 ? (
-            <p className="font-mono text-xs text-avaira-dim text-center py-6">NO UNDERWRITERS</p>
+          {loading && underwriters.length === 0 ? (
+            <RowsSkeleton rows={4} testid="underwriters-skeleton" />
+          ) : underwriters.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No underwriters yet"
+              body="Register as an underwriter to stake capital against missions and earn from the fee split."
+              testid="underwriters-empty"
+            />
           ) : (
             <div className="space-y-2">
               {underwriters.map(uw => (

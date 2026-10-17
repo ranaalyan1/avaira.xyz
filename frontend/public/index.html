@@ -14,14 +14,22 @@
         <meta name="robots" content="index, follow" />
         <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <link rel="canonical" href="https://avaira.xyz/" />
-        <link rel="icon" href="/logo.png" />
+
+        <!-- Favicon + app icons (generated from assets/logo.png) -->
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
 
         <!-- Open Graph -->
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://avaira.xyz/" />
         <meta property="og:title" content="AVAIRA — Nothing spends until the gate returns a permit" />
         <meta property="og:description" content="Envelope, policy and prover must agree before an agent action runs. Nine refusal codes, one permit." />
-        <meta property="og:image" content="https://avaira.xyz/art/hero.png" />
+        <meta property="og:image" content="https://avaira.xyz/og/og-home.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="A pixel corridor of four gates with a lit card travelling between them" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="AVAIRA Protocol" />
@@ -31,7 +39,7 @@
         <meta name="twitter:url" content="https://avaira.xyz/" />
         <meta name="twitter:title" content="AVAIRA — Execution control for agents" />
         <meta name="twitter:description" content="Envelope, policy and prover must agree before an agent action runs. Nine refusal codes, one permit." />
-        <meta name="twitter:image" content="https://avaira.xyz/art/hero.png" />
+        <meta name="twitter:image" content="https://avaira.xyz/og/og-home.png" />
         <meta name="twitter:image:alt" content="A pixel corridor of four gates with a lit card travelling between them" />
 
         <!-- Structured Data (JSON-LD) -->
@@ -46,15 +54,43 @@
             "operatingSystem": "Web"
         }
         </script>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "AVAIRA Protocol",
+            "url": "https://avaira.xyz",
+            "logo": "https://avaira.xyz/icons/icon-512.png",
+            "sameAs": ["https://github.com/ranaalyan1/avaira.xyz"]
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "AVAIRA Protocol",
+            "url": "https://avaira.xyz"
+        }
+        </script>
 
         <!-- Fonts: Doto (dot matrix) for display, IBM Plex Mono for machine text,
-             Inter for body. The React app self-hosts the same faces. -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
-            rel="stylesheet"
-        />
+             Inter for body. All three are self-hosted woff2 (latin subset) from
+             /fonts, declared once here for both the static pre-render and the
+             React app — no font CDN, no double download, font-display: swap.
+             The three above-the-fold faces are preloaded. -->
+        <link rel="preload" href="/fonts/doto-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+        <style>
+            @font-face{font-family:'Doto';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/doto-latin-400-normal.woff2') format('woff2')}
+            @font-face{font-family:'Doto';font-style:normal;font-weight:700;font-display:swap;src:url('/fonts/doto-latin-700-normal.woff2') format('woff2')}
+            @font-face{font-family:'Doto';font-style:normal;font-weight:900;font-display:swap;src:url('/fonts/doto-latin-900-normal.woff2') format('woff2')}
+            @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2')}
+            @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url('/fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2')}
+            @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/inter-latin-400-normal.woff2') format('woff2')}
+            @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('/fonts/inter-latin-500-normal.woff2') format('woff2')}
+            @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/inter-latin-600-normal.woff2') format('woff2')}
+        </style>
 
         <!--
             Critical inline CSS for the static pre-render below.
@@ -168,7 +204,10 @@
 
                 <!-- Hero -->
                 <header class="px-static-hero">
-                    <img class="px-static-art" src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" />
+                    <picture>
+                        <source srcset="/art/hero.webp" type="image/webp" />
+                        <img class="px-static-art" src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" fetchpriority="high" decoding="async" width="320" height="180" />
+                    </picture>
                     <span class="px-static-veil"></span>
                     <div class="px-static-wrap">
                         <p class="label">Execution control for agents that hold budgets</p>
@@ -212,7 +251,10 @@
                         </p>
                         <div class="px-static-grid3">
                             <article class="px-static-card">
-                                <img src="/art/score.png" alt="A pixel gauge with a lit arc and a single needle" />
+                                <picture>
+                                    <source srcset="/art/score.webp" type="image/webp" />
+                                    <img src="/art/score.png" alt="A pixel gauge with a lit arc and a single needle" loading="lazy" decoding="async" width="320" height="180" />
+                                </picture>
                                 <div class="px-static-card-body">
                                     <h3>Rate</h3>
                                     <p class="label">Score, recomputable by anyone</p>
@@ -220,7 +262,10 @@
                                 </div>
                             </article>
                             <article class="px-static-card">
-                                <img src="/art/underwrite.png" alt="A pixel vault of stacked bonded plates with particles rising" />
+                                <picture>
+                                    <source srcset="/art/underwrite.webp" type="image/webp" />
+                                    <img src="/art/underwrite.png" alt="A pixel vault of stacked bonded plates with particles rising" loading="lazy" decoding="async" width="320" height="180" />
+                                </picture>
                                 <div class="px-static-card-body">
                                     <h3>Clear</h3>
                                     <p class="label">Committed before, attested after</p>
@@ -228,7 +273,10 @@
                                 </div>
                             </article>
                             <article class="px-static-card">
-                                <img src="/art/network.png" alt="A pixel lattice of connected nodes" />
+                                <picture>
+                                    <source srcset="/art/network.webp" type="image/webp" />
+                                    <img src="/art/network.png" alt="A pixel lattice of connected nodes" loading="lazy" decoding="async" width="320" height="180" />
+                                </picture>
                                 <div class="px-static-card-body">
                                     <h3>Insure</h3>
                                     <p class="label">Underwriters stake against missions</p>
@@ -423,6 +471,7 @@ print(result["status"])   # "completed" or "blocked"</pre>
                                 <a href="/sdk">Console docs</a>
                                 <a href="https://github.com/ranaalyan1/avaira.xyz">Source</a>
                                 <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md">Security</a>
+                                <a href="/contact">Contact</a>
                             </nav>
                             <nav aria-label="Console">
                                 <h4>Console</h4>

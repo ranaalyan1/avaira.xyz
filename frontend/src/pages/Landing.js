@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/App";
 import { useEnterAnimation, useReveal, useScrubTimeline, animate, stagger } from "@/lib/motion";
+import { useSeo } from "@/lib/seo";
 import {
   ConsoleActions,
   Glyph,
@@ -116,6 +117,37 @@ export default function Home() {
   const { user } = useAuth();
   const reveal = useReveal({ step: 60 });
 
+  useSeo({
+    title: "AVAIRA — Nothing spends until the gate returns a permit",
+    fullTitle: true,
+    description:
+      "AVAIRA gates agent actions before they execute. The risk envelope, a versioned OPA Rego policy and an interval prover have to agree before a signed single-use permit exists. Rating, clearing and underwriting in one request path.",
+    path: "/",
+    image: "/og/og-home.png",
+    imageAlt: "A pixel corridor of four gates with a lit card travelling between them",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "AVAIRA Protocol",
+        description:
+          "Pre-execution control for autonomous agents. Checks every intent against a risk envelope, a policy file and a symbolic prover, then issues a single-use permit for the ones that clear.",
+        url: "https://avaira.xyz",
+        applicationCategory: "Blockchain",
+        operatingSystem: "Web",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: FAQ.map(({ q, a }) => ({
+          "@type": "Question",
+          name: q,
+          acceptedAnswer: { "@type": "Answer", text: a },
+        })),
+      },
+    ],
+  });
+
   const hero = useEnterAnimation((_scope, root) => {
     animate(root.querySelectorAll("[data-hero-line]"), {
       opacity: [0, 1],
@@ -132,6 +164,8 @@ export default function Home() {
     timeline.add(".px-pillar-art img", { translateY: ["-4%", "3%"], scale: [1.08, 1], duration: 1000 });
   });
 
+  // Conversion tracking for the console CTAs lives in ConsoleActions and
+  // PixelNav, so every entry point reports the same event with its source.
   const goToConsole = () => {
     if (user) {
       navigate("/dashboard");

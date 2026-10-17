@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Github } from "lucide-react";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
+import RelatedPages from "@/components/marketing/RelatedPages";
 import {
   ConsoleActions,
   Glyph,
@@ -81,10 +83,36 @@ const SURFACES = [
   ["Self-hosting", "API, policy engine, database and the anchoring job from the compose file"],
 ];
 
+const TRAIL = [
+  ["Home", "/"],
+  ["Integration", "/docs"],
+];
+
 export default function DocsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const reveal = useReveal({ step: 60 });
+
+  useSeo({
+    title: "Integration — one call around the function that spends",
+    description:
+      "Wrap the callable that performs the action and the gate handles the envelope, the policy check, the permit and the audit entry. SDKs for TypeScript, Python and Rust, plus LangChain and CrewAI wrappers.",
+    path: "/docs",
+    image: "/og/og-docs.png",
+    imageAlt: "AVAIRA integration card: one call around the function that spends",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: "Integrating the AVAIRA gate",
+        description:
+          "The integration point is the callable, not the model: how to wrap the function that spends.",
+        url: "https://avaira.xyz/docs",
+        author: { "@type": "Organization", name: "AVAIRA Protocol" },
+      },
+      breadcrumbJsonLd(TRAIL),
+    ],
+  });
 
   const goToConsole = () => {
     if (user) {
@@ -101,6 +129,7 @@ export default function DocsPage() {
       <PageHead
         n="05"
         section="Integration"
+        crumbs={TRAIL}
         title="One call around the function that spends."
         lede="The integration point is the callable, not the model. Wrap the function that performs the action and the gate handles the envelope, the policy check, the permit and the audit entry."
         meta={
@@ -198,6 +227,8 @@ export default function DocsPage() {
           <ConsoleActions onLaunch={goToConsole} />
         </div>
       </section>
+
+      <RelatedPages items={["gate", "evidence", "contact"]} />
 
       <PixelFooter />
     </div>

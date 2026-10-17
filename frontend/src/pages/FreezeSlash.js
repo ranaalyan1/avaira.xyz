@@ -6,11 +6,21 @@ import { toast } from "sonner";
 import { useAuth } from "@/App";
 
 import { API } from "@/lib/api";
+import { useSeo } from "@/lib/seo";
+import { EmptyState, RowsSkeleton } from "@/components/ui/page-states";
 
 export default function FreezeSlash() {
+  useSeo({
+    title: "Freeze and slash",
+    description: "Enforcement ledger: frozen agents and slashing events.",
+    path: "/freeze",
+    noindex: true,
+  });
+
   const { user } = useAuth();
   const isAdmin = !!user?.is_admin;
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState([]);
   const [freezeOpen, setFreezeOpen] = useState(false);
   const [slashOpen, setSlashOpen] = useState(false);
@@ -26,6 +36,7 @@ export default function FreezeSlash() {
       setEvents(evRes.data);
       setAgents(agRes.data);
     } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -208,8 +219,15 @@ export default function FreezeSlash() {
           <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3 flex items-center gap-2">
             <AlertTriangle size={14} className="text-avaira-yellow" /> Event Log
           </h2>
-          {events.length === 0 ? (
-            <p className="font-mono text-xs text-avaira-dim text-center py-8">NO EVENTS</p>
+          {loading && events.length === 0 ? (
+            <RowsSkeleton rows={6} testid="events-skeleton" />
+          ) : events.length === 0 ? (
+            <EmptyState
+              icon={AlertTriangle}
+              title="No enforcement events"
+              body="Freeze or slash actions against agents are recorded here with their reason and timestamp."
+              testid="events-empty"
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full data-table">

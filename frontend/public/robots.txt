@@ -1,9 +1,19 @@
 # AVAIRA Protocol - https://avaira.xyz
-# Public website content is crawlable.
+# Public website content is crawlable. The console sits behind sign-in and
+# is kept out of the index (the app also serves noindex on those routes).
 
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /dashboard
+Disallow: /agents
+Disallow: /executions
+Disallow: /freeze
+Disallow: /treasury
+Disallow: /reputation
+Disallow: /underwriters
+Disallow: /hardening-report
+Disallow: /sdk
 
 # Major AI and search crawlers (explicitly allowed)
 User-agent: GPTBot

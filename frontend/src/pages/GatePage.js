@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
+import RelatedPages from "@/components/marketing/RelatedPages";
 import GatePipeline from "@/components/marketing/GatePipeline";
 import GateTrace from "@/components/marketing/GateTrace";
 import { RefusalTable } from "@/components/marketing/SpecBlocks";
@@ -57,10 +59,36 @@ const TRACE_FIELDS = [
   ["payload", "the value the stage read, and the code it returned when it refused"],
 ];
 
+const TRAIL = [
+  ["Home", "/"],
+  ["The gate", "/gate"],
+];
+
 export default function GatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const reveal = useReveal({ step: 60 });
+
+  useSeo({
+    title: "The gate — four planes, passed in order",
+    description:
+      "Before any money moves, an agent intent clears a risk envelope, a versioned OPA Rego policy, an interval prover and a single-use EIP-712 permit. Nine refusal codes, no review queue.",
+    path: "/gate",
+    image: "/og/og-gate.png",
+    imageAlt: "AVAIRA gate card: envelope, policy, prover, then a permit",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: "The AVAIRA gate: four planes, passed in order",
+        description:
+          "How an agent intent clears the envelope, the policy file, the prover and the permit before anything spends.",
+        url: "https://avaira.xyz/gate",
+        author: { "@type": "Organization", name: "AVAIRA Protocol" },
+      },
+      breadcrumbJsonLd(TRAIL),
+    ],
+  });
 
   const goToConsole = () => {
     if (user) {
@@ -77,6 +105,7 @@ export default function GatePage() {
       <PageHead
         n="02"
         section="The gate"
+        crumbs={TRAIL}
         title="Four planes, passed in order."
         lede="Before any money moves the intent has to clear an envelope, a policy file, a prover and a permit. The gate either returns a signed permit or the code that says why it could not — there is no third outcome and no review queue."
         art="/art/hero.png"
@@ -196,6 +225,8 @@ export default function GatePage() {
           <ConsoleActions onLaunch={goToConsole} />
         </div>
       </section>
+
+      <RelatedPages items={["score", "evidence", "docs"]} />
 
       <PixelFooter />
     </div>

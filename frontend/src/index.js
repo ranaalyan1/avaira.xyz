@@ -1,10 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "@fontsource/doto/400.css";
-import "@fontsource/doto/700.css";
-import "@fontsource/doto/900.css";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
+// Fonts are self-hosted woff2 declared once in public/index.html (with
+// preloads), shared by the static pre-render and the app — importing the
+// @fontsource CSS here as well would download every face a second time
+// under a different hashed URL.
 import "@/index.css";
 import App from "@/App";
 

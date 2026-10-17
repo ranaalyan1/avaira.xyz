@@ -6,6 +6,8 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis
 import { API } from "@/lib/api";
 
 import { DARK } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
+import { PageSkeleton } from "@/components/ui/page-states";
 
 const STREAM_ICONS = { zap: Zap, shield: Shield, scissors: Scissors, database: Database };
 const STREAM_COLORS = [DARK.info, DARK.violet, DARK.warning, DARK.success];
@@ -22,6 +24,13 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function Treasury() {
+  useSeo({
+    title: "Treasury",
+    description: "Trust pool balance, protocol revenue and fee flows.",
+    path: "/treasury",
+    noindex: true,
+  });
+
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [revenueStreams, setRevenueStreams] = useState(null);
@@ -72,10 +81,8 @@ export default function Treasury() {
       </div>
 
       {loading && !stats ? (
-        <div className="cyber-card p-12 text-center mb-6">
-          <Wallet size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="text-[15px] font-medium text-avaira-muted">Loading Treasury</p>
-          <p className="font-mono text-xs text-avaira-dim mt-1">Fetching fee flows, splits, and recent transactions</p>
+        <div className="mb-6" data-testid="treasury-skeleton">
+          <PageSkeleton />
         </div>
       ) : null}
 

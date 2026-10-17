@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { API } from "@/lib/api";
 
 import { DARK } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
+import { EmptyState, RowsSkeleton } from "@/components/ui/page-states";
 
 const STEP_ICONS = { request_submitted: Send, risk_validation: Shield, execution: Zap, fee_deducted: Clock };
 
@@ -39,12 +41,20 @@ const TimelineStep = ({ step, isLast }) => {
 };
 
 export default function ExecutionFlow() {
+  useSeo({
+    title: "Execution flow",
+    description: "Watch intents clear the gate or stop at a refusal code.",
+    path: "/executions",
+    noindex: true,
+  });
+
   const [executions, setExecutions] = useState([]);
   const [agents, setAgents] = useState([]);
   const [selectedExec, setSelectedExec] = useState(null);
   const [searchTerm, setSearch_term] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ agent_id: "", action: "swap", target_address: "", value: "1.0", chain_id: "43113" });
+  const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -55,6 +65,7 @@ export default function ExecutionFlow() {
       setExecutions(execRes.data);
       setAgents(agentRes.data);
     } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -177,11 +188,15 @@ export default function ExecutionFlow() {
         {/* Execution List */}
         <div className="lg:col-span-2 cyber-card p-4">
           <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Execution history</h2>
-          {executions.length === 0 ? (
-            <div className="text-center py-8">
-              <Zap size={32} className="text-avaira-dim mx-auto mb-2" strokeWidth={1} />
-              <p className="font-mono text-xs text-avaira-dim">NO EXECUTIONS</p>
-            </div>
+          {loading && executions.length === 0 ? (
+            <RowsSkeleton rows={6} testid="executions-skeleton" />
+          ) : executions.length === 0 ? (
+            <EmptyState
+              icon={Zap}
+              title="No executions yet"
+              body="Submit an execution request above, or run a simulation from the dashboard, and the gate trace for each intent will appear here."
+              testid="executions-empty"
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full data-table">

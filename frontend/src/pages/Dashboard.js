@@ -7,9 +7,11 @@ import { toast } from "sonner";
 import { API } from "@/lib/api";
 import AgentDashboard from "@/components/AgentDashboard";
 import TrustHeatmap from "@/components/TrustHeatmap";
+import { PageSkeleton } from "@/components/ui/page-states";
 
 import { CHART_COLORS, DARK, STATUS_COLORS as PLOT_STATUS_COLORS } from "@/lib/palette";
 import { useCountUp } from "@/lib/motion";
+import { useSeo } from "@/lib/seo";
 
 // The figure counts up when the tile enters the viewport. The markup already
 // carries the final value, so a static render, a crawler or a reduced-motion
@@ -56,6 +58,13 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function Dashboard() {
+  useSeo({
+    title: "Protocol overview",
+    description: "Real-time execution monitoring for registered agents.",
+    path: "/dashboard",
+    noindex: true,
+  });
+
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
   const [simulating, setSimulating] = useState(false);
@@ -99,8 +108,8 @@ export default function Dashboard() {
 
   if (loading && !stats) {
     return (
-      <div className="cyber-card p-6" data-testid="dashboard-loading">
-        <p className="font-mono text-xs text-avaira-muted uppercase tracking-wider">Loading dashboard data...</p>
+      <div className="page-shell" data-testid="dashboard-loading">
+        <PageSkeleton />
       </div>
     );
   }

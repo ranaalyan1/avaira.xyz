@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useSeo } from "@/lib/seo";
 import { Glyph } from "@/components/marketing/pixel";
 
 export default function NotFound() {
+  useSeo({
+    title: "Page not found",
+    description: "The path you asked for does not exist. Nothing was executed.",
+    path: "/404",
+    noindex: true,
+  });
+
   return (
     <div className="px-site px-login" data-testid="not-found-page">
       <span className="px-login-veil" aria-hidden="true" />

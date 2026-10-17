@@ -6,6 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { API } from "@/lib/api";
 
 import { DARK } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
+import { RowsSkeleton } from "@/components/ui/page-states";
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -26,6 +28,13 @@ const getRepColor = (score) => {
 };
 
 export default function Reputation() {
+  useSeo({
+    title: "Reputation",
+    description: "Score history and the agent leaderboard.",
+    path: "/reputation",
+    noindex: true,
+  });
+
   const [leaderboard, setLeaderboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,10 +76,8 @@ export default function Reputation() {
       </div>
 
       {loading && leaderboard.length === 0 && history.length === 0 ? (
-        <div className="cyber-card p-12 text-center mb-4">
-          <TrendingUp size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="text-[15px] font-medium text-avaira-muted">Loading reputation data</p>
-          <p className="font-mono text-xs text-avaira-dim mt-1">Fetching leaderboard scores and change history</p>
+        <div className="mb-4" data-testid="reputation-skeleton">
+          <RowsSkeleton rows={8} />
         </div>
       ) : null}
 

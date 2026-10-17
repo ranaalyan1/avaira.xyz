@@ -10,7 +10,9 @@ import ScorePage from "@/pages/ScorePage";
 import EvidencePage from "@/pages/EvidencePage";
 import DocsPage from "@/pages/DocsPage";
 import Login from "@/pages/Login";
+import Contact from "@/pages/Contact";
 import NotFound from "@/pages/NotFound";
+import CookieConsent from "@/components/CookieConsent";
 import Dashboard from "@/pages/Dashboard";
 import AgentRegistry from "@/pages/AgentRegistry";
 import ExecutionFlow from "@/pages/ExecutionFlow";
@@ -46,6 +48,7 @@ function AppRoutes() {
         <Route path="/score" element={<ScorePage />} />
         <Route path="/evidence" element={<EvidencePage />} />
         <Route path="/docs" element={<DocsPage />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route
           element={(
@@ -107,6 +110,7 @@ function App() {
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
+        <CookieConsent />
         <Toaster
           position="top-right"
           toastOptions={{

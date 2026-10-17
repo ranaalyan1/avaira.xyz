@@ -12,6 +12,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Github, LogIn } from "lucide-react";
+import Breadcrumbs from "@/components/marketing/Breadcrumbs";
+import { track } from "@/lib/analytics";
 
 /* ── brand type ───────────────────────────────────────────────────────────
  * Doto (dot matrix) for display, IBM Plex Mono for machine text. Loaded from
@@ -140,7 +142,14 @@ export function PixelNav({ onLaunch, onSignIn }) {
           <button className="px-btn px-btn-quiet" data-testid="nav-login-btn" onClick={onSignIn}>
             Sign in
           </button>
-          <button className="px-btn px-btn-accent" data-testid="launch-protocol-btn" onClick={onLaunch}>
+          <button
+            className="px-btn px-btn-accent"
+            data-testid="launch-protocol-btn"
+            onClick={() => {
+              track("console_opened", { source: `nav:${pathname}` });
+              if (onLaunch) onLaunch();
+            }}
+          >
             Console
           </button>
         </div>
@@ -189,6 +198,7 @@ export function PixelFooter() {
             <a href="https://github.com/ranaalyan1/avaira.xyz">Source</a>
             <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md">Security</a>
             <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/CHANGELOG.md">Changelog</a>
+            <Link to="/contact">Contact</Link>
           </nav>
 
           <nav className="px-footer-col" aria-label="Console">
@@ -318,7 +328,7 @@ export const Marquee = ({ items }) => {
 };
 
 /** Page header: index, display title, lede, optional pixel-art backdrop. */
-export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, children }) => (
+export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, crumbs, children }) => (
   <header className="px-page-head" id="top">
     {art ? (
       <div className="px-page-head-art">
@@ -327,6 +337,7 @@ export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, c
     ) : null}
     <span className="px-page-head-veil" aria-hidden="true" />
     <div className="px-wrap px-page-head-inner">
+      {crumbs ? <Breadcrumbs trail={crumbs} /> : null}
       <SectionIndex n={n} label={section} />
       <h1 className="px-dot px-display px-page-title" data-reveal>
         {title}
@@ -343,35 +354,42 @@ export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, c
 );
 
 /** The two console entry points, wired once and shared by every page. */
-export const ConsoleActions = ({ onLaunch, onSignIn, size = "lg", launchTestId, signInTestId }) => (
-  <div className="px-hero-actions">
-    <button
-      className={`px-btn px-btn-accent${size === "lg" ? " px-btn-lg" : ""}`}
-      onClick={onLaunch}
-      data-testid={launchTestId}
-    >
-      Open the console
-      <ArrowUpRight size={15} strokeWidth={2} />
-    </button>
-    {onSignIn ? (
+export const ConsoleActions = ({ onLaunch, onSignIn, size = "lg", launchTestId, signInTestId }) => {
+  const { pathname } = useLocation();
+  return (
+    <div className="px-hero-actions">
       <button
-        className={`px-btn px-btn-quiet${size === "lg" ? " px-btn-lg" : ""}`}
-        onClick={onSignIn}
-        data-testid={signInTestId}
+        className={`px-btn px-btn-accent${size === "lg" ? " px-btn-lg" : ""}`}
+        onClick={() => {
+          track("console_opened", { source: pathname });
+          if (onLaunch) onLaunch();
+        }}
+        data-testid={launchTestId}
       >
-        <LogIn size={14} strokeWidth={2} />
-        Sign in
+        Open the console
+        <ArrowUpRight size={15} strokeWidth={2} />
       </button>
-    ) : (
-      <a
-        className={`px-btn px-btn-quiet${size === "lg" ? " px-btn-lg" : ""}`}
-        href="https://github.com/ranaalyan1/avaira.xyz"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <Github size={14} strokeWidth={2} />
-        Read the source
-      </a>
-    )}
-  </div>
-);
+      {onSignIn ? (
+        <button
+          className={`px-btn px-btn-quiet${size === "lg" ? " px-btn-lg" : ""}`}
+          onClick={onSignIn}
+          data-testid={signInTestId}
+        >
+          <LogIn size={14} strokeWidth={2} />
+          Sign in
+        </button>
+      ) : (
+        <a
+          className={`px-btn px-btn-quiet${size === "lg" ? " px-btn-lg" : ""}`}
+          href="https://github.com/ranaalyan1/avaira.xyz"
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => track("outbound_github", { source: pathname })}
+        >
+          <Github size={14} strokeWidth={2} />
+          Read the source
+        </a>
+      )}
+    </div>
+  );
+};

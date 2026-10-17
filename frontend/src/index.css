@@ -198,3 +198,113 @@
         transition-duration: 0.001ms !important;
     }
 }
+
+/* ── Cookie consent (banner + preferences) ─────────────────────────────────
+   Rendered outside both page scopes, so it styles itself from the global
+   tokens and inherits nothing from the pixel or console skins. */
+.ck-banner, .ck-panel {
+    background: #0B0D12;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #F5F6F8;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+.ck-banner {
+    position: fixed;
+    z-index: 90;
+    left: 16px;
+    bottom: 16px;
+    max-width: 420px;
+    padding: 18px 20px;
+    box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.8);
+}
+.ck-title {
+    margin: 0;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #C9C7FF;
+}
+.ck-body { margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: #9AA1AE; }
+.ck-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.ck-btn {
+    appearance: none;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #F5F6F8;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 9px 14px;
+}
+.ck-btn:hover { border-color: rgba(255, 255, 255, 0.55); }
+.ck-btn-accent { background: #6E6BF2; border-color: #6E6BF2; color: #fff; }
+.ck-btn-accent:hover { background: #5B58E8; border-color: #5B58E8; }
+.ck-btn-quiet { border-color: rgba(255, 255, 255, 0.14); color: #9AA1AE; }
+.ck-panel-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+.ck-panel { width: min(540px, 100%); padding: 22px 24px; }
+.ck-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ck-row:first-of-type { margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.ck-row-name { margin: 0; font-size: 13px; font-weight: 600; }
+.ck-pill, .ck-switch span {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.ck-pill { color: #5E6674; border: 1px solid rgba(255, 255, 255, 0.14); padding: 5px 9px; }
+.ck-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #C9C7FF; }
+.ck-switch input { accent-color: #6E6BF2; width: 15px; height: 15px; cursor: pointer; }
+.ck-reopen {
+    position: fixed;
+    z-index: 60;
+    left: 12px;
+    bottom: 12px;
+    appearance: none;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #5E6674;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 5px 8px;
+}
+.ck-reopen:hover { color: #9AA1AE; border-color: rgba(255, 255, 255, 0.3); }
+
+/* ── Breadcrumb trail (marketing pages) ──────────────────────────────────── */
+.px-crumbs { margin-bottom: 1.25rem; }
+.px-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.px-crumbs li { display: inline-flex; align-items: center; gap: 8px; }
+.px-crumbs li + li::before { content: "/"; color: #5E6674; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 10px; }
+.px-crumbs a, .px-crumbs span[aria-current] {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9AA1AE;
+    text-decoration: none;
+}
+.px-crumbs a:hover { color: #F5F6F8; }
+.px-crumbs span[aria-current] { color: #C9C7FF; }

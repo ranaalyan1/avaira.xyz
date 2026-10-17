@@ -2129,6 +2129,106 @@ async def validate_intent_endpoint(body: IntentValidateRequest, request: Request
     result = await avaira_validator.validate(body.intent, body.risk_envelope)
     return result
 
+# ─── CONTACT ─────────────────────────────────────────────────────
+# The website's contact form. The message is stored, then a notification
+# email is sent to the team inbox when SMTP is configured; without SMTP the
+# endpoint still accepts the message and logs it, so the form never breaks
+# because a mail server is missing.
+CONTACT_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+CONTACT_TOPICS = {"integration", "underwriting", "security", "other"}
+SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "").strip()
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+SMTP_FROM = os.environ.get("SMTP_FROM", "").strip() or SMTP_USERNAME
+SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "true").lower() == "true"
+CONTACT_NOTIFY_EMAIL = os.environ.get("CONTACT_NOTIFY_EMAIL", "").strip()
+
+
+class ContactMessage(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    email: str = Field(min_length=3, max_length=254)
+    topic: str = Field(default="other", max_length=32)
+    message: str = Field(min_length=20, max_length=4000)
+
+
+def _send_contact_notification(record: Dict[str, Any]) -> None:
+    """Blocking SMTP send; runs in a worker thread via asyncio.to_thread."""
+    import smtplib
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg["Subject"] = f"[avaira.xyz contact] {record['topic']}: {record['name']}"
+    msg["From"] = SMTP_FROM
+    msg["To"] = CONTACT_NOTIFY_EMAIL
+    msg["Reply-To"] = record["email"]
+    msg.set_content(
+        "New message from the avaira.xyz contact form\n"
+        f"\nName:    {record['name']}"
+        f"\nEmail:   {record['email']}"
+        f"\nTopic:   {record['topic']}"
+        f"\nSent at: {record['created_at']}"
+        f"\n\n{record['message']}\n"
+    )
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
+        if SMTP_USE_TLS:
+            smtp.starttls()
+        if SMTP_USERNAME:
+            smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+        smtp.send_message(msg)
+
+
+@api_router.post("/contact")
+async def submit_contact_message(body: ContactMessage, request: Request):
+    await enforce_rate_limit(request, "contact_form", limit=5, window_seconds=300)
+
+    name = body.name.strip()
+    email = body.email.strip().lower()
+    message = body.message.strip()
+    topic = body.topic.strip().lower() if body.topic else "other"
+    if topic not in CONTACT_TOPICS:
+        topic = "other"
+    if not CONTACT_EMAIL_RE.match(email):
+        raise HTTPException(422, "Enter a valid email address so the team can reply.")
+    if len(message) < 20:
+        raise HTTPException(422, "Say a little more - messages need at least 20 characters.")
+
+    record = {
+        "id": str(uuid.uuid4()),
+        "name": name,
+        "email": email,
+        "topic": topic,
+        "message": message,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "notified": False,
+    }
+
+    try:
+        await db.contact_messages.insert_one(dict(record))
+    except Exception as exc:  # storage is best-effort; the notification still goes out
+        logger.warning("contact message not stored: %s", exc)
+
+    if SMTP_HOST and CONTACT_NOTIFY_EMAIL:
+        try:
+            await asyncio.to_thread(_send_contact_notification, record)
+            record["notified"] = True
+            try:
+                await db.contact_messages.update_one({"id": record["id"]}, {"$set": {"notified": True}})
+            except Exception:
+                pass
+        except Exception as exc:
+            # The visitor's message is already stored; do not fail the request
+            # because the mail server misbehaved.
+            logger.error("contact notification email failed: %s", exc)
+    else:
+        logger.info(
+            "contact message received (no SMTP configured): %s <%s> topic=%s",
+            name, email, topic,
+        )
+
+    return {"status": "received", "id": record["id"]}
+
+
 # ─── HEALTH ──────────────────────────────────────────────────────
 @api_router.get("/anchor-state")
 async def anchor_state_endpoint():

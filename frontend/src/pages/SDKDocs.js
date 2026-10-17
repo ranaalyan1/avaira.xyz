@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { API } from "@/lib/api";
 
 import { DARK } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
 
 const CopyBtn = ({ text }) => {
   const [copied, setCopied] = useState(false);
@@ -34,6 +35,13 @@ const CodeBlock = ({ code, lang = "typescript" }) => (
 );
 
 export default function SDKDocs() {
+  useSeo({
+    title: "SDK reference",
+    description: "Console reference for the AVAIRA SDKs.",
+    path: "/sdk",
+    noindex: true,
+  });
+
   const [docs, setDocs] = useState(null);
   const [activeFunc, setActiveFunc] = useState(0);
 

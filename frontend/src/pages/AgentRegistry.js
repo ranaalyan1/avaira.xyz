@@ -9,6 +9,8 @@ import { API } from "@/lib/api";
 
 
 import { DARK, gradeColor } from "@/lib/palette";
+import { useSeo } from "@/lib/seo";
+import { RowsSkeleton } from "@/components/ui/page-states";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -103,6 +105,13 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
 };
 
 export default function AgentRegistry() {
+  useSeo({
+    title: "Agent registry",
+    description: "Register agents and manage their risk envelopes.",
+    path: "/agents",
+    noindex: true,
+  });
+
   const { user } = useAuth();
   const isAdmin = !!user?.is_admin;
   const [agents, setAgents] = useState([]);
@@ -248,11 +257,7 @@ export default function AgentRegistry() {
       </Dialog>
 
       {loading ? (
-        <div className="cyber-card p-12 text-center">
-          <Zap size={40} className="text-avaira-dim mx-auto mb-3 animate-glow-pulse" strokeWidth={1} />
-          <p className="text-[15px] font-medium text-avaira-muted">Loading agents</p>
-          <p className="font-mono text-xs text-avaira-dim mt-1">Pulling registry and score data from the protocol</p>
-        </div>
+        <RowsSkeleton rows={8} testid="agents-skeleton" />
       ) : agents.length === 0 ? (
         <div className="cyber-card p-12 text-center">
           <Shield size={40} className="text-avaira-dim mx-auto mb-3" strokeWidth={1} />

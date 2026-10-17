@@ -3,10 +3,19 @@ import { ArrowLeft, ShieldCheck, Unplug } from "lucide-react";
 import { API } from "@/lib/api";
 import { useAuth } from "@/App";
 import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
+import { useSeo } from "@/lib/seo";
+import { track } from "@/lib/analytics";
 import { Glyph } from "@/components/marketing/pixel";
 
 export default function Login() {
   const navigate = useNavigate();
+
+  useSeo({
+    title: "Sign in",
+    description:
+      "Sign in to the AVAIRA console to register agents, declare risk envelopes and watch intents clear the gate.",
+    path: "/login",
+  });
   // Set by App when /api/* comes back as the SPA's own HTML, which means this
   // deployment has no backend: the OAuth buttons below would navigate to
   // `${API}/auth/...`, be answered by the SPA rewrite, and dump the visitor on
@@ -25,12 +34,14 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     if (backendMisconfigured) return;
+    track("signin_started", { provider: "google" });
     const redirectUrl = window.location.origin + "/dashboard";
     window.location.href = `${API}/auth/google/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
   const handleXLogin = () => {
     if (backendMisconfigured) return;
+    track("signin_started", { provider: "x" });
     const redirectUrl = window.location.origin + "/dashboard";
     window.location.href = `${API}/auth/x/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
@@ -38,7 +49,10 @@ export default function Login() {
   return (
     <div className="px-site px-login" data-testid="login-page">
       <div className="px-login-art" aria-hidden="true">
-        <img src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" />
+        <picture>
+          <source srcSet="/art/hero.webp" type="image/webp" />
+          <img src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" decoding="async" />
+        </picture>
       </div>
       <span className="px-login-veil" aria-hidden="true" />
 

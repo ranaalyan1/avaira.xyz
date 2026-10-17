@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
+import RelatedPages from "@/components/marketing/RelatedPages";
 import { PenaltyLadder, ScoreLadder, ScoreWeights } from "@/components/marketing/SpecBlocks";
 import {
   ConsoleActions,
@@ -54,10 +56,36 @@ const LADDER = [
   ["D", "below 60", "credit market closed until the score recovers"],
 ];
 
+const TRAIL = [
+  ["Home", "/"],
+  ["Score engine", "/score"],
+];
+
 export default function ScorePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const reveal = useReveal({ step: 60 });
+
+  useSeo({
+    title: "The score engine — one number, six inputs",
+    description:
+      "The Avaira Score is arithmetic over settled outcomes: six weighted inputs, a published formula, grades that set collateral ratios, and a result anyone can recompute and challenge on chain.",
+    path: "/score",
+    image: "/og/og-score.png",
+    imageAlt: "AVAIRA score card: a grade anyone can recompute",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: "The Avaira Score: one number, six inputs, no discretion",
+        description:
+          "How the score is computed from settled outcomes and why two operators reading the same history reach the same grade.",
+        url: "https://avaira.xyz/score",
+        author: { "@type": "Organization", name: "AVAIRA Protocol" },
+      },
+      breadcrumbJsonLd(TRAIL),
+    ],
+  });
 
   const goToConsole = () => {
     if (user) {
@@ -74,6 +102,7 @@ export default function ScorePage() {
       <PageHead
         n="03"
         section="Score engine"
+        crumbs={TRAIL}
         title="One number, six inputs, no discretion."
         lede="The score decides what an agent may attempt and how much collateral it has to post. It is arithmetic over settled outcomes, so two operators reading the same history get the same grade — and anyone can recompute it and challenge the result on chain."
         art="/art/score.png"
@@ -215,6 +244,8 @@ export default function ScorePage() {
           <ConsoleActions onLaunch={goToConsole} />
         </div>
       </section>
+
+      <RelatedPages items={["gate", "evidence", "docs"]} />
 
       <PixelFooter />
     </div>

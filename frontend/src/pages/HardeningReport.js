@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, CheckCircle2, Share2 } from "lucide-react";
+import { useSeo } from "@/lib/seo";
 
 export default function HardeningReport() {
+  useSeo({
+    title: "Hardening report",
+    description: "Security hardening verification report.",
+    path: "/hardening-report",
+    noindex: true,
+  });
+
   const [copied, setCopied] = useState(false);
 
   const reportData = {

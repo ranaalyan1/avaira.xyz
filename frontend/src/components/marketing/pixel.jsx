@@ -85,6 +85,61 @@ const NAV = [
   { to: "/docs", label: "Docs" },
 ];
 
+/* what the scroll-reveal exposes, in document order */
+const REVEAL_SELECTOR = [
+  ".px-section .px-label",
+  ".px-section .px-h2",
+  ".px-section .px-h3",
+  ".px-section .px-body",
+  ".px-section .px-index",
+  ".px-fact",
+  ".px-step",
+  ".px-pillar",
+  ".px-spec-row",
+  ".px-frame",
+  ".px-related-card",
+  ".px-footer-col",
+].join(", ");
+
+/**
+ * Scroll-to-expose transitions. Tags content blocks with .rv (hidden, lowered)
+ * and flips them to .rv-in as they enter the viewport, with a small stagger.
+ * No IntersectionObserver (jsdom, old browsers) or reduced motion → the page
+ * simply stays fully visible.
+ */
+function useScrollReveal(pathname) {
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const root = document.querySelector(".px-site");
+    if (!root) return undefined;
+
+    const targets = Array.from(root.querySelectorAll(REVEAL_SELECTOR));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("rv-in");
+          io.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.05 }
+    );
+    targets.forEach((el, i) => {
+      el.classList.add("rv");
+      el.style.setProperty("--rv-delay", `${(i % 4) * 70}ms`);
+      io.observe(el);
+    });
+    return () => {
+      io.disconnect();
+      targets.forEach((el) => {
+        el.classList.remove("rv", "rv-in");
+        el.style.removeProperty("--rv-delay");
+      });
+    };
+  }, [pathname]);
+}
+
 /**
  * Navigation. Transparent over the hero frame, then a black surface once the
  * page has moved; the dotted progress rule underneath reads scroll position.
@@ -92,6 +147,7 @@ const NAV = [
 export function PixelNav({ onLaunch, onSignIn }) {
   const navRef = useRef(null);
   const { pathname } = useLocation();
+  useScrollReveal(pathname);
 
   useEffect(() => {
     const nav = navRef.current;

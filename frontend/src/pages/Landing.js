@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
@@ -16,6 +17,99 @@ import {
   SpecRows,
 } from "@/components/marketing/pixel";
 import { EvidenceTable } from "@/components/marketing/SpecBlocks";
+
+/* ── the run: a scroll-driven agent travelling through the gate ──────────
+   A tall section pins a glass stage; scrolling moves the agent chip along
+   the track, lights each check as it passes and flips the status readout.
+   Reduced motion renders the finished state (everything lit) statically. */
+
+const RUN_GATES = [
+  { key: "envelope", label: "Risk envelope" },
+  { key: "policy", label: "Policy file" },
+  { key: "prover", label: "Symbolic prover" },
+  { key: "permit", label: "Signed permit" },
+];
+const RUN_STATUS = ["Intent received", "Envelope ok", "Policy ok", "Proof witnessed", "Permit issued"];
+
+function AgentRun() {
+  const wrap = useRef(null);
+
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return undefined;
+    const gates = Array.from(el.querySelectorAll("[data-gate]"));
+    const status = el.querySelector("[data-run-status]");
+    const pct = el.querySelector("[data-run-pct]");
+
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.setProperty("--run", "1");
+      gates.forEach((g) => g.classList.add("is-lit"));
+      if (status) status.textContent = RUN_STATUS[RUN_STATUS.length - 1];
+      if (pct) pct.textContent = "100%";
+      return undefined;
+    }
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = el.getBoundingClientRect();
+      const span = Math.max(1, rect.height - window.innerHeight);
+      const run = Math.min(1, Math.max(0, -rect.top / span));
+      el.style.setProperty("--run", run.toFixed(4));
+      gates.forEach((g, i) => g.classList.toggle("is-lit", run >= (i + 1) / 5));
+      if (status) status.textContent = RUN_STATUS[Math.min(RUN_STATUS.length - 1, Math.floor(run * 5))];
+      if (pct) pct.textContent = `${Math.round(run * 100)}%`;
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <section className="px-run" data-testid="agent-run-section" ref={wrap} aria-label="An agent moving through the gate">
+      <div className="px-run-sticky">
+        <div className="px-wrap">
+          <p className="px-label">The run / keep scrolling</p>
+          <h2 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>
+            Watch an intent become a permit.
+          </h2>
+
+          <div className="px-run-panel px-glass">
+            <div className="px-run-head px-mono">
+              <span>AGENT 0x7F2 · TRANSFER 1,240 USDC</span>
+              <span>
+                <span data-run-status>Intent received</span> · <span data-run-pct>0%</span>
+              </span>
+            </div>
+
+            <div className="px-run-track">
+              <span className="px-run-line" aria-hidden="true" />
+              <span className="px-run-line-fill" aria-hidden="true" />
+              {RUN_GATES.map((gate, i) => (
+                <span className="px-run-gate" data-gate key={gate.key} style={{ left: `${(i + 1) * 20}%` }}>
+                  <span className="px-run-gate-dot" />
+                  <span className="px-run-gate-label">{gate.label}</span>
+                </span>
+              ))}
+              <span className="px-run-agent px-glass">
+                <img src="/logo.png" alt="The agent token carrying the intent" width="28" height="28" />
+                <span>AGENT</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /* The home page states the rule the protocol enforces and then hands off: the
  * mechanism lives on /gate, the score on /score, the measurements on /evidence
@@ -232,6 +326,9 @@ export default function Home() {
       </header>
 
       <Marquee items={MARQUEE} />
+
+      {/* ── the run: scroll-driven walkthrough ───────────────── */}
+      <AgentRun />
 
       {/* ── facts ────────────────────────────────────────────── */}
       <section className="px-section px-section-flat">

@@ -87,13 +87,16 @@
 }
 .px-site .px-btn,
 .px-site .px-btn *,
-.px-site .px-brand-badge,
-.px-site .px-brand-badge *,
 .px-site .px-btn-ico,
 .px-site input.px-input,
 .px-site select.px-input,
 .px-site textarea.px-input {
-    border-radius: 999px !important; /* ... except pills and badges */
+    border-radius: 999px !important; /* ... except pills */
+}
+/* the brand badge is a rounded square so the full logo shows uncropped */
+.px-site .px-brand-badge,
+.px-site .px-brand-badge img {
+    border-radius: 10px !important;
 }
 .px-site textarea.px-input { border-radius: 20px !important; }
 .px-site .px-card,
@@ -244,10 +247,11 @@
     justify-content: center;
     width: 2.6rem;
     height: 2.6rem;
+    overflow: hidden;
     background: var(--px-hi);
     transition: transform 0.18s ease, background-color 0.18s ease;
 }
-.px-site .px-brand-badge img { width: 1.8rem; height: 1.8rem; display: block; }
+.px-site .px-brand-badge img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .px-site .px-brand:hover .px-brand-badge { background: #fff; transform: scale(1.05); }
 
 .px-site .px-nav-actions { justify-self: end; display: flex; gap: 0.6rem; }
@@ -353,13 +357,21 @@
     background: linear-gradient(to bottom, transparent, rgb(52 66 0 / 0.4));
 }
 
-/* cards pick up a faint raise instead of hairline grids */
+/* cards go glass: translucent panes floating over the starfield */
 .px-site .px-fact,
 .px-site .px-step,
 .px-site .px-moat,
-.px-site .px-related-card {
-    background: rgb(255 255 255 / 0.03);
-    border: 1px solid var(--px-line);
+.px-site .px-pillar,
+.px-site .px-login-card,
+.px-site .px-related-card,
+.px-site .px-glass {
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02));
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        0 24px 48px -24px rgb(0 0 0 / 0.8);
 }
 .px-site .px-related-card:hover { border-color: var(--px-hi); background: rgb(204 255 0 / 0.07); }
 
@@ -381,4 +393,144 @@
     .px-site .px-nav-links { display: none; }
     .px-site .px-brand { justify-self: start; }
     .px-site .px-wordmark { font-size: clamp(4rem, 18vw, 8rem); }
+}
+
+/* ── scroll-to-expose transitions ───────────────────────────────────────
+   Elements tagged .rv by the reveal hook start lowered and transparent,
+   then expose as they cross into the viewport. If JS or IO is missing the
+   hook never runs and everything stays visible — crawlers see a full page. */
+.px-site .rv {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+        opacity 0.7s ease var(--rv-delay, 0ms),
+        transform 0.8s cubic-bezier(0.2, 0.65, 0.2, 1) var(--rv-delay, 0ms);
+    will-change: opacity, transform;
+}
+.px-site .rv.rv-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+    .px-site .rv { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── the run: a scroll-driven agent travelling through the gate ────────
+   The section is tall; a sticky stage pins while --run (0..1, set from
+   scroll) moves the agent chip along the track and lights each gate. */
+.px-site .px-run { position: relative; height: 240vh; }
+.px-site .px-run-sticky {
+    position: sticky;
+    top: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 6rem 0 4rem;
+}
+.px-site .px-run-panel {
+    border-radius: 20px !important;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    margin-top: 2rem;
+}
+.px-site .px-run-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #b7bbc6;
+    margin-bottom: 4.5rem;
+}
+.px-site .px-run-head [data-run-status] { color: var(--px-hi); }
+
+.px-site .px-run-track { position: relative; height: 9.5rem; }
+.px-site .px-run-line,
+.px-site .px-run-line-fill {
+    position: absolute;
+    left: 0;
+    top: 3rem;
+    height: 2px;
+    width: 100%;
+    background: rgb(255 255 255 / 0.14);
+}
+.px-site .px-run-line-fill {
+    background: var(--px-hi);
+    width: calc(var(--run, 0) * 100%);
+    box-shadow: 0 0 18px rgb(204 255 0 / 0.55);
+}
+
+.px-site .px-run-gate {
+    position: absolute;
+    top: 3rem;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+}
+.px-site .px-run-gate-dot {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 999px !important;
+    border: 2px solid rgb(255 255 255 / 0.35);
+    background: var(--px-black);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.px-site .px-run-gate-label {
+    margin-top: 1.4rem;
+    font-family: var(--px-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8a8f9a;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+}
+.px-site .px-run-gate.is-lit .px-run-gate-dot {
+    background: var(--px-hi);
+    border-color: var(--px-hi);
+    box-shadow: 0 0 16px rgb(204 255 0 / 0.8);
+}
+.px-site .px-run-gate.is-lit .px-run-gate-label { color: var(--px-hi); }
+
+.px-site .px-run-agent {
+    position: absolute;
+    top: 3rem;
+    left: calc(var(--run, 0) * 100%);
+    transform: translate(calc(var(--run, 0) * -100%), calc(-50% - 2.6rem));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.85rem 0.45rem 0.45rem;
+    border-radius: 999px !important;
+    font-family: var(--px-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    color: #fff;
+    white-space: nowrap;
+}
+.px-site .px-run-agent::after {
+    /* stem connecting the chip to the line */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 2px;
+    height: 1.35rem;
+    background: rgb(204 255 0 / 0.5);
+}
+.px-site .px-run-agent img {
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 999px !important;
+    display: block;
+}
+
+@media (max-width: 720px) {
+    .px-site .px-run { height: 200vh; }
+    .px-site .px-run-gate-label { display: none; }
+    .px-site .px-run-head { margin-bottom: 3.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .px-site .px-run { height: auto; }
+    .px-site .px-run-sticky { position: static; min-height: 0; }
 }

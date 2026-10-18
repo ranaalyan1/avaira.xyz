@@ -129,7 +129,6 @@ const PILLARS = [
     seed: "RATE",
     term: "Rate",
     art: "/art/score.png",
-    gif: "/art/score.gif",
     artAlt: "A pixel gauge with a lit arc and a single needle",
     subtitle: "Score, recomputable by anyone",
     body: "Six weighted inputs decide what an agent may attempt and how much collateral it posts. The formula is public, so two operators reading the same settled history reach the same grade.",
@@ -141,7 +140,6 @@ const PILLARS = [
     seed: "CLEAR",
     term: "Clear",
     art: "/art/underwrite.png",
-    gif: "/art/underwrite.gif",
     artAlt: "A pixel vault of stacked bonded plates with particles rising",
     subtitle: "Committed before, attested after",
     body: "The envelope is hashed and committed before the action is attempted, then the outcome is attested against it. The protocol keeps its own record of what was authorised and what actually ran.",
@@ -153,7 +151,6 @@ const PILLARS = [
     seed: "INSURE",
     term: "Insure",
     art: "/art/network.png",
-    gif: "/art/network.gif",
     artAlt: "A pixel lattice of connected nodes",
     subtitle: "Underwriters stake against missions",
     body: "Backers take a position on a mission. A failed mission pays them from slashed collateral on the 85, 10 and 5 split; a mission that settles returns principal plus its share of the fee.",
@@ -277,7 +274,6 @@ export default function Home() {
         <div className="px-hero-art">
           <PixelArt
             png="/art/hero.png"
-            gif="/art/hero.gif"
             alt="A pixel corridor of four gates with a lit card travelling between them"
             loading="eager"
             fetchPriority="high"
@@ -360,7 +356,7 @@ export default function Home() {
             {PILLARS.map((pillar) => (
               <article className="px-pillar" data-testid={pillar.id} data-reveal key={pillar.term}>
                 <figure className="px-pillar-art">
-                  <PixelArt png={pillar.art} gif={pillar.gif} alt={pillar.artAlt} />
+                  <PixelArt png={pillar.art} alt={pillar.artAlt} />
                 </figure>
                 <div className="px-pillar-body">
                   <div className="px-pillar-head">
@@ -392,7 +388,6 @@ export default function Home() {
             <div className="px-cell" data-reveal>
               <PixelFrame
                 src="/art/permit.png"
-                gif="/art/permit.gif"
                 alt="A pixel permit card with a signature drawn across it and a seal stamped into the corner"
                 ratio="16 / 9"
                 caption="Permitted"
@@ -407,7 +402,6 @@ export default function Home() {
             <div className="px-cell" data-reveal>
               <PixelFrame
                 src="/art/refuse.png"
-                gif="/art/refuse.gif"
                 alt="A pixel corridor stopped by a red barrier lowered across it"
                 ratio="16 / 9"
                 caption="Refused"

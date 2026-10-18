@@ -9,7 +9,7 @@
  * Geometry is deterministic: a glyph is a pure function of its seed, so the
  * same page always draws the same matrix.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Github, LogIn } from "lucide-react";
 import Breadcrumbs from "@/components/marketing/Breadcrumbs";
@@ -130,12 +130,40 @@ function useScrollReveal(pathname) {
       el.style.setProperty("--rv-delay", `${(i % 4) * 70}ms`);
       io.observe(el);
     });
+
+    /* scroll scrub: every art plate tracks the scroll position directly —
+       --ply runs -1 (plate below the fold) → 1 (plate above it), so even a
+       slight scroll visibly moves the artwork. Replaces the old GIF loops. */
+    const plates = Array.from(root.querySelectorAll("img[data-px-art]"));
+    let frame = 0;
+    const scrub = () => {
+      frame = 0;
+      const vh = window.innerHeight;
+      plates.forEach((img) => {
+        const rect = img.getBoundingClientRect();
+        if (rect.bottom < -200 || rect.top > vh + 200) return;
+        const centre = rect.top + rect.height / 2;
+        const ply = Math.max(-1, Math.min(1, (vh / 2 - centre) / (vh / 2)));
+        img.style.setProperty("--ply", ply.toFixed(4));
+      });
+    };
+    const onScrub = () => {
+      if (!frame) frame = window.requestAnimationFrame(scrub);
+    };
+    scrub();
+    window.addEventListener("scroll", onScrub, { passive: true });
+    window.addEventListener("resize", onScrub);
+
     return () => {
       io.disconnect();
+      window.removeEventListener("scroll", onScrub);
+      window.removeEventListener("resize", onScrub);
+      if (frame) window.cancelAnimationFrame(frame);
       targets.forEach((el) => {
         el.classList.remove("rv", "rv-in");
         el.style.removeProperty("--rv-delay");
       });
+      plates.forEach((img) => img.style.removeProperty("--ply"));
     };
   }, [pathname]);
 }
@@ -294,54 +322,26 @@ export const SectionIndex = ({ n, label }) => (
  * sequence is swapped in once the page has painted, and only for visitors who
  * have not asked for reduced motion. The pair is always the same scene, so the
  * swap is invisible. */
-export const PixelArt = ({ png, gif, alt, className = "", loading = "lazy", ...rest }) => {
-  const [src, setSrc] = useState(png);
+/* GIF sequences are retired: every plate is a sharp still that moves with the
+   page instead — the scroll scrub in useScrollReveal drives a per-plate
+   parallax (--ply) so even a slight scroll shifts the artwork. The `gif`
+   prop is still accepted from old call sites and deliberately ignored. */
+export const PixelArt = ({ png, gif: _gif, alt, className = "", loading = "lazy", ...rest }) => (
+  <img
+    src={png}
+    alt={alt}
+    className={className}
+    loading={loading}
+    decoding="async"
+    data-px-art=""
+    data-px-still={png}
+    {...rest}
+  />
+);
 
-  useEffect(() => {
-    if (!gif || typeof window === "undefined") return undefined;
-    const media = window.matchMedia;
-    if (media && media("(prefers-reduced-motion: reduce)").matches) return undefined;
-
-    let cancelled = false;
-    let preload;
-    // the sequence is fetched while the page is idle and only swapped in once
-    // it is decoded, so the plate never flickers between the two frames
-    const swap = () => {
-      preload = new window.Image();
-      preload.onload = () => {
-        if (!cancelled) setSrc(gif);
-      };
-      preload.src = gif;
-    };
-    const idle = window.requestIdleCallback;
-    const handle = idle ? idle(swap, { timeout: 1500 }) : window.setTimeout(swap, 300);
-    const cancel = window.cancelIdleCallback;
-    return () => {
-      cancelled = true;
-      if (preload) preload.onload = null;
-      if (idle && cancel) cancel(handle);
-      else window.clearTimeout(handle);
-    };
-  }, [gif]);
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      loading={loading}
-      decoding="async"
-      data-px-art=""
-      data-px-still={png}
-      data-px-motion={gif || undefined}
-      {...rest}
-    />
-  );
-};
-
-export const PixelFrame = ({ src, gif, alt, ratio = "16 / 9", scan = true, caption, hint, className = "" }) => (
+export const PixelFrame = ({ src, alt, ratio = "16 / 9", scan = true, caption, hint, className = "" }) => (
   <figure className={`px-frame ${className}`} style={ratio ? { aspectRatio: ratio } : undefined}>
-    <PixelArt png={src} gif={gif} alt={alt} />
+    <PixelArt png={src} alt={alt} />
     {scan ? <span className="px-frame-scan" aria-hidden="true" /> : null}
     <span className="px-frame-tick px-frame-tick-tl" aria-hidden="true" />
     <span className="px-frame-tick px-frame-tick-tr" aria-hidden="true" />
@@ -388,11 +388,11 @@ export const Marquee = ({ items }) => {
 };
 
 /** Page header: index, display title, lede, optional pixel-art backdrop. */
-export const PageHead = ({ n, section, title, lede, art, artGif, artAlt, meta, crumbs, children }) => (
+export const PageHead = ({ n, section, title, lede, art, artAlt, meta, crumbs, children }) => (
   <header className="px-page-head" id="top">
     {art ? (
       <div className="px-page-head-art">
-        <PixelArt png={art} gif={artGif} alt={artAlt || ""} loading="eager" fetchPriority="high" />
+        <PixelArt png={art} alt={artAlt || ""} loading="eager" fetchPriority="high" />
       </div>
     ) : null}
     <span className="px-page-head-veil" aria-hidden="true" />

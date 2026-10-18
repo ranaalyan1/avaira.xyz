@@ -534,3 +534,26 @@
     .px-site .px-run { height: auto; }
     .px-site .px-run-sticky { position: static; min-height: 0; }
 }
+
+/* ── scroll-scrub plates (replaces the GIF loops) ──────────────────────
+   --ply is -1..1 from the scrub in useScrollReveal: plates drift and
+   breathe with the scroll position, so motion follows the reader's hand. */
+.px-site img[data-px-art] {
+    transform:
+        translateY(calc(var(--ply, 0) * -26px))
+        scale(calc(1.06 + var(--ply, 0) * 0.03));
+    will-change: transform;
+}
+/* the hero plate is full-bleed: deeper travel, slow zoom-out as you leave */
+.px-site .px-hero-art img[data-px-art] {
+    transform:
+        translateY(calc(var(--ply, 0) * -70px))
+        scale(calc(1.12 + var(--ply, 0) * 0.05));
+}
+/* frames clip the drift so plates never spill out of their card */
+.px-site .px-frame, .px-site .px-hero-art, .px-site .px-pillar-art,
+.px-site .px-page-head-art { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+    .px-site img[data-px-art],
+    .px-site .px-hero-art img[data-px-art] { transform: none; }
+}

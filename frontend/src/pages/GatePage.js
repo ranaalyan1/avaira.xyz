@@ -109,7 +109,6 @@ export default function GatePage() {
         title="Four planes, passed in order."
         lede="Before any money moves the intent has to clear an envelope, a policy file, a prover and a permit. The gate either returns a signed permit or the code that says why it could not — there is no third outcome and no review queue."
         art="/art/hero.png"
-        artGif="/art/hero.gif"
         artAlt="A pixel corridor of four gates with a lit card travelling between them"
         meta={
           <>
@@ -163,7 +162,6 @@ export default function GatePage() {
             <SpecRows title="What a trace records" rows={TRACE_FIELDS} />
             <PixelFrame
               src="/art/permit.png"
-              gif="/art/permit.gif"
               alt="A pixel permit card with a signature drawn across it and a seal stamped into the corner"
               ratio="16 / 9"
               caption="Permit"
@@ -203,7 +201,6 @@ export default function GatePage() {
 
           <PixelFrame
             src="/art/refuse.png"
-            gif="/art/refuse.gif"
             alt="A pixel corridor stopped by a red barrier lowered across it"
             ratio="21 / 9"
             caption="ENVELOPE_MISMATCH"

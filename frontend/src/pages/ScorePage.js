@@ -106,7 +106,6 @@ export default function ScorePage() {
         title="One number, six inputs, no discretion."
         lede="The score decides what an agent may attempt and how much collateral it has to post. It is arithmetic over settled outcomes, so two operators reading the same history get the same grade — and anyone can recompute it and challenge the result on chain."
         art="/art/score.png"
-        artGif="/art/score.gif"
         artAlt="A pixel gauge with a lit arc and a single needle"
         meta={
           <>
@@ -180,7 +179,6 @@ export default function ScorePage() {
             <PenaltyLadder />
             <PixelFrame
               src="/art/burn.png"
-              gif="/art/burn.gif"
               alt="A pixel stack of bonded plates burning down under a falling red slash mark"
               ratio="4 / 5"
               caption="Slash"
@@ -221,7 +219,6 @@ export default function ScorePage() {
 
             <PixelFrame
               src="/art/network.png"
-              gif="/art/network.gif"
               alt="A pixel lattice of connected nodes with pulses travelling the links"
               ratio="16 / 10"
               caption="Underwriting"

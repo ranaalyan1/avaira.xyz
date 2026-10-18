@@ -28,9 +28,9 @@
     --px-line: rgb(255 255 255 / 0.14);
     --px-line-strong: rgb(255 255 255 / 0.3);
 
-    --px-accent: #6e6bf2;
-    --px-accent-soft: rgb(110 107 242 / 0.16);
-    --px-hi: #c9c7ff;
+    --px-accent: #ccff00;
+    --px-accent-soft: rgb(204 255 0 / 0.14);
+    --px-hi: #ccff00;
     --px-red: #f45b69;
     --px-green: #34d399;
 
@@ -803,7 +803,7 @@
 }
 
 .px-site .gate-plane.is-passed {
-    border-color: rgb(110 107 242 / 0.7);
+    border-color: rgb(204 255 0 / 0.7);
 }
 
 .px-site .gate-plane.is-blocked {

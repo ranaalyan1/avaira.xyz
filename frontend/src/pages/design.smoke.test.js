@@ -329,8 +329,8 @@ describe("palette", () => {
   it("keeps the dark console and light marketing tokens apart", () => {
     expect(DARK.accent).not.toEqual(LIGHT.accent);
     expect(DARK.app).not.toEqual(LIGHT.app);
-    // The console accent is indigo; red is reserved for danger.
-    expect(DARK.accent).toBe("#6E6BF2");
+    // The console accent is the brand lime; red is reserved for danger.
+    expect(DARK.accent).toBe("#CCFF00");
     expect(DARK.danger).toBe("#F45B69");
   });
 

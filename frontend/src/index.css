@@ -27,9 +27,9 @@
         --text-secondary: 168 176 191;  /* #A8B0BF */
         --text-muted: 111 121 135;      /* #6F7987 */
 
-        --accent: 110 107 242;          /* #6E6BF2 indigo */
-        --accent-hover: 130 127 255;
-        --violet: 154 107 255;
+        --accent: 204 255 0;            /* #CCFF00 brand lime */
+        --accent-hover: 217 255 77;
+        --violet: 163 204 0;
         --success: 52 211 153;
         --warning: 245 181 68;
         --danger: 244 91 105;
@@ -42,7 +42,7 @@
         --shadow-panel-hover: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
 
         /* Pastel atmosphere for marketing glows (blurred blobs, never on text) */
-        --glow-violet: 199 197 255;
+        --glow-violet: 224 255 128;
         --glow-sky: 207 228 255;
         --glow-rose: 255 217 228;
 
@@ -53,8 +53,8 @@
         --card-foreground: 236 239 244;
         --popover: 18 20 26;
         --popover-foreground: 236 239 244;
-        --primary: 110 107 242;
-        --primary-foreground: 255 255 255;
+        --primary: 204 255 0;
+        --primary-foreground: 10 12 2;
         --secondary: 30 33 42;
         --secondary-foreground: 236 239 244;
         --muted: 24 27 34;
@@ -87,8 +87,8 @@
         --text-secondary: 91 96 104;    /* #5B6068 */
         --text-muted: 133 139 148;      /* #858B94 */
 
-        --accent: 91 91 214;            /* #5B5BD6 */
-        --accent-hover: 74 74 196;
+        --accent: 111 140 0;            /* #6F8C00 — lime, darkened for white surfaces */
+        --accent-hover: 92 116 0;
         --violet: 124 92 240;
         --success: 22 163 74;
         --warning: 180 123 4;
@@ -101,7 +101,7 @@
         --shadow-panel: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -16px rgba(16, 24, 40, 0.14);
         --shadow-panel-hover: 0 2px 4px rgba(16, 24, 40, 0.05), 0 24px 48px -24px rgba(16, 24, 40, 0.22);
 
-        --glow-violet: 199 197 255;
+        --glow-violet: 224 255 128;
         --glow-sky: 207 228 255;
         --glow-rose: 255 217 228;
 
@@ -111,8 +111,8 @@
         --card-foreground: 22 24 29;
         --popover: 255 255 255;
         --popover-foreground: 22 24 29;
-        --primary: 91 91 214;
-        --primary-foreground: 255 255 255;
+        --primary: 111 140 0;
+        --primary-foreground: 10 12 2;
         --secondary: 245 246 248;
         --secondary-foreground: 22 24 29;
         --muted: 245 246 248;
@@ -224,7 +224,7 @@
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #C9C7FF;
+    color: #CCFF00;
 }
 .ck-body { margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: #9AA1AE; }
 .ck-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
@@ -243,7 +243,7 @@
     padding: 10px 16px;
 }
 .ck-btn:hover { border-color: rgba(255, 255, 255, 0.55); }
-.ck-btn-accent { background: #6E6BF2; border-color: #6E6BF2; color: #fff; }
+.ck-btn-accent { background: #CCFF00; border-color: #CCFF00; color: #0A0C02; }
 .ck-btn-accent:hover { background: #5B58E8; border-color: #5B58E8; }
 .ck-btn-quiet { border-color: rgba(255, 255, 255, 0.14); color: #9AA1AE; }
 .ck-panel-veil {
@@ -276,8 +276,8 @@
     white-space: nowrap;
 }
 .ck-pill { color: #5E6674; border: 1px solid rgba(255, 255, 255, 0.14); padding: 5px 9px; }
-.ck-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #C9C7FF; }
-.ck-switch input { accent-color: #6E6BF2; width: 15px; height: 15px; cursor: pointer; }
+.ck-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: #CCFF00; }
+.ck-switch input { accent-color: #CCFF00; width: 15px; height: 15px; cursor: pointer; }
 .ck-reopen {
     position: fixed;
     z-index: 60;
@@ -310,4 +310,4 @@
     text-decoration: none;
 }
 .px-crumbs a:hover { color: #F5F6F8; }
-.px-crumbs span[aria-current] { color: #C9C7FF; }
+.px-crumbs span[aria-current] { color: #CCFF00; }

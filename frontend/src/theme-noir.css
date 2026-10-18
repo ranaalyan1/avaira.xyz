@@ -15,17 +15,17 @@
 
 .px-site {
     /* brand accents: Avaira violet in the roles Lenis gives its pink */
-    --px-accent: #6e6bf2;
-    --px-accent-soft: rgb(110 107 242 / 0.16);
-    --px-hi: #c3c1ff;          /* pale lavender = the "pink" role */
-    --px-pill: #c9c7ff;        /* pill button fill */
-    --px-pill-ink: #0a0810;    /* text on pills */
+    --px-accent: #ccff00;
+    --px-accent-soft: rgb(204 255 0 / 0.14);
+    --px-hi: #ccff00;          /* brand lime = the "pink" role */
+    --px-pill: #ccff00;        /* pill button fill */
+    --px-pill-ink: #0a0c02;    /* text on pills */
 
-    --px-black: #030204;
-    --px-bg: #050307;
-    --px-panel: #0c0a12;
-    --px-raise: #141019;
-    --px-inset: #070509;
+    --px-black: #020301;
+    --px-bg: #050602;
+    --px-panel: #0b0d06;
+    --px-raise: #12150a;
+    --px-inset: #070904;
 
     --px-line: rgb(255 255 255 / 0.12);
     --px-line-strong: rgb(255 255 255 / 0.26);
@@ -33,7 +33,7 @@
     --px-display-font: "Anton", "Inter", system-ui, sans-serif;
 
     background:
-        linear-gradient(to bottom, rgb(3 2 4 / 0) 55%, rgb(42 23 84 / 0.5) 100%),
+        linear-gradient(to bottom, rgb(2 3 1 / 0) 55%, rgb(52 66 0 / 0.55) 100%),
         var(--px-bg);
     background-attachment: fixed;
 }
@@ -51,14 +51,14 @@
     background-image:
         radial-gradient(1px 1px at 12% 18%, rgb(255 236 220 / 0.8) 50%, transparent 51%),
         radial-gradient(1px 1px at 34% 66%, rgb(255 255 255 / 0.5) 50%, transparent 51%),
-        radial-gradient(1.5px 1.5px at 58% 32%, rgb(221 215 255 / 0.7) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 58% 32%, rgb(235 255 180 / 0.7) 50%, transparent 51%),
         radial-gradient(1px 1px at 73% 81%, rgb(255 244 230 / 0.6) 50%, transparent 51%),
         radial-gradient(1px 1px at 88% 12%, rgb(255 255 255 / 0.45) 50%, transparent 51%),
-        radial-gradient(1.5px 1.5px at 22% 89%, rgb(201 199 255 / 0.55) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 22% 89%, rgb(228 255 150 / 0.55) 50%, transparent 51%),
         radial-gradient(1px 1px at 45% 8%, rgb(255 255 255 / 0.4) 50%, transparent 51%),
         radial-gradient(1px 1px at 94% 54%, rgb(255 236 220 / 0.5) 50%, transparent 51%),
         radial-gradient(1px 1px at 5% 45%, rgb(255 255 255 / 0.35) 50%, transparent 51%),
-        radial-gradient(1.5px 1.5px at 66% 93%, rgb(221 215 255 / 0.5) 50%, transparent 51%);
+        radial-gradient(1.5px 1.5px at 66% 93%, rgb(235 255 180 / 0.5) 50%, transparent 51%);
     background-size: 900px 900px;
 }
 .px-site::after {
@@ -74,6 +74,9 @@
 @media (prefers-reduced-motion: reduce) {
     .px-site::before, .px-site::after { animation: none; }
 }
+/* pixel art reads monochrome so the only colour on the page is the brand lime */
+.px-site img[src^="/art/"] { filter: grayscale(1) contrast(1.06); }
+
 /* content sits above the starfield */
 .px-site > * { position: relative; z-index: 1; }
 
@@ -161,7 +164,7 @@
 .px-site .px-btn-accent {
     background: var(--px-accent);
     border-color: var(--px-accent);
-    color: #fff;
+    color: var(--px-pill-ink);
 }
 .px-site .px-btn-accent:hover { background: var(--px-hi); border-color: var(--px-hi); color: var(--px-pill-ink); }
 
@@ -187,16 +190,16 @@
     flex: none;
 }
 .px-site .px-btn-quiet .px-btn-ico { background: rgb(255 255 255 / 0.14); color: #fff; }
-.px-site .px-btn-accent .px-btn-ico { background: #0a0810; color: #fff; }
+.px-site .px-btn-accent .px-btn-ico { background: #0a0c02; color: var(--px-pill); }
 
 /* ── nav: fixed black bar, logo centred, progress line on top ──────────── */
 .px-site .px-nav {
-    background: rgb(3 2 4 / 0.82);
+    background: rgb(2 3 1 / 0.82);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid transparent;
 }
 .px-site .px-nav.is-stuck {
-    background: rgb(3 2 4 / 0.92);
+    background: rgb(2 3 1 / 0.92);
     border-bottom-color: var(--px-line);
 }
 .px-site .px-nav-inner {
@@ -271,8 +274,8 @@
 .px-site .px-hero-art img { opacity: 0.32; }
 .px-site .px-hero-veil {
     background:
-        radial-gradient(90% 70% at 50% 110%, rgb(110 107 242 / 0.28), transparent 70%),
-        linear-gradient(to top, rgb(3 2 4 / 0.95), rgb(3 2 4 / 0.45) 45%, rgb(3 2 4 / 0.85));
+        radial-gradient(90% 70% at 50% 110%, rgb(204 255 0 / 0.14), transparent 70%),
+        linear-gradient(to top, rgb(2 3 1 / 0.95), rgb(2 3 1 / 0.45) 45%, rgb(2 3 1 / 0.85));
 }
 
 .px-site .px-wordmark {
@@ -334,8 +337,8 @@
 .px-site .px-page-head-art img { opacity: 0.3; }
 .px-site .px-page-head-veil {
     background:
-        radial-gradient(90% 70% at 50% 115%, rgb(110 107 242 / 0.24), transparent 70%),
-        linear-gradient(to top, rgb(3 2 4 / 0.95), rgb(3 2 4 / 0.5) 45%, rgb(3 2 4 / 0.85));
+        radial-gradient(90% 70% at 50% 115%, rgb(204 255 0 / 0.12), transparent 70%),
+        linear-gradient(to top, rgb(2 3 1 / 0.95), rgb(2 3 1 / 0.5) 45%, rgb(2 3 1 / 0.85));
 }
 
 /* ── shared surfaces ────────────────────────────────────────────────────── */
@@ -343,11 +346,11 @@
 .px-site .px-marquee {
     border-top: 1px solid var(--px-line);
     border-bottom: 1px solid var(--px-line);
-    background: rgb(3 2 4 / 0.6);
+    background: rgb(2 3 1 / 0.6);
 }
 .px-site .px-footer {
     border-top: 1px solid var(--px-line);
-    background: linear-gradient(to bottom, transparent, rgb(42 23 84 / 0.35));
+    background: linear-gradient(to bottom, transparent, rgb(52 66 0 / 0.4));
 }
 
 /* cards pick up a faint raise instead of hairline grids */
@@ -358,7 +361,7 @@
     background: rgb(255 255 255 / 0.03);
     border: 1px solid var(--px-line);
 }
-.px-site .px-related-card:hover { border-color: var(--px-hi); background: rgb(110 107 242 / 0.08); }
+.px-site .px-related-card:hover { border-color: var(--px-hi); background: rgb(204 255 0 / 0.07); }
 
 /* breadcrumbs take the accent language */
 .px-crumbs a, .px-crumbs span[aria-current] {
@@ -366,10 +369,10 @@
     font-weight: 800;
     letter-spacing: 0.22em;
 }
-.px-crumbs span[aria-current] { color: var(--px-hi, #c3c1ff); }
+.px-crumbs span[aria-current] { color: var(--px-hi, #ccff00); }
 
 /* selection + focus in the new accent */
-.px-site ::selection { background: var(--px-hi); color: #0a0810; }
+.px-site ::selection { background: var(--px-hi); color: #0a0c02; }
 .px-site :focus-visible { outline-color: var(--px-hi); }
 
 /* mobile: nav collapses to badge + actions */

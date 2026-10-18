@@ -178,7 +178,7 @@ export default function Home() {
     <div className="px-site" data-testid="landing-page" ref={reveal}>
       <PixelNav onLaunch={goToConsole} onSignIn={() => navigate("/login")} />
 
-      {/* ── hero ─────────────────────────────────────────────── */}
+      {/* ── hero: the wordmark fills the frame, the rule sits under it ── */}
       <header className="px-hero" data-testid="hero-section" ref={hero}>
         <div className="px-hero-art">
           <PixelArt
@@ -192,23 +192,25 @@ export default function Home() {
         <span className="px-hero-veil" aria-hidden="true" />
 
         <div className="px-wrap px-hero-inner">
-          <p className="px-label" data-hero-line>
-            <Glyph seed="GATE" size={13} className="px-glyph" /> Execution control for agents that hold budgets
-          </p>
-
-          <h1 className="px-dot px-display px-hero-title">
-            <span data-hero-line style={{ display: "block" }}>Nothing spends</span>
-            <span data-hero-line style={{ display: "block", color: "var(--px-hi)" }}>until the gate</span>
-            <span data-hero-line style={{ display: "block" }}>returns a permit.</span>
+          <h1 className="px-hero-title" data-hero-line>
+            <span className="px-wordmark">Avaira</span>
+            <span className="px-hero-sub">
+              <span data-hero-line style={{ display: "block" }}>Nothing spends <em>until the gate</em></span>
+              <span data-hero-line style={{ display: "block" }}>returns a permit.</span>
+            </span>
           </h1>
 
-          <p className="px-body px-hero-lede" data-hero-line>
-            AVAIRA sits between an agent and the action it wants to take. The intent is checked against
-            a risk envelope, a policy file and a symbolic prover. All three have to agree before a
-            signed permit exists, and that permit is the only thing that lets the action run.
-          </p>
+          <div className="px-hero-base" data-hero-line>
+            <p className="px-scroll-cue" aria-hidden="true">
+              Scroll<br />to explore
+            </p>
 
-          <div data-hero-line>
+            <p className="px-body px-hero-lede" style={{ maxWidth: "46ch", margin: 0 }}>
+              AVAIRA sits between an agent and the action it wants to take. The intent is checked
+              against a risk envelope, a policy file and a symbolic prover. All three have to agree
+              before a signed permit exists, and that permit is the only thing that lets the action run.
+            </p>
+
             <ConsoleActions
               onLaunch={goToConsole}
               onSignIn={() => navigate("/login")}

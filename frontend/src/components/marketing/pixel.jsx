@@ -121,11 +121,6 @@ export function PixelNav({ onLaunch, onSignIn }) {
   return (
     <nav className="px-nav" ref={navRef}>
       <div className="px-wrap px-nav-inner">
-        <Link className="px-brand" to="/" aria-label="AVAIRA home">
-          <Glyph seed="AVAIRA" size={22} solid />
-          <span className="px-brand-name">Avaira</span>
-        </Link>
-
         <div className="px-nav-links">
           {NAV.map((item) => (
             <Link
@@ -137,6 +132,13 @@ export function PixelNav({ onLaunch, onSignIn }) {
             </Link>
           ))}
         </div>
+
+        <Link className="px-brand" to="/">
+          <span className="px-brand-badge">
+            <img src="/logo.png" alt="AVAIRA home" width="28" height="28" />
+          </span>
+          <span className="px-brand-name">Avaira</span>
+        </Link>
 
         <div className="px-nav-actions">
           <button className="px-btn px-btn-quiet" data-testid="nav-login-btn" onClick={onSignIn}>
@@ -166,7 +168,9 @@ export function PixelFooter() {
         <div className="px-footer-grid">
           <div>
             <div className="px-brand">
-              <Glyph seed="AVAIRA" size={22} solid />
+              <span className="px-brand-badge">
+                <img src="/logo.png" alt="AVAIRA logo" width="28" height="28" />
+              </span>
               <span className="px-brand-name">Avaira</span>
             </div>
             <p className="px-body" style={{ marginTop: "1rem", maxWidth: "34ch" }}>
@@ -366,8 +370,10 @@ export const ConsoleActions = ({ onLaunch, onSignIn, size = "lg", launchTestId, 
         }}
         data-testid={launchTestId}
       >
+        <span className="px-btn-ico" aria-hidden="true">
+          <ArrowUpRight size={15} strokeWidth={2.2} />
+        </span>
         Open the console
-        <ArrowUpRight size={15} strokeWidth={2} />
       </button>
       {onSignIn ? (
         <button
@@ -375,7 +381,9 @@ export const ConsoleActions = ({ onLaunch, onSignIn, size = "lg", launchTestId, 
           onClick={onSignIn}
           data-testid={signInTestId}
         >
-          <LogIn size={14} strokeWidth={2} />
+          <span className="px-btn-ico" aria-hidden="true">
+            <LogIn size={14} strokeWidth={2.2} />
+          </span>
           Sign in
         </button>
       ) : (
@@ -386,7 +394,9 @@ export const ConsoleActions = ({ onLaunch, onSignIn, size = "lg", launchTestId, 
           rel="noreferrer"
           onClick={() => track("outbound_github", { source: pathname })}
         >
-          <Github size={14} strokeWidth={2} />
+          <span className="px-btn-ico" aria-hidden="true">
+            <Github size={14} strokeWidth={2.2} />
+          </span>
           Read the source
         </a>
       )}

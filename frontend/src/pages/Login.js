@@ -5,7 +5,6 @@ import { useAuth } from "@/App";
 import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
 import { useSeo } from "@/lib/seo";
 import { track } from "@/lib/analytics";
-import { Glyph } from "@/components/marketing/pixel";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -59,7 +58,7 @@ export default function Login() {
       <div className="px-login-inner" ref={entrance}>
         <div className="px-login-head" data-login-enter>
           <span className="px-login-mark" data-testid="login-logo" aria-hidden="true">
-            <Glyph seed="AVAIRA" size={40} solid />
+            <img src="/logo.png" alt="" width="56" height="56" style={{ display: "block" }} />
           </span>
           <p className="px-label">Execution control protocol</p>
           <h1 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>

@@ -1,7 +1,9 @@
 import "@/App.css";
 import "@/pixel.css";
+import "@/theme-noir.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
+import Lenis from "lenis";
 import axios from "axios";
 import Layout from "@/components/Layout";
 import Landing from "@/pages/Landing";
@@ -27,6 +29,30 @@ import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
 
 export const AuthContext = createContext({ user: null, authReady: false, setUser: () => {}, logout: () => {}, backendMisconfigured: false });
 export const useAuth = () => useContext(AuthContext);
+
+/**
+ * Lenis smooth scroll — the scroll feel the new design is built around.
+ * Skipped entirely for visitors who asked the OS for less motion; native
+ * scrolling (and every anchor link) keeps working either way.
+ */
+function useSmoothScroll() {
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+
+    const lenis = new Lenis({ lerp: 0.12, wheelMultiplier: 1, smoothWheel: true });
+    let frame;
+    const raf = (time) => {
+      lenis.raf(time);
+      frame = window.requestAnimationFrame(raf);
+    };
+    frame = window.requestAnimationFrame(raf);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      lenis.destroy();
+    };
+  }, []);
+}
 
 function ProtectedRoute({ children }) {
   const { user, authReady } = useAuth();
@@ -74,6 +100,7 @@ function AppRoutes() {
 }
 
 function App() {
+  useSmoothScroll();
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   // True when /api/* is being answered by the SPA rewrite, i.e. this deployment

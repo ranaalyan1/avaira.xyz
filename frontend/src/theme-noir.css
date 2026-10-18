@@ -1,0 +1,381 @@
+/*
+  Noir layer — the Lenis-inspired re-skin, themed to the Avaira brand.
+
+  Loaded AFTER pixel.css, this file rewrites the marketing site's visual
+  language in place: pure black starfield with a deep violet glow, heavy
+  condensed display type (Anton), tracked-caps accent subheads, pill buttons
+  with icon chips, a fixed nav with the real Avaira logo centred, and a thin
+  accent progress bar across the top.
+
+  The class names and the resolved-state contract of pixel.css are untouched:
+  the same markup renders, only the skin changes. Reduced motion keeps
+  working because nothing here introduces its own animation except the slow
+  star drift, which is disabled under prefers-reduced-motion.
+*/
+
+.px-site {
+    /* brand accents: Avaira violet in the roles Lenis gives its pink */
+    --px-accent: #6e6bf2;
+    --px-accent-soft: rgb(110 107 242 / 0.16);
+    --px-hi: #c3c1ff;          /* pale lavender = the "pink" role */
+    --px-pill: #c9c7ff;        /* pill button fill */
+    --px-pill-ink: #0a0810;    /* text on pills */
+
+    --px-black: #030204;
+    --px-bg: #050307;
+    --px-panel: #0c0a12;
+    --px-raise: #141019;
+    --px-inset: #070509;
+
+    --px-line: rgb(255 255 255 / 0.12);
+    --px-line-strong: rgb(255 255 255 / 0.26);
+
+    --px-display-font: "Anton", "Inter", system-ui, sans-serif;
+
+    background:
+        linear-gradient(to bottom, rgb(3 2 4 / 0) 55%, rgb(42 23 84 / 0.5) 100%),
+        var(--px-bg);
+    background-attachment: fixed;
+}
+
+/* ── starfield ──────────────────────────────────────────────────────────
+   Two layers of tiny radial dots, deterministic positions, drifting very
+   slowly. Pure decoration: behind everything, hidden from readers. */
+.px-site::before,
+.px-site::after {
+    content: "";
+    position: fixed;
+    inset: -10%;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 12% 18%, rgb(255 236 220 / 0.8) 50%, transparent 51%),
+        radial-gradient(1px 1px at 34% 66%, rgb(255 255 255 / 0.5) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 58% 32%, rgb(221 215 255 / 0.7) 50%, transparent 51%),
+        radial-gradient(1px 1px at 73% 81%, rgb(255 244 230 / 0.6) 50%, transparent 51%),
+        radial-gradient(1px 1px at 88% 12%, rgb(255 255 255 / 0.45) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 22% 89%, rgb(201 199 255 / 0.55) 50%, transparent 51%),
+        radial-gradient(1px 1px at 45% 8%, rgb(255 255 255 / 0.4) 50%, transparent 51%),
+        radial-gradient(1px 1px at 94% 54%, rgb(255 236 220 / 0.5) 50%, transparent 51%),
+        radial-gradient(1px 1px at 5% 45%, rgb(255 255 255 / 0.35) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 66% 93%, rgb(221 215 255 / 0.5) 50%, transparent 51%);
+    background-size: 900px 900px;
+}
+.px-site::after {
+    background-size: 1400px 1400px;
+    opacity: 0.6;
+    animation: px-star-drift 240s linear infinite;
+}
+.px-site::before { animation: px-star-drift 160s linear infinite reverse; }
+@keyframes px-star-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-120px, -200px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .px-site::before, .px-site::after { animation: none; }
+}
+/* content sits above the starfield */
+.px-site > * { position: relative; z-index: 1; }
+
+/* ── soft geometry: the hard-edge rule is replaced ─────────────────────── */
+.px-site,
+.px-site * {
+    border-radius: 0 !important; /* default stays square ... */
+}
+.px-site .px-btn,
+.px-site .px-btn *,
+.px-site .px-brand-badge,
+.px-site .px-brand-badge *,
+.px-site .px-btn-ico,
+.px-site input.px-input,
+.px-site select.px-input,
+.px-site textarea.px-input {
+    border-radius: 999px !important; /* ... except pills and badges */
+}
+.px-site textarea.px-input { border-radius: 20px !important; }
+.px-site .px-card,
+.px-site .px-pillar,
+.px-site .px-frame,
+.px-site .px-related-card,
+.px-site .px-login-card,
+.px-site .px-fact,
+.px-site .px-step,
+.px-site .px-moat {
+    border-radius: 14px !important;
+    overflow: hidden;
+}
+
+/* ── type: Anton carries every headline ────────────────────────────────── */
+.px-site .px-dot,
+.px-site .px-display,
+.px-site .px-h2,
+.px-site .px-h3,
+.px-site .px-num,
+.px-site .px-fact-value,
+.px-site .px-step-term {
+    font-family: var(--px-display-font);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+.px-site .px-display {
+    font-size: clamp(2.6rem, 8vw, 7rem);
+    line-height: 0.96;
+    letter-spacing: 0.005em;
+}
+.px-site .px-h2 { font-size: clamp(1.8rem, 3.8vw, 3.1rem); line-height: 1.02; }
+.px-site .px-h3 { font-size: clamp(1.15rem, 1.8vw, 1.55rem); line-height: 1.1; }
+
+/* accent subheads: the tracked-caps role Lenis renders in pink */
+.px-site .px-label {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--px-hi);
+}
+.px-site .px-body { color: #b7bbc6; }
+
+/* section index rule keeps its layout, takes the accent */
+.px-site .px-index span:first-child,
+.px-site .px-accent-text { color: var(--px-hi); }
+
+/* ── buttons: pills with an icon chip ──────────────────────────────────── */
+.px-site .px-btn {
+    height: 3rem;
+    padding: 0 1.6rem;
+    border: 1px solid transparent;
+    background: var(--px-pill);
+    color: var(--px-pill-ink);
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    gap: 0.65rem;
+    transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.px-site .px-btn:hover { background: #ffffff; color: #000; transform: translateY(-1px); }
+.px-site .px-btn:active { transform: translateY(0); }
+.px-site .px-btn svg { color: currentColor; }
+
+.px-site .px-btn-accent {
+    background: var(--px-accent);
+    border-color: var(--px-accent);
+    color: #fff;
+}
+.px-site .px-btn-accent:hover { background: var(--px-hi); border-color: var(--px-hi); color: var(--px-pill-ink); }
+
+.px-site .px-btn-quiet {
+    background: transparent;
+    border-color: var(--px-line-strong);
+    color: var(--px-ink);
+}
+.px-site .px-btn-quiet:hover { background: rgb(255 255 255 / 0.08); color: #fff; border-color: #fff; }
+
+.px-site .px-btn-lg { height: 3.4rem; padding: 0 2rem; font-size: 0.78rem; }
+
+/* icon chip inside pill buttons (ConsoleActions wraps icons in .px-btn-ico) */
+.px-site .px-btn-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    margin-left: -0.8rem;
+    background: var(--px-pill-ink);
+    color: var(--px-pill);
+    flex: none;
+}
+.px-site .px-btn-quiet .px-btn-ico { background: rgb(255 255 255 / 0.14); color: #fff; }
+.px-site .px-btn-accent .px-btn-ico { background: #0a0810; color: #fff; }
+
+/* ── nav: fixed black bar, logo centred, progress line on top ──────────── */
+.px-site .px-nav {
+    background: rgb(3 2 4 / 0.82);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid transparent;
+}
+.px-site .px-nav.is-stuck {
+    background: rgb(3 2 4 / 0.92);
+    border-bottom-color: var(--px-line);
+}
+.px-site .px-nav-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 4.25rem;
+    gap: 1rem;
+}
+.px-site .px-nav-links {
+    justify-self: start;
+    display: flex;
+    gap: 0.25rem;
+    margin: 0;
+}
+.px-site .px-nav-link {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.85;
+    padding: 0.55rem 0.8rem;
+}
+.px-site .px-nav-link:hover { opacity: 1; color: var(--px-hi); background: transparent; }
+.px-site .px-nav-link.is-active { color: var(--px-hi); opacity: 1; }
+.px-site .px-nav-link.is-active::after { display: none; }
+
+.px-site .px-brand { justify-self: center; gap: 0; }
+.px-site .px-nav .px-brand-name { display: none; } /* in the nav the badge carries the brand */
+.px-site .px-footer .px-brand { gap: 0.7rem; }
+.px-site .px-footer .px-brand-name {
+    font-family: var(--px-display-font);
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.px-site .px-brand-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    background: var(--px-hi);
+    transition: transform 0.18s ease, background-color 0.18s ease;
+}
+.px-site .px-brand-badge img { width: 1.8rem; height: 1.8rem; display: block; }
+.px-site .px-brand:hover .px-brand-badge { background: #fff; transform: scale(1.05); }
+
+.px-site .px-nav-actions { justify-self: end; display: flex; gap: 0.6rem; }
+.px-site .px-nav-actions .px-btn { height: 2.5rem; padding: 0 1.2rem; font-size: 0.68rem; }
+
+/* progress bar: thin accent line pinned to the very top */
+.px-site .px-nav-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: auto;
+    height: 3px;
+    width: 100%;
+    background: var(--px-hi);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--progress, 0));
+}
+
+/* ── hero: giant wordmark over the glow ────────────────────────────────── */
+.px-site .px-hero {
+    background: transparent;
+    border-bottom: 0;
+}
+.px-site .px-hero-art img { opacity: 0.32; }
+.px-site .px-hero-veil {
+    background:
+        radial-gradient(90% 70% at 50% 110%, rgb(110 107 242 / 0.28), transparent 70%),
+        linear-gradient(to top, rgb(3 2 4 / 0.95), rgb(3 2 4 / 0.45) 45%, rgb(3 2 4 / 0.85));
+}
+
+.px-site .px-wordmark {
+    display: block;
+    font-family: var(--px-display-font);
+    font-weight: 400;
+    font-size: clamp(5rem, 19.5vw, 19rem);
+    line-height: 0.84;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--px-hi);
+    text-align: center;
+    user-select: none;
+}
+.px-site .px-hero-sub {
+    display: block;
+    margin-top: 1.2rem;
+    font-family: var(--px-display-font);
+    font-size: clamp(1.3rem, 4.4vw, 3.6rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: right;
+    line-height: 1.05;
+}
+.px-site .px-hero-sub em { font-style: normal; color: var(--px-hi); }
+
+.px-site .px-hero-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: clamp(2rem, 6vh, 4.5rem);
+}
+.px-site .px-scroll-cue {
+    display: flex;
+    gap: 0.8rem;
+    align-items: stretch;
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.3;
+}
+.px-site .px-scroll-cue::before {
+    content: "";
+    width: 3px;
+    background: var(--px-hi);
+    border-radius: 999px !important;
+}
+.px-site .px-hero-lede { color: #c6c9d2; }
+.px-site .px-hero-meta { border-top-color: var(--px-line); }
+
+/* inner page heads share the hero treatment */
+.px-site .px-page-head { background: transparent; border-bottom: 0; }
+.px-site .px-page-head-art img { opacity: 0.3; }
+.px-site .px-page-head-veil {
+    background:
+        radial-gradient(90% 70% at 50% 115%, rgb(110 107 242 / 0.24), transparent 70%),
+        linear-gradient(to top, rgb(3 2 4 / 0.95), rgb(3 2 4 / 0.5) 45%, rgb(3 2 4 / 0.85));
+}
+
+/* ── shared surfaces ────────────────────────────────────────────────────── */
+.px-site .px-section { border-top: 0; }
+.px-site .px-marquee {
+    border-top: 1px solid var(--px-line);
+    border-bottom: 1px solid var(--px-line);
+    background: rgb(3 2 4 / 0.6);
+}
+.px-site .px-footer {
+    border-top: 1px solid var(--px-line);
+    background: linear-gradient(to bottom, transparent, rgb(42 23 84 / 0.35));
+}
+
+/* cards pick up a faint raise instead of hairline grids */
+.px-site .px-fact,
+.px-site .px-step,
+.px-site .px-moat,
+.px-site .px-related-card {
+    background: rgb(255 255 255 / 0.03);
+    border: 1px solid var(--px-line);
+}
+.px-site .px-related-card:hover { border-color: var(--px-hi); background: rgb(110 107 242 / 0.08); }
+
+/* breadcrumbs take the accent language */
+.px-crumbs a, .px-crumbs span[aria-current] {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+}
+.px-crumbs span[aria-current] { color: var(--px-hi, #c3c1ff); }
+
+/* selection + focus in the new accent */
+.px-site ::selection { background: var(--px-hi); color: #0a0810; }
+.px-site :focus-visible { outline-color: var(--px-hi); }
+
+/* mobile: nav collapses to badge + actions */
+@media (max-width: 860px) {
+    .px-site .px-nav-inner { grid-template-columns: auto 1fr auto; }
+    .px-site .px-nav-links { display: none; }
+    .px-site .px-brand { justify-self: start; }
+    .px-site .px-wordmark { font-size: clamp(4rem, 18vw, 8rem); }
+}

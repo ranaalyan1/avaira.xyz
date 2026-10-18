@@ -100,7 +100,7 @@ function AgentRun() {
                 </span>
               ))}
               <span className="px-run-agent px-glass">
-                <img src="/logo.png" alt="The agent token carrying the intent" width="28" height="28" />
+                <img src="/logo.png?v=3" alt="The agent token carrying the intent" width="28" height="28" />
                 <span>AGENT</span>
               </span>
             </div>

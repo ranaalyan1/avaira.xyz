@@ -58,7 +58,7 @@ export default function Login() {
       <div className="px-login-inner" ref={entrance}>
         <div className="px-login-head" data-login-enter>
           <span className="px-login-mark" data-testid="login-logo" aria-hidden="true">
-            <img src="/logo.png" alt="" width="56" height="56" style={{ display: "block" }} />
+            <img src="/logo.png?v=3" alt="" width="56" height="56" style={{ display: "block" }} />
           </span>
           <p className="px-label">Execution control protocol</p>
           <h1 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>

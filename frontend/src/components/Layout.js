@@ -85,7 +85,7 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-4">
-          <img src="/logo.png" alt="AVAIRA" className="h-8 w-8 rounded-lg" data-testid="sidebar-logo" />
+          <img src="/logo.png?v=3" alt="AVAIRA" className="h-8 w-8 rounded-lg" data-testid="sidebar-logo" />
           <div className="min-w-0">
             <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground" data-testid="app-logo">
               AVAIRA

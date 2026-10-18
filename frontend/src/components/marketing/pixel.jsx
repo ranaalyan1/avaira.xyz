@@ -219,7 +219,7 @@ export function PixelNav({ onLaunch, onSignIn }) {
 
         <Link className="px-brand" to="/">
           <span className="px-brand-badge">
-            <img src="/logo.png" alt="AVAIRA home" width="28" height="28" />
+            <img src="/logo.png?v=3" alt="AVAIRA home" width="28" height="28" />
           </span>
           <span className="px-brand-name">Avaira</span>
         </Link>
@@ -253,7 +253,7 @@ export function PixelFooter() {
           <div>
             <div className="px-brand">
               <span className="px-brand-badge">
-                <img src="/logo.png" alt="AVAIRA logo" width="28" height="28" />
+                <img src="/logo.png?v=3" alt="AVAIRA logo" width="28" height="28" />
               </span>
               <span className="px-brand-name">Avaira</span>
             </div>

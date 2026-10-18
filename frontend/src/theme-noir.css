@@ -78,8 +78,8 @@
 .px-site picture { display: contents; }
 .px-site img[data-px-art] { image-rendering: auto !important; }
 
-/* content sits above the starfield */
-.px-site > * { position: relative; z-index: 1; }
+/* content sits above the starfield (nav + spotlight manage their own layers) */
+.px-site > :not(.px-nav):not(.px-spotlight) { position: relative; z-index: 1; }
 
 /* ── soft geometry: the hard-edge rule is replaced ─────────────────────── */
 .px-site,
@@ -198,6 +198,9 @@
 
 /* ── nav: fixed black bar, logo centred, progress line on top ──────────── */
 .px-site .px-nav {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
     background: rgb(2 3 1 / 0.82);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid transparent;
@@ -633,4 +636,29 @@
     .px-site .px-wordmark,
     .px-site .px-run-agent,
     .px-site .px-btn::after { animation: none; }
+}
+
+/* ── bugfix pass: small screens & overflow guards ──────────────────────── */
+
+/* nav actions: two pills don't fit next to the badge on phones */
+@media (max-width: 600px) {
+    .px-site .px-nav-actions .px-btn-quiet { display: none; }
+    .px-site .px-nav-actions .px-btn { padding: 0 0.9rem; font-size: 0.62rem; }
+    .px-site .px-nav-actions .px-btn .px-btn-ico { display: none; }
+}
+
+/* hero: the sub-line stacks under the wordmark cleanly on phones */
+@media (max-width: 720px) {
+    .px-site .px-hero-sub { text-align: left; letter-spacing: 0.12em; }
+    .px-site .px-hero-base { flex-direction: column; align-items: flex-start; }
+}
+
+/* long display headlines never cause sideways scroll */
+.px-site { overflow-x: clip; }
+.px-site .px-wordmark { overflow-wrap: anywhere; }
+
+/* the run panel stays inside short viewports */
+@media (max-height: 760px) {
+    .px-site .px-run-sticky { padding-top: 5rem; }
+    .px-site .px-run-sticky .px-h2 { font-size: clamp(1.4rem, 3vw, 2.2rem); }
 }

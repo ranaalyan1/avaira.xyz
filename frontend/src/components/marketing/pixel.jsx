@@ -154,10 +154,20 @@ function useScrollReveal(pathname) {
     window.addEventListener("scroll", onScrub, { passive: true });
     window.addEventListener("resize", onScrub);
 
+    /* cursor spotlight: a soft lime halo trails the pointer */
+    const spot = document.querySelector("[data-px-spotlight]");
+    const onMove = (e) => {
+      if (!spot) return;
+      spot.style.setProperty("--mx", `${e.clientX}px`);
+      spot.style.setProperty("--my", `${e.clientY}px`);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+
     return () => {
       io.disconnect();
       window.removeEventListener("scroll", onScrub);
       window.removeEventListener("resize", onScrub);
+      window.removeEventListener("pointermove", onMove);
       if (frame) window.cancelAnimationFrame(frame);
       targets.forEach((el) => {
         el.classList.remove("rv", "rv-in");
@@ -203,7 +213,9 @@ export function PixelNav({ onLaunch, onSignIn }) {
   }, []);
 
   return (
-    <nav className="px-nav" ref={navRef}>
+    <>
+      <span className="px-spotlight" aria-hidden="true" data-px-spotlight="" />
+      <nav className="px-nav" ref={navRef}>
       <div className="px-wrap px-nav-inner">
         <div className="px-nav-links">
           {NAV.map((item) => (
@@ -241,7 +253,8 @@ export function PixelNav({ onLaunch, onSignIn }) {
         </div>
       </div>
       <span className="px-nav-progress" aria-hidden="true" />
-    </nav>
+      </nav>
+    </>
   );
 }
 
@@ -325,18 +338,22 @@ export const SectionIndex = ({ n, label }) => (
 /* GIF sequences are retired: every plate is a sharp still that moves with the
    page instead — the scroll scrub in useScrollReveal drives a per-plate
    parallax (--ply) so even a slight scroll shifts the artwork. The `gif`
-   prop is still accepted from old call sites and deliberately ignored. */
+   prop is still accepted from old call sites and deliberately ignored.
+   Each still ships as webp with the png as fallback. */
 export const PixelArt = ({ png, gif: _gif, alt, className = "", loading = "lazy", ...rest }) => (
-  <img
-    src={png}
-    alt={alt}
-    className={className}
-    loading={loading}
-    decoding="async"
-    data-px-art=""
-    data-px-still={png}
-    {...rest}
-  />
+  <picture>
+    <source srcSet={png.replace(/\.png$/, ".webp")} type="image/webp" />
+    <img
+      src={png}
+      alt={alt}
+      className={className}
+      loading={loading}
+      decoding="async"
+      data-px-art=""
+      data-px-still={png}
+      {...rest}
+    />
+  </picture>
 );
 
 export const PixelFrame = ({ src, alt, ratio = "16 / 9", scan = true, caption, hint, className = "" }) => (

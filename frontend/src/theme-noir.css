@@ -74,8 +74,9 @@
 @media (prefers-reduced-motion: reduce) {
     .px-site::before, .px-site::after { animation: none; }
 }
-/* pixel art reads monochrome so the only colour on the page is the brand lime */
-.px-site img[src^="/art/"] { filter: grayscale(1) contrast(1.06); }
+/* the art plates are brand renders (black + lime): smooth scaling, no filter */
+.px-site picture { display: contents; }
+.px-site img[data-px-art] { image-rendering: auto !important; }
 
 /* content sits above the starfield */
 .px-site > * { position: relative; z-index: 1; }
@@ -275,7 +276,7 @@
     background: transparent;
     border-bottom: 0;
 }
-.px-site .px-hero-art img { opacity: 0.32; }
+.px-site .px-hero-art img { opacity: 0.55; }
 .px-site .px-hero-veil {
     background:
         radial-gradient(90% 70% at 50% 110%, rgb(204 255 0 / 0.14), transparent 70%),
@@ -338,7 +339,7 @@
 
 /* inner page heads share the hero treatment */
 .px-site .px-page-head { background: transparent; border-bottom: 0; }
-.px-site .px-page-head-art img { opacity: 0.3; }
+.px-site .px-page-head-art img { opacity: 0.5; }
 .px-site .px-page-head-veil {
     background:
         radial-gradient(90% 70% at 50% 115%, rgb(204 255 0 / 0.12), transparent 70%),
@@ -556,4 +557,80 @@
 @media (prefers-reduced-motion: reduce) {
     .px-site img[data-px-art],
     .px-site .px-hero-art img[data-px-art] { transform: none; }
+}
+
+/* ── juice: micro-interactions and signature motion ─────────────────── */
+
+/* pill buttons: a light sheen sweeps across on hover */
+.px-site .px-btn { position: relative; overflow: hidden; }
+.px-site .px-btn::after {
+    content: "";
+    position: absolute;
+    inset: -40% auto;
+    left: -30%;
+    width: 30%;
+    transform: skewX(-20deg) translateX(-120%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+    pointer-events: none;
+}
+.px-site .px-btn:hover::after { transition: transform 0.6s ease; transform: skewX(-20deg) translateX(480%); }
+
+/* glass cards: lift and glow lime when hovered */
+.px-site .px-fact,
+.px-site .px-step,
+.px-site .px-pillar,
+.px-site .px-related-card {
+    transition: transform 0.3s cubic-bezier(0.2, 0.65, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.px-site .px-fact:hover,
+.px-site .px-step:hover,
+.px-site .px-pillar:hover,
+.px-site .px-related-card:hover {
+    transform: translateY(-5px);
+    border-color: rgb(204 255 0 / 0.5);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        0 24px 48px -24px rgb(0 0 0 / 0.8),
+        0 0 32px -6px rgb(204 255 0 / 0.35);
+}
+
+/* hero wordmark: rises out of a clip on load, glow breathes slowly */
+@keyframes px-wordmark-in {
+    from { transform: translateY(55%); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes px-wordmark-glow {
+    0%, 100% { text-shadow: 0 0 60px rgb(204 255 0 / 0.25); }
+    50%      { text-shadow: 0 0 110px rgb(204 255 0 / 0.5); }
+}
+.px-site .px-hero-title { overflow: hidden; }
+.px-site .px-wordmark {
+    animation:
+        px-wordmark-in 0.9s cubic-bezier(0.2, 0.65, 0.2, 1) both,
+        px-wordmark-glow 6s ease-in-out 1s infinite;
+}
+
+/* the agent chip pulses while it travels */
+@keyframes px-agent-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(204 255 0 / 0.45); }
+    60%      { box-shadow: 0 0 0 12px rgb(204 255 0 / 0); }
+}
+.px-site .px-run-agent { animation: px-agent-pulse 2s ease-out infinite; }
+
+/* cursor spotlight: a soft lime halo follows the pointer (desktop only) */
+.px-spotlight {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        420px circle at var(--mx, 50%) var(--my, -20%),
+        rgb(204 255 0 / 0.07),
+        transparent 70%);
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+    .px-spotlight { display: none; }
+    .px-site .px-wordmark,
+    .px-site .px-run-agent,
+    .px-site .px-btn::after { animation: none; }
 }

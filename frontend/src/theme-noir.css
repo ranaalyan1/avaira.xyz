@@ -606,7 +606,7 @@
     0%, 100% { text-shadow: 0 0 60px rgb(204 255 0 / 0.25); }
     50%      { text-shadow: 0 0 110px rgb(204 255 0 / 0.5); }
 }
-.px-site .px-hero-title { overflow: hidden; }
+.px-site .px-hero-title { overflow: hidden; max-width: none; margin-top: 0; }
 .px-site .px-wordmark {
     animation:
         px-wordmark-in 0.9s cubic-bezier(0.2, 0.65, 0.2, 1) both,
@@ -655,7 +655,7 @@
 
 /* long display headlines never cause sideways scroll */
 .px-site { overflow-x: clip; }
-.px-site .px-wordmark { overflow-wrap: anywhere; }
+.px-site .px-wordmark { white-space: nowrap; }
 
 /* the run panel stays inside short viewports */
 @media (max-height: 760px) {

@@ -273,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", metavar="PATH", help="write the report as JSON")
     args = ap.parse_args(argv)
 
-    manifest_path = Path(args.manifest) if args.manifest else ROOT / "deployments" / f"{args.chain}.json"
+    manifest_path = Path(args.manifest) if args.manifest else ROOT / "contracts" / "deployments" / f"{args.chain}.json"
     rpc_url = args.rpc or os.environ.get(RPC_ENV_BY_CHAIN.get(args.chain, ""), "") or RPC_BY_CHAIN.get(args.chain)
     if not rpc_url:
         print(f"  ✗ no RPC endpoint known for chain {args.chain} — pass --rpc", file=sys.stderr)

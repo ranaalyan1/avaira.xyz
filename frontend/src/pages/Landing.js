@@ -53,6 +53,13 @@ const LAYERS = [
   },
 ];
 
+const SOCIALS = [
+  { label: "X (Avaira)", href: "https://x.com/avairaprotocol", note: "@avairaprotocol" },
+  { label: "X (founder)", href: "https://x.com/alyan_rana1", note: "@alyan_rana1" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/m-alyan-ashraf", note: "M. Alyan Ashraf" },
+  { label: "GitHub", href: "https://github.com/ranaalyan1", note: "ranaalyan1" },
+];
+
 const REFUSALS = [
   "UNKNOWN_AGENT", "BANNED", "SUSPENDED", "STAKE_TOO_LOW", "SCORE_TOO_LOW",
   "INTENT_NOT_COMMITTED", "INTENT_EXPIRED", "INTENT_ALREADY_EXECUTED", "ENVELOPE_MISMATCH",
@@ -74,15 +81,21 @@ export default function Landing() {
   /* scrollytelling state — refs, not re-renders, at 60fps */
   const trackRef = useRef(null);
   const explodedRef = useRef(0);
+  const barRef = useRef(null);
   const [layer, setLayer] = useState(0);
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || prefersReducedMotion()) return undefined;
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
+        /* global page progress for the top bar */
+        const doc = document.documentElement;
+        const pageP = Math.min(1, window.scrollY / Math.max(1, doc.scrollHeight - window.innerHeight));
+        if (barRef.current) barRef.current.style.width = `${pageP * 100}%`;
+        /* boundary scrollytelling */
+        if (!track || prefersReducedMotion()) return;
         const r = track.getBoundingClientRect();
         const total = r.height - window.innerHeight;
         const p = Math.min(1, Math.max(0, -r.top / Math.max(1, total)));
@@ -100,6 +113,7 @@ export default function Landing() {
   return (
     <div className="landing-immersive" data-testid="landing-page" ref={revealRoot}>
       <a href="#hero" className="sr-only focus:not-sr-only">Skip to content</a>
+      <div className="imm-progressbar" aria-hidden="true"><i ref={barRef} /></div>
 
       {/* nav */}
       <nav className="imm-nav" aria-label="Avaira">
@@ -133,8 +147,15 @@ export default function Landing() {
         <div className="imm-hero-canvas">
           <BoundaryScene exploded={0} />
         </div>
+        <div className="imm-hud" aria-hidden="true">
+          <p>ROBINHOOD TESTNET <b>/ CHAIN 46630</b></p>
+          <p>GATE <b>OPERATIONAL</b> / REFUSALS 9</p>
+          <p>SETTLEMENT <b>24H CHALLENGE WINDOW</b></p>
+        </div>
+        <span className="imm-corner tl" aria-hidden="true" />
+        <span className="imm-corner br" aria-hidden="true" />
         <div className="imm-hero-copy">
-          <p className="imm-label" style={{ marginBottom: "1.4rem" }}>Onchain accountability for AI agents</p>
+          <p className="imm-label" style={{ marginBottom: "1.4rem" }}>Act 01 <em>— onchain accountability for AI agents</em></p>
           <h1 className="imm-display">
             An agent proposes.
             <br />
@@ -163,10 +184,23 @@ export default function Landing() {
         <p className="imm-label imm-scrollhint">Scroll — the boundary explains itself</p>
       </header>
 
+      {/* the refusal ticker — the nine real revert codes, on a slow loop */}
+      <div className="imm-ticker" aria-label="The nine refusal codes" role="img">
+        <div className="imm-ticker-track">
+          {[0, 1].map((dup) => (
+            <span key={dup}>
+              {REFUSALS.map((code) => (
+                <span key={code}>{code} <i>{"//"}</i> </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Act II — the problem */}
       <section className="imm-act" data-testid="problem-section" aria-labelledby="problem-h">
         <div className="imm-act-head">
-          <p className="imm-label">The problem</p>
+          <p className="imm-label">Act 02 <em>— the problem</em></p>
           <h2 className="imm-h2" id="problem-h" data-reveal>
             Between a proposal and an action there is usually nothing.
           </h2>
@@ -218,7 +252,7 @@ export default function Landing() {
       {/* Act IV — the execution */}
       <section className="imm-act" id="execution" data-testid="workflow-section" aria-labelledby="execution-h">
         <div className="imm-act-head">
-          <p className="imm-label">The execution</p>
+          <p className="imm-label">Act 04 <em>— the execution</em></p>
           <h2 className="imm-h2" id="execution-h" data-reveal>
             Five functions, in the order the chain enforces them.
           </h2>
@@ -242,7 +276,7 @@ export default function Landing() {
       {/* Act V — the decision */}
       <section className="imm-act" data-testid="decision-section" aria-labelledby="decision-h">
         <div className="imm-act-head">
-          <p className="imm-label">The decision</p>
+          <p className="imm-label">Act 05 <em>— the decision</em></p>
           <h2 className="imm-h2" id="decision-h" data-reveal>
             One view call. Two outcomes. Nine ways to be refused.
           </h2>
@@ -283,7 +317,7 @@ export default function Landing() {
       {/* Act VI — the evidence */}
       <section className="imm-act" id="evidence" data-testid="evidence-section" aria-labelledby="evidence-h">
         <div className="imm-act-head">
-          <p className="imm-label">The evidence</p>
+          <p className="imm-label">Act 06 <em>— the evidence</em></p>
           <h2 className="imm-h2" id="evidence-h" data-reveal>
             Deployed, wired, and verifiable from the explorer.
           </h2>
@@ -342,7 +376,7 @@ export default function Landing() {
       {/* Act VII — the architecture */}
       <section className="imm-act" id="architecture" data-testid="architecture-section" aria-labelledby="arch-h">
         <div className="imm-act-head">
-          <p className="imm-label">The architecture</p>
+          <p className="imm-label">Act 07 <em>— the architecture</em></p>
           <h2 className="imm-h2" id="arch-h" data-reveal>
             Six contracts, two services, two SDKs, one public formula.
           </h2>
@@ -379,7 +413,7 @@ export default function Landing() {
       {/* Act VIII — the invitation */}
       <section className="imm-cta" data-testid="cta-section" aria-labelledby="cta-h">
         <div>
-          <p className="imm-label">The invitation</p>
+          <p className="imm-label">Act 08 <em>— the invitation</em></p>
           <h2 className="imm-h2" id="cta-h" style={{ margin: "0.8rem 0 1rem" }} data-reveal>
             Build agents that can prove what they did.
           </h2>
@@ -402,16 +436,54 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="imm-foot">
-        <p className="imm-footnote">
-          Avaira is an independent project building on the public Robinhood
-          Chain network. It is not affiliated with Robinhood. Contract
-          addresses on this page refer to the public testnet, chain id 46630.
-        </p>
-        <div style={{ display: "flex", gap: "1.4rem" }}>
-          <Link to="/evidence">Evidence</Link>
-          <Link to="/docs">Docs</Link>
-          <a href="https://github.com/ranaalyan1/avaira.xyz">GitHub</a>
+      <footer className="imm-foot" data-testid="footer-section">
+        <div className="imm-foot-grid">
+          <div className="imm-foot-brand">
+            <a className="imm-wordmark" href="#hero">AVaira<span>.</span></a>
+            <p className="imm-tagline">
+              Onchain accountability for AI agents. Commit the plan, gate the
+              action, attest the outcome, slash the deviation.
+            </p>
+            <div className="imm-founder">
+              <div>
+                <span>Founded by</span>
+                <br />
+                <a href="https://x.com/avairaprotocol">Muhammad Alyan Ashraf</a>
+              </div>
+            </div>
+          </div>
+          <div className="imm-foot-col">
+            <h4>Explore</h4>
+            <ul>
+              <li><a href="#boundary">The boundary</a></li>
+              <li><a href="#execution">Execution</a></li>
+              <li><a href="#evidence">Evidence</a></li>
+              <li><a href="#architecture">Architecture</a></li>
+            </ul>
+          </div>
+          <div className="imm-foot-col">
+            <h4>Protocol</h4>
+            <ul>
+              <li><Link to="/gate">Gate mechanics</Link></li>
+              <li><Link to="/score">The score</Link></li>
+              <li><Link to="/evidence">Evidence ledger</Link></li>
+              <li><Link to="/docs">Docs and SDK</Link></li>
+            </ul>
+          </div>
+          <div className="imm-foot-col">
+            <h4>Connect</h4>
+            <ul>
+              {SOCIALS.map((s2) => (
+                <li key={s2.href}>
+                  <a href={s2.href}>{s2.label}<span>{s2.note}</span></a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="imm-foot-bottom">
+          <p>{`(c) 2026 Avaira — an independent project, not affiliated with Robinhood`}</p>
+          <p>{`Testnet build / chain 46630 / contracts deployed 2026-10-24`}</p>
         </div>
       </footer>
     </div>

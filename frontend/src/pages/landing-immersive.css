@@ -122,3 +122,71 @@
    visible by default, animated in by useReveal when it observes it, and a
    no-op under prefers-reduced-motion. */
 .landing-immersive [data-reveal] { will-change: opacity, transform; }
+
+/* ── finalization pass ───────────────────────────────────────────── */
+
+/* global scroll progress: a 2px lime line under the nav */
+.imm-progressbar { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50; background: transparent; }
+.imm-progressbar i { display: block; height: 100%; width: 0%; background: var(--imm-lime); transition: width 80ms linear; }
+
+/* hero HUD — technical readout, top-left, under the nav */
+.imm-hud { position: absolute; top: 5.2rem; left: clamp(1.2rem, 5vw, 4.5rem); z-index: 2; display: grid; gap: 0.32rem; }
+.imm-hud p { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; letter-spacing: 0.14em; color: var(--imm-faint); margin: 0; }
+.imm-hud p b { color: var(--imm-lime); font-weight: 400; }
+@media (max-width: 640px) { .imm-hud { display: none; } }
+
+/* crosshair corner marks on the hero */
+.imm-corner { position: absolute; z-index: 2; width: 18px; height: 18px; border-color: var(--imm-line-strong); border-style: solid; border-width: 0; }
+.imm-corner.tl { top: 4.6rem; left: clamp(0.8rem, 3vw, 2.6rem); border-left-width: 1px; border-top-width: 1px; }
+.imm-corner.br { bottom: 1.1rem; left: clamp(0.8rem, 3vw, 2.6rem); border-right-width: 1px; border-bottom-width: 1px; }
+@media (max-width: 640px) { .imm-corner { display: none; } }
+
+/* the refusal ticker — a slow marquee of the nine real revert codes */
+.imm-ticker { border-top: 1px solid var(--imm-line); border-bottom: 1px solid var(--imm-line); overflow: hidden; padding: 0.85rem 0; background: var(--imm-bg-raised); }
+.imm-ticker-track { display: flex; width: max-content; animation: imm-ticker 46s linear infinite; }
+.imm-ticker-track span { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--imm-muted); white-space: nowrap; padding: 0 1.3rem; }
+.imm-ticker-track i { color: var(--imm-lime); font-style: normal; }
+@keyframes imm-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .imm-ticker-track { animation: none; } }
+
+/* act numbering + corner marks */
+.imm-act { max-width: 84rem; margin: 0 auto; }
+.imm-act-head .imm-label em { font-style: normal; color: var(--imm-muted); }
+.imm-act::after { content: "+"; position: absolute; top: -0.62rem; right: clamp(1.2rem, 5vw, 4.5rem); color: var(--imm-line-strong); font-family: "IBM Plex Mono", monospace; font-size: 0.9rem; }
+
+/* verdict cards: a quiet radial glow, plus a scored left rail */
+.imm-verdict { position: relative; }
+.imm-verdict.imm-allowed::before { content: ""; position: absolute; inset: 0; background: radial-gradient(42rem 20rem at 18% 0%, rgba(204,255,0,0.07), transparent 65%); pointer-events: none; }
+.imm-verdict.imm-rejected::before { content: ""; position: absolute; inset: 0; background: radial-gradient(42rem 20rem at 18% 0%, rgba(244,244,239,0.05), transparent 65%); pointer-events: none; }
+
+/* evidence table: row rails and a lime hover */
+.imm-table tbody tr { position: relative; transition: background 140ms ease; }
+.imm-table tbody tr:hover { background: rgba(204,255,0,0.045); }
+.imm-table tbody tr td:first-child::before { content: ""; display: inline-block; width: 3px; height: 0.9em; margin-right: 0.7rem; background: var(--imm-line-strong); transition: background 140ms ease; vertical-align: baseline; }
+.imm-table tbody tr:hover td:first-child::before { background: var(--imm-lime); }
+
+/* pipeline steps: lime rail on hover */
+.imm-step { transition: background 160ms ease; }
+.imm-step:hover { background: #0d0d0d; }
+.imm-step::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: transparent; transition: background 160ms ease; }
+.imm-step:hover::after { background: var(--imm-lime); }
+
+/* cta: lime halo */
+.imm-cta { overflow: hidden; }
+.imm-cta::before { content: ""; position: absolute; left: 50%; top: 46%; width: 72rem; height: 40rem; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(204,255,0,0.075), transparent); pointer-events: none; }
+
+/* ── footer ─────────────────────────────────────────────────────── */
+.imm-foot-grid { position: relative; display: grid; gap: 3rem; grid-template-columns: 1fr; padding: clamp(3.5rem, 7vw, 6rem) clamp(1.2rem, 5vw, 4.5rem) 2.6rem; border-top: 1px solid var(--imm-line); }
+@media (min-width: 860px) { .imm-foot-grid { grid-template-columns: 1.6fr 1fr 1fr 1.2fr; } }
+.imm-foot-brand p.imm-tagline { font-size: 0.92rem; line-height: 1.6; color: var(--imm-muted); max-width: 26rem; margin: 1.1rem 0 1.6rem; }
+.imm-foot-col h4 { font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--imm-faint); font-weight: 400; margin: 0 0 1.1rem; }
+.imm-foot-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.imm-foot-col a { color: var(--imm-muted); text-decoration: none; font-size: 0.88rem; }
+.imm-foot-col a:hover, .imm-foot-col a:focus-visible { color: var(--imm-lime); }
+.imm-foot-col a span { color: var(--imm-faint); font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; margin-left: 0.4rem; }
+.imm-founder { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.8rem; padding-top: 1.2rem; border-top: 1px solid var(--imm-line); width: 100%; max-width: 26rem; }
+.imm-founder a { color: var(--imm-ink); text-decoration: none; font-size: 0.85rem; }
+.imm-founder a:hover { color: var(--imm-lime); }
+.imm-founder span { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; letter-spacing: 0.18em; color: var(--imm-faint); text-transform: uppercase; }
+.imm-foot-bottom { display: flex; flex-wrap: wrap; gap: 0.8rem 2rem; justify-content: space-between; align-items: center; padding: 1.2rem clamp(1.2rem, 5vw, 4.5rem) 1.6rem; border-top: 1px solid var(--imm-line); }
+.imm-foot-bottom p { margin: 0; font-size: 0.72rem; color: var(--imm-faint); font-family: "IBM Plex Mono", monospace; letter-spacing: 0.04em; }

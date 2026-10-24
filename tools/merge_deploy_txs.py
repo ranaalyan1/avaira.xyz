@@ -104,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check", action="store_true", help="report consistency without writing")
     args = ap.parse_args(argv)
 
-    manifest_path = Path(args.manifest) if args.manifest else ROOT / "deployments" / f"{args.chain}.json"
+    manifest_path = Path(args.manifest) if args.manifest else ROOT / "contracts" / "deployments" / f"{args.chain}.json"
     broadcast_path = (
         Path(args.broadcast)
         if args.broadcast

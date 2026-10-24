@@ -1,0 +1,30 @@
+{
+  "admin": "0x809b7BCFCd8132C8baD4f61a80641935C04f616e",
+  "agentRegistry": "eip155:46630:0xBAd4cb2Ec6667674b2B61B1d4C8FFfbF7FE64040",
+  "chainId": 46630,
+  "challengeWindow": 86400,
+  "challengerBond": 5000000,
+  "creditMarket": "0xa542F94233783EB0Ac55a48695D9bd9224EE025C",
+  "deploymentBlock": 11981851,
+  "identityRegistry": "0xBAd4cb2Ec6667674b2B61B1d4C8FFfbF7FE64040",
+  "intentVault": "0x7778b9698cBA4Ff687Aa054c836F27b17640bF1c",
+  "minGroundedPayment": 100000,
+  "minScore": 60,
+  "minStake": 100000000,
+  "registrationBond": 50000000000000000,
+  "reputationRegistry": "0xA565859472b507C539Fec560cc03D98a090108aB",
+  "settlementToken": "0x6f92176d07634Be0D2E0334178fa23866aCcE802",
+  "stakeRegistry": "0x430fBFc8B5D77c7063725ECDd4c6E56CB952bd99",
+  "treasury": "0x809b7BCFCd8132C8baD4f61a80641935C04f616e",
+  "validationRegistry": "0x64DA01075D461Ef772E31fbE85fd74166852C72f",
+  "deploymentTxs": {
+    "AvairaIdentityRegistry": "0xe5cec748525f43c010219f9392020f9847511cbb07acee85f3c3a224656c301e",
+    "AvairaReputationRegistry": "0x12ab4e97f4d725296cad89fe56f2f08a34b5a61ce015f5813b2874bab07bd7a4",
+    "AvairaValidationRegistry": "0xedd6054b546350f3144045bccbfc4787e7b4f891e228d45a86ce0f9cd0aa7b75",
+    "AvairaStakeRegistry": "0xef1781440b032dd71aa5c580e7ae84ba0035725e13bab0725e36e591e9687253",
+    "AvairaIntentVault": "0x85ab310e897e805a25f1de19cc605c9cd023fa65caaaabb96aeb000168ffe4c6",
+    "AvairaCreditMarket": "0xf50a01ad0e232a813d83838cdc0b4b7fbb644178bb4f64bed1d31035e3413729",
+    "MockUSDC": "0x219c28517c01406b221484e73cd2b9bb2ac306f31c455de96f6ed4a16deba02c"
+  },
+  "deployer": "0x809b7bcfcd8132c8bad4f61a80641935c04f616e"
+}

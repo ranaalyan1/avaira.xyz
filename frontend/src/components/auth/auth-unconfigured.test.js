@@ -11,6 +11,20 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 jest.mock("@dynamic-labs-sdk/client", () => ({ createDynamicClient: jest.fn() }), { virtual: true });
 jest.mock("@dynamic-labs-sdk/evm", () => ({ addEvmExtension: jest.fn() }), { virtual: true });
+jest.mock("@dynamic-labs-sdk/react-hooks", () => ({
+  DynamicProvider: ({ children }) => children,
+  useUser: () => ({ data: null }),
+  useGetWalletAccounts: () => ({ data: [] }),
+  useOnEvent: () => {},
+  useSendEmailOTP: () => ({ mutate: () => {}, data: undefined, isPending: false, error: null }),
+  useVerifyOTP: () => ({ mutate: () => {}, isPending: false, error: null }),
+  useLogout: () => ({ mutate: () => {} }),
+  useSignInWithSocialPopUp: () => ({ mutate: () => {}, isPending: false, error: null }),
+}), { virtual: true });
+jest.mock("@dynamic-labs-sdk/client/waas", () => ({
+  createWaasWalletAccounts: jest.fn(),
+  getChainsMissingWaasWalletAccounts: () => [],
+}), { virtual: true });
 jest.mock("@/dynamicClient", () => ({
   DYNAMIC_ENV_ID: "",
   dynamicAuthConfigured: false,

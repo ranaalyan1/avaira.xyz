@@ -1,0 +1,124 @@
+/* The immersive landing scope — the marketing site's second surface.
+ *
+ * The console is indigo-on-dark and the classic marketing pages are light; the
+ * immersive landing is deliberately its own space: black architecture, one
+ * electric chartreuse accent (#CCFF00), technical grid hairlines, Space
+ * Grotesk for display, IBM Plex Mono for labels. Everything here is a token —
+ * if a value is not on this sheet, it does not belong in the landing. */
+.landing-immersive {
+  --imm-bg: #050505;
+  --imm-bg-raised: #0a0a0a;
+  --imm-ink: #f4f4ef;
+  --imm-muted: #97978f;
+  --imm-faint: #565650;
+  --imm-lime: #ccff00;
+  --imm-line: rgba(244, 244, 239, 0.08);
+  --imm-line-strong: rgba(244, 244, 239, 0.18);
+  background: var(--imm-bg);
+  color: var(--imm-ink);
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+.landing-immersive ::selection { background: var(--imm-lime); color: #050505; }
+
+/* type scale — dramatic, deliberate changes, nothing artificial */
+.imm-display { font-weight: 500; letter-spacing: -0.03em; line-height: 0.98; font-size: clamp(2.6rem, 7.2vw, 5.4rem); }
+.imm-h2 { font-weight: 500; letter-spacing: -0.02em; line-height: 1.04; font-size: clamp(1.9rem, 4.4vw, 3.1rem); }
+.imm-lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.55; color: var(--imm-muted); max-width: 34em; }
+.imm-body { font-size: 1rem; line-height: 1.65; color: var(--imm-muted); }
+.imm-label { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--imm-faint); }
+.imm-mono { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--imm-muted); }
+
+/* structure */
+.imm-rule { border: 0; border-top: 1px solid var(--imm-line); }
+.imm-nav { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem clamp(1.2rem, 4vw, 3rem); background: linear-gradient(to bottom, rgba(5,5,5,0.92), rgba(5,5,5,0)); }
+.imm-nav-links { display: none; gap: 2rem; }
+.imm-nav-links a { color: var(--imm-muted); font-size: 0.82rem; letter-spacing: 0.06em; text-decoration: none; }
+.imm-nav-links a:hover, .imm-nav-links a:focus-visible { color: var(--imm-lime); }
+.imm-nav-links a.imm-here { color: var(--imm-ink); }
+@media (min-width: 900px) { .imm-nav-links { display: flex; } }
+.imm-wordmark { font-weight: 700; letter-spacing: 0.34em; font-size: 0.95rem; color: var(--imm-ink); text-decoration: none; }
+.imm-wordmark span { color: var(--imm-lime); }
+
+/* buttons — lime carries authorization; everything else is quiet */
+.imm-btn { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; padding: 0.78rem 1.4rem; border-radius: 999px; transition: transform 160ms ease, background 160ms ease, color 160ms ease; }
+.imm-btn-primary { background: var(--imm-lime); color: #050505; }
+.imm-btn-primary:hover { transform: translateY(-1px); }
+.imm-btn-ghost { border: 1px solid var(--imm-line-strong); color: var(--imm-ink); }
+.imm-btn-ghost:hover, .imm-btn-ghost:focus-visible { border-color: var(--imm-lime); color: var(--imm-lime); }
+.imm-btn:focus-visible { outline: 2px solid var(--imm-lime); outline-offset: 3px; }
+
+/* hero */
+.imm-hero { position: relative; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 clamp(1.2rem, 5vw, 4.5rem) 4.5rem; }
+.imm-hero-canvas { position: absolute; inset: 0; z-index: 0; }
+.imm-hero-copy { position: relative; z-index: 2; max-width: 46rem; }
+.imm-hero-copy .imm-display em { font-style: normal; color: var(--imm-lime); }
+.imm-scrollhint { position: absolute; bottom: 1.4rem; right: clamp(1.2rem, 5vw, 4.5rem); z-index: 2; }
+
+/* acts */
+.imm-act { position: relative; padding: clamp(4.5rem, 9vw, 9rem) clamp(1.2rem, 5vw, 4.5rem); border-top: 1px solid var(--imm-line); }
+.imm-act-head { display: grid; gap: 1.6rem; max-width: 62rem; margin-bottom: 3.2rem; }
+
+/* the sticky scrollytelling act */
+.imm-boundary { position: relative; border-top: 1px solid var(--imm-line); }
+.imm-boundary-track { height: 460vh; }
+.imm-boundary-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.imm-boundary-canvas { position: absolute; inset: 0; z-index: 0; }
+.imm-layer { position: absolute; left: clamp(1.2rem, 5vw, 4.5rem); bottom: 10vh; z-index: 3; max-width: 23rem; opacity: 0; transform: translateY(18px); transition: opacity 420ms ease, transform 420ms ease; }
+.imm-layer.imm-layer-on { opacity: 1; transform: none; }
+.imm-layer h3 { font-size: 1.35rem; font-weight: 500; margin: 0.5rem 0 0.4rem; }
+.imm-layer .imm-reason { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--imm-lime); letter-spacing: 0.08em; }
+.imm-progress { position: absolute; right: clamp(1.2rem, 5vw, 4.5rem); top: 50%; transform: translateY(-50%); z-index: 3; display: flex; flex-direction: column; gap: 0.9rem; }
+.imm-progress-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--imm-line-strong); }
+.imm-progress-dot.imm-dot-on { background: var(--imm-lime); }
+@media (max-width: 767px) { .imm-boundary-canvas, .imm-progress { display: none; } .imm-layer { position: static; opacity: 1; transform: none; max-width: 34rem; margin-bottom: 2.2rem; } .imm-boundary-track { height: auto; padding: clamp(4rem, 8vw, 7rem) 0; } .imm-boundary-stage { position: static; height: auto; } }
+
+/* workflow pipeline */
+.imm-pipeline { display: grid; gap: 1px; background: var(--imm-line); border: 1px solid var(--imm-line); }
+@media (min-width: 860px) { .imm-pipeline { grid-template-columns: repeat(5, 1fr); } }
+.imm-step { background: var(--imm-bg); padding: 1.6rem 1.4rem 1.9rem; position: relative; }
+.imm-step .imm-step-no { font-family: "IBM Plex Mono", monospace; color: var(--imm-lime); font-size: 0.72rem; letter-spacing: 0.18em; }
+.imm-step h3 { font-size: 1.02rem; margin: 0.9rem 0 0.45rem; }
+.imm-step p { font-size: 0.86rem; line-height: 1.6; color: var(--imm-muted); margin: 0; }
+.imm-step code { font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--imm-lime); }
+
+/* decision act */
+.imm-decision { display: grid; gap: 1px; background: var(--imm-line); border: 1px solid var(--imm-line); }
+@media (min-width: 860px) { .imm-decision { grid-template-columns: 1fr 1fr; } }
+.imm-verdict { background: var(--imm-bg); padding: 2.2rem clamp(1.2rem, 3vw, 2.4rem); }
+.imm-verdict.imm-allowed { border-top: 2px solid var(--imm-lime); }
+.imm-verdict.imm-rejected { border-top: 2px solid var(--imm-line-strong); }
+.imm-verdict h3 { font-size: 1.5rem; font-weight: 500; margin: 0.4rem 0 0.8rem; }
+.imm-reasons { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1.4rem; padding: 0; list-style: none; }
+.imm-reasons li { font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.06em; padding: 0.32rem 0.6rem; border: 1px solid var(--imm-line-strong); color: var(--imm-muted); }
+
+/* evidence table */
+.imm-table { width: 100%; border-collapse: collapse; }
+.imm-table th { font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--imm-faint); text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--imm-line-strong); }
+.imm-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--imm-line); font-size: 0.86rem; }
+.imm-table td.imm-addr { font-family: "IBM Plex Mono", monospace; font-size: 0.74rem; color: var(--imm-muted); }
+.imm-table a { color: var(--imm-lime); text-decoration: none; }
+.imm-receipts { display: grid; gap: 1px; background: var(--imm-line); border: 1px solid var(--imm-line); margin-top: 2.4rem; }
+@media (min-width: 760px) { .imm-receipts { grid-template-columns: repeat(4, 1fr); } }
+.imm-receipt { background: var(--imm-bg); padding: 1.4rem; }
+.imm-receipt strong { display: block; font-size: 1.7rem; font-weight: 500; color: var(--imm-ink); margin: 0.4rem 0 0.2rem; }
+.imm-receipt span { font-size: 0.78rem; color: var(--imm-muted); }
+
+/* architecture + cta */
+.imm-stack { display: grid; gap: 1px; background: var(--imm-line); border: 1px solid var(--imm-line); }
+.imm-stack-row { background: var(--imm-bg); display: grid; gap: 0.4rem 2rem; padding: 1.3rem 1.4rem; grid-template-columns: 1fr; }
+@media (min-width: 860px) { .imm-stack-row { grid-template-columns: 15rem 1fr 10rem; align-items: baseline; } }
+.imm-stack-row h3 { font-size: 1rem; margin: 0; }
+.imm-stack-row p { font-size: 0.85rem; color: var(--imm-muted); margin: 0; line-height: 1.55; }
+.imm-stack-row a { color: var(--imm-lime); text-decoration: none; font-size: 0.8rem; font-family: "IBM Plex Mono", monospace; }
+.imm-cta { position: relative; min-height: 88svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.6rem; border-top: 1px solid var(--imm-line); padding: 4rem 1.2rem; }
+.imm-cta-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; justify-content: center; }
+.imm-foot { display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: space-between; padding: 1.6rem clamp(1.2rem, 5vw, 4.5rem); border-top: 1px solid var(--imm-line); }
+.imm-foot a { color: var(--imm-faint); text-decoration: none; font-size: 0.78rem; font-family: "IBM Plex Mono", monospace; }
+.imm-foot a:hover { color: var(--imm-lime); }
+.imm-footnote { font-size: 0.74rem; color: var(--imm-faint); max-width: 30rem; line-height: 1.5; }
+
+/* reveal primitive — same data-reveal contract as the rest of the site:
+   visible by default, animated in by useReveal when it observes it, and a
+   no-op under prefers-reduced-motion. */
+.landing-immersive [data-reveal] { will-change: opacity, transform; }

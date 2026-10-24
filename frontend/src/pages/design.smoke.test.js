@@ -90,12 +90,18 @@ const PAGES = [
     element: <Home />,
     testids: [
       "landing-page", "nav-login-btn", "launch-protocol-btn", "hero-section",
-      "hero-launch-btn", "hero-login-btn", "pillars-section", "pillar-rate",
-      "pillar-clear", "pillar-insure", "cta-section", "cta-launch-btn",
+      "hero-launch-btn", "hero-login-btn", "problem-section", "boundary-section",
+      "boundary-act-identity", "boundary-act-stake", "boundary-act-score",
+      "boundary-act-intent", "boundary-act-time", "workflow-section",
+      "decision-section", "evidence-section", "evidence-table",
+      "architecture-section", "cta-section", "cta-launch-btn",
     ],
-    ids: ["pillars", "faq"],
-    copy: ["Nothing spends", "until the gate", "94.4%", "8,031", "Committed before execution"],
-    art: ["/art/hero.png", "/art/score.png", "/art/underwrite.png", "/art/network.png", "/art/permit.png", "/art/refuse.png"],
+    ids: ["hero", "boundary", "execution", "evidence", "architecture"],
+    copy: [
+      "An agent proposes", "verifies", "ENVELOPE_MISMATCH",
+      "chain id 46630", "157", "0 violations", "not affiliated with Robinhood",
+    ],
+    art: [],
   },
   {
     name: "gate",
@@ -151,7 +157,8 @@ describe("marketing site", () => {
 
   it("the chrome deep-links into every section", () => {
     const html = render(<Home />);
-    for (const link of ["/gate#execution", "/gate#moats", "/score#revenue", "/docs#sdk", "/#pillars", "/#faq"]) {
+    // the immersive home anchors its own acts and hands off to /gate and /docs
+    for (const link of ["/gate", "/docs", "#boundary", "#execution", "#evidence", "#architecture"]) {
       has(html, `href="${link}"`);
     }
   });
@@ -161,8 +168,10 @@ describe("marketing site", () => {
     for (const needle of copy) has(html, needle);
   });
 
-  it.each(PAGES)("$name is in the pixel scope", ({ element }) => {
-    has(render(element), 'class="px-site"');
+  it.each(PAGES)("$name is in its declared scope", ({ name, element }) => {
+    // home is the immersive landing; the other marketing pages keep the pixel scope.
+    if (name === "home") has(render(element), 'class="landing-immersive"');
+    else has(render(element), 'class="px-site"');
   });
 
   // The page carries no pricing surface and no revenue projections: a figure a
@@ -218,16 +227,16 @@ describe("marketing site", () => {
 
   it("animates the art the marketing site is built around", () => {
     const unique = [...new Set(motions)];
-    for (const gif of ["/art/hero.gif", "/art/score.gif", "/art/permit.gif", "/art/refuse.gif"]) {
+    for (const gif of ["/art/score.gif", "/art/permit.gif", "/art/refuse.gif"]) {
       expect(unique).toContain(gif);
     }
-    expect(unique.length).toBeGreaterThanOrEqual(6);
+    expect(unique.length).toBeGreaterThanOrEqual(5);
   });
 
   it("still ships a static frame for every plate", () => {
     // the login plate is the one deliberate exception: it is background, and it
-    // is described anyway
-    expect(stills.length + motions.length).toBeGreaterThanOrEqual(12);
+    // is described anyway. The immersive home renders 3D, not plates.
+    expect(stills.length + motions.length).toBeGreaterThanOrEqual(8);
   });
 
   // Count-ups, corridor stages and the score marker all render their final
@@ -235,8 +244,8 @@ describe("marketing site", () => {
   // real numbers rather than a zero.
   it("renders every animated figure in its resolved state", () => {
     const home = render(<Home />);
-    has(home, "94.4%");
-    has(home, "8,031");
+    has(home, "157"); // the Foundry count, in static markup
+    has(home, "chain id 46630");
 
     const gate = render(<GatePage />);
     has(gate, "four planes cleared");

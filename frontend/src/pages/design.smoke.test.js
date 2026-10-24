@@ -1,7 +1,7 @@
 /**
  * Design smoke test.
  *
- * The marketing site is five routes and a console, and this file is the
+ * The marketing site is seven routes and a console, and this file is the
  * contract between them and the rest of the repository: every documented
  * data-testid and anchor still has to render, the pixel scope has to wrap every
  * marketing page, the rendered art has to be described, and the two rules the
@@ -15,8 +15,13 @@ import path from "path";
 import { createElement, Fragment } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+/* the static-render world (router, axios, sonner, API mocks) is shared with the
+ * prerender script so the tested markup and the shipped markup agree. */
+import "./marketing.mocks";
 import { AuthContext } from "@/App";
 import Home from "@/pages/Landing";
+import ExecutionPage from "@/pages/ExecutionPage";
+import ImmersiveEvidence from "@/pages/EvidenceImmersive";
 import GatePage from "@/pages/GatePage";
 import ScorePage from "@/pages/ScorePage";
 import EvidencePage from "@/pages/EvidencePage";
@@ -27,51 +32,6 @@ import Layout from "@/components/Layout";
 import AgentRegistry from "@/pages/AgentRegistry";
 import ExecutionFlow from "@/pages/ExecutionFlow";
 import { DARK, LIGHT, gradeColor, statusColor } from "@/lib/palette";
-
-// react-router-dom v7 publishes ESM only, which the jest 27 resolver shipped
-// with react-scripts cannot resolve. The marketing pages only need navigation
-// primitives, so they are mocked rather than pulling the real package in.
-// axios 1.x ships ESM, which the same jest resolver cannot parse. The pages only
-// touch it from effects, which renderToStaticMarkup never runs.
-jest.mock("axios", () => ({ __esModule: true, default: { get: async () => ({ data: {} }), post: async () => ({ data: {} }), defaults: {} } }));
-
-// Same story for the toast helper: imported, never invoked during a static render.
-jest.mock("sonner", () => ({ Toaster: () => null, toast: { success: () => {}, error: () => {}, info: () => {} } }));
-
-// …and the API base URL constant.
-jest.mock("@/lib/api", () => ({ API: "http://localhost:8001/api", API_BASE: "http://localhost:8001" }));
-
-jest.mock("@/App", () => {
-  const React = require("react");
-  const AuthContext = React.createContext({ user: null, authReady: true, setUser: () => {}, logout: () => {} });
-  // Read the provider so tests can render both signed-in and anonymous states.
-  return { AuthContext, useAuth: () => React.useContext(AuthContext) };
-});
-
-jest.mock(
-  "react-router-dom",
-  () => {
-    const React = require("react");
-    const Passthrough = ({ children }) => React.createElement(React.Fragment, null, children);
-    // A router Link renders an anchor with an href — mirror that, so tests can
-    // assert on the destination the way a crawler would see it.
-    const Anchor = ({ children, to, ...rest }) =>
-      React.createElement("a", { ...rest, href: typeof to === "string" ? to : rest.href }, children);
-    return {
-      BrowserRouter: Passthrough,
-      MemoryRouter: Passthrough,
-      Routes: Passthrough,
-      Route: () => null,
-      Navigate: () => null,
-      Outlet: () => null,
-      Link: Anchor,
-      NavLink: Anchor,
-      useNavigate: () => () => {},
-      useLocation: () => ({ pathname: "/" }),
-    };
-  },
-  { virtual: true }
-);
 
 const ANON = { user: null, authReady: true, setUser: () => {}, logout: () => {} };
 
@@ -92,15 +52,41 @@ const PAGES = [
       "landing-page", "nav-login-btn", "launch-protocol-btn", "hero-section",
       "hero-launch-btn", "hero-login-btn", "problem-section", "boundary-section",
       "boundary-act-identity", "boundary-act-stake", "boundary-act-score",
-      "boundary-act-intent", "boundary-act-time", "workflow-section",
-      "decision-section", "evidence-section", "evidence-table",
-      "architecture-section", "cta-section", "cta-launch-btn", "footer-section",
+      "boundary-act-intent", "boundary-act-time",
+      "cta-section", "cta-launch-btn", "footer-section",
     ],
-    ids: ["hero", "boundary", "execution", "evidence", "architecture"],
+    ids: ["hero", "boundary"],
     copy: [
       "An agent proposes", "verifies", "ENVELOPE_MISMATCH",
-      "chain id 46630", "157", "0 violations", "not affiliated with Robinhood",
-      "Founded by", "@avairaprotocol", "linkedin.com/in/m-alyan-ashraf",
+      "not affiliated with Robinhood", "Founded by", "@avairaprotocol",
+      "linkedin.com/in/m-alyan-ashraf",
+    ],
+    art: [],
+  },
+  {
+    name: "execution",
+    element: <ExecutionPage />,
+    testids: [
+      "workflow-section", "decision-section", "cta-section", "footer-section",
+    ],
+    ids: ["execution"],
+    copy: [
+      "Five functions", "commitIntent", "checkGate", "attestOutcome",
+      "challengeDeviation", "ENVELOPE_MISMATCH", "INTENT_NOT_COMMITTED",
+    ],
+    art: [],
+  },
+  {
+    name: "evidence",
+    element: <ImmersiveEvidence />,
+    testids: [
+      "evidence-section", "evidence-table", "architecture-section",
+      "cta-section", "footer-section",
+    ],
+    ids: ["evidence", "architecture"],
+    copy: [
+      "chain id 46630", "157", "0 violations", "IdentityRegistry",
+      "Gateway service", "not affiliated with Robinhood",
     ],
     art: [],
   },
@@ -126,7 +112,7 @@ const PAGES = [
     art: ["/art/score.png", "/art/burn.png", "/art/network.png"],
   },
   {
-    name: "evidence",
+    name: "ledger",
     element: <EvidencePage />,
     testids: ["evidence-table"],
     ids: ["top"],
@@ -156,10 +142,10 @@ describe("marketing site", () => {
     for (const id of ids) has(html, `id="${id}"`);
   });
 
-  it("the chrome deep-links into every section", () => {
-    const html = render(<Home />);
-    // the immersive home anchors its own acts and hands off to /gate and /docs
-    for (const link of ["/gate", "/docs", "#boundary", "#execution", "#evidence", "#architecture"]) {
+  it("the chrome deep-links into every narrative page", () => {
+    // the top nav is the page selector; the landing links every sibling route
+    for (const link of ["/", "/execution", "/evidence", "/docs", "/gate"]) {
+      const html = render(<Home />);
       has(html, `href="${link}"`);
     }
   });
@@ -170,8 +156,8 @@ describe("marketing site", () => {
   });
 
   it.each(PAGES)("$name is in its declared scope", ({ name, element }) => {
-    // home is the immersive landing; the other marketing pages keep the pixel scope.
-    if (name === "home") has(render(element), 'class="landing-immersive"');
+    // the narrative routes are immersive; the reference pages keep the pixel scope.
+    if (["home", "execution", "evidence"].includes(name)) has(render(element), 'class="landing-immersive"');
     else has(render(element), 'class="px-site"');
   });
 
@@ -244,9 +230,9 @@ describe("marketing site", () => {
   // value in static markup, so a crawler or a reduced-motion visitor reads the
   // real numbers rather than a zero.
   it("renders every animated figure in its resolved state", () => {
-    const home = render(<Home />);
-    has(home, "157"); // the Foundry count, in static markup
-    has(home, "chain id 46630");
+    const evidence = render(<ImmersiveEvidence />);
+    has(evidence, "157"); // the Foundry count, in static markup
+    has(evidence, "chain id 46630");
 
     const gate = render(<GatePage />);
     has(gate, "four planes cleared");

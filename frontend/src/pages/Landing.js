@@ -171,7 +171,10 @@ export default function Landing() {
 
       {/* nav */}
       <nav className="imm-nav" aria-label="Avaira">
-        <a className="imm-wordmark" href="#hero">AVaira<span>.</span></a>
+        <a className="imm-wordmark" href="#hero" aria-label="Avaira home">
+          <img src="/logo.png" alt="Avaira mark" width="34" height="34" />
+          AVaira<span>.</span>
+        </a>
         <div className="imm-nav-links">
           <a href="#boundary">The boundary</a>
           <a href="#execution">Execution</a>
@@ -505,7 +508,10 @@ export default function Landing() {
       <footer className="imm-foot" data-testid="footer-section">
         <div className="imm-foot-grid">
           <div className="imm-foot-brand">
-            <a className="imm-wordmark" href="#hero">AVaira<span>.</span></a>
+            <a className="imm-wordmark" href="#hero" aria-label="Avaira home">
+              <img src="/logo.png" alt="Avaira mark" width="34" height="34" />
+              AVaira<span>.</span>
+            </a>
             <p className="imm-tagline">
               Onchain accountability for AI agents. Commit the plan, gate the
               action, attest the outcome, slash the deviation.

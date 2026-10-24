@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { TrendingUp, Trophy, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { TrendingUp, Trophy, ArrowUp, ArrowDown, Minus, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 import { API } from "@/lib/api";
 
+import ConsoleError from "@/components/ConsoleError";
 import { DARK } from "@/lib/palette";
+import { num, text, toNumber } from "@/lib/format";
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -29,6 +31,7 @@ export default function Reputation() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -39,8 +42,9 @@ export default function Reputation() {
       ]);
       setLeaderboard(lbRes.data);
       setHistory(histRes.data);
+      setLoadError(null);
     } catch (e) {
-      console.error(e);
+      setLoadError(e?.message || "The reputation API did not respond.");
     } finally {
       setLoading(false);
     }
@@ -48,11 +52,14 @@ export default function Reputation() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const chartData = leaderboard.slice(0, 10).map(a => ({
-    name: a.name.length > 10 ? a.name.slice(0, 10) + '...' : a.name,
-    score: a.reputation,
-    fill: getRepColor(a.reputation)
-  }));
+  const chartData = leaderboard.slice(0, 10).map(a => {
+    const score = toNumber(a.reputation);
+    return {
+      name: text(a.name, "unnamed").length > 10 ? `${text(a.name, "unnamed").slice(0, 10)}...` : text(a.name, "unnamed"),
+      score: score === null ? 0 : score,
+      fill: getRepColor(score === null ? 0 : score)
+    };
+  });
 
   return (
     <div className="page-shell animate-slide-in" data-testid="reputation-page">
@@ -65,6 +72,13 @@ export default function Reputation() {
           <RefreshCw size={14} />
         </button>
       </div>
+
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Reputation data unavailable"
+        testid="reputation-error"
+      />
 
       {loading && leaderboard.length === 0 && history.length === 0 ? (
         <div className="cyber-card p-12 text-center mb-4">
@@ -98,24 +112,26 @@ export default function Reputation() {
                 </thead>
                 <tbody>
                   {leaderboard.map((agent, i) => {
-                    const rate = agent.total_executions > 0 ? ((agent.successful_executions / agent.total_executions) * 100).toFixed(0) : '-';
+                    const executions = toNumber(agent.total_executions) || 0;
+                    const successful = toNumber(agent.successful_executions) || 0;
+                    const rate = executions > 0 ? ((successful / executions) * 100).toFixed(0) : '-';
                     return (
                       <tr key={agent.id} data-testid={`lb-row-${i}`}>
                         <td className="text-avaira-dim">{i + 1}</td>
-                        <td className="text-foreground font-semibold">{agent.name}</td>
+                        <td className="text-foreground font-semibold">{text(agent.name, "unnamed")}</td>
                         <td>
                           <span className={`status-dot ${agent.status === 'active' ? 'active' : agent.status === 'frozen' ? 'frozen' : 'paused'}`} />
                         </td>
                         <td className="text-right">
-                          <span className="font-bold" style={{ color: getRepColor(agent.reputation) }}>
-                            {agent.reputation.toFixed(0)}
+                          <span className="font-bold" style={{ color: getRepColor(toNumber(agent.reputation) ?? 0) }}>
+                            {num(agent.reputation, 0)}
                           </span>
                         </td>
-                        <td className="text-right text-foreground">{agent.total_executions}</td>
+                        <td className="text-right text-foreground">{text(agent.total_executions, "0")}</td>
                         <td className="text-right" style={{ color: rate !== '-' && parseInt(rate) >= 80 ? DARK.success : rate !== '-' && parseInt(rate) >= 50 ? DARK.warning : rate === '-' ? DARK.textMuted : DARK.danger }}>
                           {rate}{rate !== '-' ? '%' : ''}
                         </td>
-                        <td className="text-right text-avaira-primary">{agent.collateral_remaining.toFixed(2)}</td>
+                        <td className="text-right text-avaira-primary">{num(agent.collateral_remaining, 2)}</td>
                       </tr>
                     );
                   })}
@@ -134,7 +150,7 @@ export default function Reputation() {
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke={DARK.hairline} horizontal={false} />
-                  <XAxis type="number" domain={[0, 200]} tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
+                  <XAxis type="number" domain={[0, 100]} tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
                   <YAxis dataKey="name" type="category" width={80} tick={{ fill: DARK.textMuted, fontSize: 9, fontFamily: 'JetBrains Mono' }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="score" name="Reputation" radius={[0, 2, 2, 0]}>
@@ -156,18 +172,24 @@ export default function Reputation() {
               <p className="font-mono text-xs text-avaira-dim text-center py-6">NO HISTORY</p>
             ) : (
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {history.slice(0, 15).map(h => (
+                {history.slice(0, 15).map(h => {
+                  /* A zero-delta row is a level score, not a fall — it used to
+                   * render a red down arrow. */
+                  const delta = toNumber(h.delta) ?? 0;
+                  const color = delta > 0 ? DARK.success : delta < 0 ? DARK.danger : DARK.textMuted;
+                  return (
                   <div key={h.id} className="p-2 hover:bg-white/[0.02] border-b border-white/[0.04] flex items-center gap-2" data-testid={`rep-history-${h.id}`}>
-                    {h.delta > 0 ? <ArrowUp size={12} className="text-avaira-green" /> : <ArrowDown size={12} className="text-avaira-red" />}
+                    {delta > 0 ? <ArrowUp size={12} style={{ color }} /> : delta < 0 ? <ArrowDown size={12} style={{ color }} /> : <Minus size={12} style={{ color }} />}
                     <div className="flex-1 min-w-0">
-                      <p className="font-mono text-xs text-foreground truncate">{h.agent_name}</p>
-                      <p className="font-mono text-[10px] text-avaira-dim truncate">{h.reason}</p>
+                      <p className="font-mono text-xs text-foreground truncate">{text(h.agent_name, "unnamed")}</p>
+                      <p className="font-mono text-[10px] text-avaira-dim truncate">{text(h.reason, "")}</p>
                     </div>
-                    <span className="font-mono text-xs font-bold" style={{ color: h.delta > 0 ? DARK.success : DARK.danger }}>
-                      {h.delta > 0 ? '+' : ''}{h.delta}
+                    <span className="font-mono text-xs font-bold" style={{ color }}>
+                      {delta > 0 ? '+' : ''}{delta}
                     </span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

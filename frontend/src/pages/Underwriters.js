@@ -8,7 +8,9 @@ import { useAuth } from "@/App";
 import { API } from "@/lib/api";
 
 
+import ConsoleError from "@/components/ConsoleError";
 import { DARK, gradeColor } from "@/lib/palette";
+import { num, text, toNumber } from "@/lib/format";
 
 export default function Underwriters() {
   const { user } = useAuth();
@@ -16,6 +18,7 @@ export default function Underwriters() {
   const [underwriters, setUnderwriters] = useState([]);
   const [missions, setMissions] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [missionOpen, setMissionOpen] = useState(false);
   const [stakeOpen, setStakeOpen] = useState(false);
@@ -34,7 +37,8 @@ export default function Underwriters() {
       setUnderwriters(uwRes.data);
       setMissions(mRes.data);
       setAgents(aRes.data);
-    } catch (e) { console.error(e); }
+      setLoadError(null);
+    } catch (e) { setLoadError(e?.message || "The marketplace API did not respond."); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -99,8 +103,8 @@ export default function Underwriters() {
 
   const openMissions = missions.filter(m => m.status === "open");
   const settledMissions = missions.filter(m => m.status === "settled");
-  const totalStaked = underwriters.reduce((s, u) => s + u.capital_staked, 0);
-  const totalEarnings = underwriters.reduce((s, u) => s + u.total_earnings, 0);
+  const totalStaked = underwriters.reduce((sum, u) => sum + (toNumber(u.capital_staked) || 0), 0);
+  const totalEarnings = underwriters.reduce((sum, u) => sum + (toNumber(u.total_earnings) || 0), 0);
 
   return (
     <div className="page-shell animate-slide-in" data-testid="underwriters-page">
@@ -179,6 +183,13 @@ export default function Underwriters() {
         </div>
       </div>
 
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Underwriting data unavailable"
+        testid="underwriters-error"
+      />
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="cyber-card p-4">
@@ -187,11 +198,11 @@ export default function Underwriters() {
         </div>
         <div className="cyber-card p-4">
           <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Capital Staked</p>
-          <p className="font-heading font-bold text-xl text-avaira-primary">${totalStaked.toFixed(2)}</p>
+          <p className="font-heading font-bold text-xl text-avaira-primary">${num(totalStaked, 2)}</p>
         </div>
         <div className="cyber-card p-4">
           <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Total Earnings</p>
-          <p className="font-heading font-bold text-xl text-avaira-green">${totalEarnings.toFixed(2)}</p>
+          <p className="font-heading font-bold text-xl text-avaira-green">${num(totalEarnings, 2)}</p>
         </div>
         <div className="cyber-card p-4">
           <p className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Open Missions</p>
@@ -217,13 +228,13 @@ export default function Underwriters() {
                         <span className="text-sm font-semibold tracking-tight text-foreground">{m.agent_name}</span>
                         <span className="font-mono text-[10px] ml-2 px-1.5 py-0.5 border" style={{ borderColor: gradeColor(m.agent_grade) + '50', color: gradeColor(m.agent_grade) }}>{m.agent_grade}</span>
                       </div>
-                      <span className={`font-mono text-[10px] px-1.5 py-0.5 border ${m.risk_level === 'high' ? 'border-red-500/30 text-red-400' : m.risk_level === 'medium' ? 'border-yellow-500/30 text-yellow-400' : 'border-green-500/30 text-green-400'}`}>{m.risk_level.toUpperCase()}</span>
+                      <span className={`font-mono text-[10px] px-1.5 py-0.5 border ${m.risk_level === 'high' ? 'border-red-500/30 text-red-400' : m.risk_level === 'medium' ? 'border-yellow-500/30 text-yellow-400' : 'border-green-500/30 text-green-400'}`}>{text(m.risk_level, "unknown").toUpperCase()}</span>
                     </div>
                     <p className="font-mono text-xs text-avaira-muted">{m.description}</p>
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-avaira-border">
                       <div className="flex gap-4 font-mono text-[10px]">
                         <span className="text-avaira-primary">VALUE: ${m.target_value}</span>
-                        <span className="text-avaira-green">STAKED: ${m.total_staked.toFixed(2)}</span>
+                        <span className="text-avaira-green">STAKED: ${num(m.total_staked, 2)}</span>
                         <span className="text-avaira-muted">UW: {m.underwriters.length}</span>
                       </div>
                       <div className="flex gap-1.5">
@@ -289,11 +300,11 @@ export default function Underwriters() {
                 <div key={uw.id} className="p-3 border border-avaira-border" data-testid={`uw-card-${uw.id}`}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-semibold tracking-tight text-foreground">{uw.name}</span>
-                    <span className="font-mono text-[10px] text-avaira-green">{uw.total_earnings.toFixed(4)} earned</span>
+                    <span className="font-mono text-[10px] text-avaira-green">{num(uw.total_earnings, 4)} earned</span>
                   </div>
                   <div className="space-y-0.5 font-mono text-[10px]">
-                    <div className="flex justify-between"><span className="text-avaira-muted">AVAILABLE</span><span className="text-avaira-primary">${uw.capital_available.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span className="text-avaira-muted">STAKED</span><span className="text-avaira-yellow">${uw.capital_staked.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span className="text-avaira-muted">AVAILABLE</span><span className="text-avaira-primary">${num(uw.capital_available, 2)}</span></div>
+                    <div className="flex justify-between"><span className="text-avaira-muted">STAKED</span><span className="text-avaira-yellow">${num(uw.capital_staked, 2)}</span></div>
                     <div className="flex justify-between"><span className="text-avaira-muted">MISSIONS</span><span className="text-foreground">{uw.missions_successful}/{uw.missions_underwritten}</span></div>
                   </div>
                 </div>
@@ -314,7 +325,7 @@ export default function Underwriters() {
                 <label className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest block mb-1">Underwriter</label>
                 <select data-testid="stake-uw-select" value={stakeForm.underwriter_id} onChange={e => setStakeForm(p => ({ ...p, underwriter_id: e.target.value }))} className="w-full bg-black border border-white/20 text-white font-mono text-sm p-2 outline-none">
                   <option value="">Select underwriter...</option>
-                  {underwriters.filter(u => u.capital_available > 0).map(u => <option key={u.id} value={u.id}>{u.name} ({u.capital_available.toFixed(2)} avail)</option>)}
+                  {underwriters.filter(u => toNumber(u.capital_available) > 0).map(u => <option key={u.id} value={u.id}>{u.name} ({num(u.capital_available, 2)} avail)</option>)}
                 </select>
               </div>
               <div>

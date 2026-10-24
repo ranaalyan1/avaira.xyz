@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Glyph } from "@/components/marketing/pixel";
+import { usePageTitle } from "@/lib/pageTitle";
 
 export default function NotFound() {
+  usePageTitle("Page not found — AVAIRA");
   return (
     <div className="px-site px-login" data-testid="not-found-page">
       <span className="px-login-veil" aria-hidden="true" />

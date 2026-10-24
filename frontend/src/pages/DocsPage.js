@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Github } from "lucide-react";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { usePageTitle } from "@/lib/pageTitle";
 import {
   ConsoleActions,
   Glyph,
@@ -84,6 +85,7 @@ const SURFACES = [
 export default function DocsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  usePageTitle("Docs and SDK — AVAIRA");
   const reveal = useReveal({ step: 60 });
 
   const goToConsole = () => {

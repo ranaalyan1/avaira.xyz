@@ -1,17 +1,24 @@
-import { useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, Unplug } from "lucide-react";
 import { API } from "@/lib/api";
 import { useAuth } from "@/App";
 import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
 import { Glyph } from "@/components/marketing/pixel";
+import { usePageTitle } from "@/lib/pageTitle";
+import { safeInternalPath } from "@/lib/navigation";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   // Set by App when /api/* comes back as the SPA's own HTML, which means this
   // deployment has no backend: the OAuth buttons below would navigate to
   // `${API}/auth/...`, be answered by the SPA rewrite, and dump the visitor on
   // the app's 404 page. Say what is actually wrong instead.
-  const { backendMisconfigured } = useAuth();
+  const { backendMisconfigured, user, authReady } = useAuth();
+  usePageTitle("Sign in — AVAIRA");
+  /* Where the visitor was headed (ProtectedRoute appends ?redirect=…), and
+   * only ever a same-origin path — see safeInternalPath. */
+  const nextPath = safeInternalPath(new URLSearchParams(location.search).get("redirect"));
   const cardTilt = usePointerTilt({ max: 3 });
   const entrance = useEnterAnimation((_scope, root) => {
     animate(root.querySelectorAll("[data-login-enter]"), {
@@ -25,15 +32,19 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     if (backendMisconfigured) return;
-    const redirectUrl = window.location.origin + "/dashboard";
+    const redirectUrl = window.location.origin + nextPath;
     window.location.href = `${API}/auth/google/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
   const handleXLogin = () => {
     if (backendMisconfigured) return;
-    const redirectUrl = window.location.origin + "/dashboard";
+    const redirectUrl = window.location.origin + nextPath;
     window.location.href = `${API}/auth/x/login?redirect=${encodeURIComponent(redirectUrl)}`;
   };
+
+  /* Already signed in (or signed in from another tab): do not show the sign-in
+   * card again — go where they were going. */
+  if (authReady && user) return <Navigate to={nextPath} replace />;
 
   return (
     <div className="px-site px-login" data-testid="login-page">

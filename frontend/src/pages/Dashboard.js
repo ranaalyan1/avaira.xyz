@@ -7,9 +7,11 @@ import { toast } from "sonner";
 import { API } from "@/lib/api";
 import AgentDashboard from "@/components/AgentDashboard";
 import TrustHeatmap from "@/components/TrustHeatmap";
+import ConsoleError from "@/components/ConsoleError";
 
 import { CHART_COLORS, DARK, STATUS_COLORS as PLOT_STATUS_COLORS } from "@/lib/palette";
 import { useCountUp } from "@/lib/motion";
+import { dateLabel, num, text } from "@/lib/format";
 
 // The figure counts up when the tile enters the viewport. The markup already
 // carries the final value, so a static render, a crawler or a reduced-motion
@@ -60,6 +62,7 @@ export default function Dashboard() {
   const [activity, setActivity] = useState([]);
   const [simulating, setSimulating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -70,8 +73,11 @@ export default function Dashboard() {
       ]);
       setStats(statsRes.data);
       setActivity(activityRes.data);
+      setLoadError(null);
     } catch (e) {
-      console.error("Dashboard fetch error:", e);
+      /* An unreachable API used to look like an idle protocol: the empty
+       * states below would render with no explanation. */
+      setLoadError(e?.message || "The dashboard API did not respond.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +95,7 @@ export default function Dashboard() {
     setSimulating(true);
     try {
       const res = await axios.post(`${API}/simulate/lifecycle`, {}, { withCredentials: true });
-      toast.success(`Simulation complete: ${res.data.steps.length} steps executed`);
+      toast.success(`Simulation complete: ${res.data?.steps?.length ?? 0} steps executed`);
       fetchData();
     } catch (e) {
       toast.error("Simulation failed. Check admin privileges.");
@@ -138,6 +144,13 @@ export default function Dashboard() {
         </button>
       </div>
 
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Dashboard data unavailable"
+        testid="dashboard-error"
+      />
+
       {/* Stats Grid */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
@@ -145,8 +158,8 @@ export default function Dashboard() {
           <StatCard icon={Activity} label="Active Agents" value={stats.active_agents} color={DARK.success} delay={2} />
           <StatCard icon={Zap} label="Executions" value={stats.total_executions} color={DARK.violet} delay={3} />
           <StatCard icon={ShieldOff} label="Frozen" value={stats.frozen_agents} color={DARK.danger} delay={4} />
-          <StatCard icon={Wallet} label="Total Fees (USD)" value={stats.total_fees_collected.toFixed(2)} color={DARK.warning} delay={5} />
-          <StatCard icon={TrendingUp} label="Trust Pool (USD)" value={stats.trust_pool_balance.toFixed(2)} color={DARK.info} delay={6} />
+          <StatCard icon={Wallet} label="Total Fees (USD)" value={num(stats.total_fees_collected, 2)} color={DARK.warning} delay={5} />
+          <StatCard icon={TrendingUp} label="Trust Pool (USD)" value={num(stats.trust_pool_balance, 2)} color={DARK.info} delay={6} />
         </div>
       )}
 
@@ -169,10 +182,10 @@ export default function Dashboard() {
                   <div className={`status-dot ${item.status === 'completed' ? 'active' : item.status === 'freeze' || item.status === 'rejected_deviation' ? 'frozen' : 'paused'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="font-mono text-xs text-foreground truncate">{item.description}</p>
-                    <p className="font-mono text-[10px] text-avaira-dim">{new Date(item.timestamp).toLocaleString()}</p>
+                    <p className="font-mono text-[10px] text-avaira-dim">{dateLabel(item.timestamp, { withTime: true })}</p>
                   </div>
                   <span className="font-mono text-[10px] px-2 py-0.5 border" style={{ borderColor: (STATUS_COLORS[item.status] || DARK.hairlineStrong) + '50', color: STATUS_COLORS[item.status] || DARK.textMuted }}>
-                    {item.type.toUpperCase()}
+                    {text(item.type, "event").toUpperCase()}
                   </span>
                 </div>
               ))}
@@ -222,7 +235,7 @@ export default function Dashboard() {
                   <div key={d.name}>
                     <div className="flex justify-between font-mono text-xs mb-1">
                       <span className="text-avaira-muted">{d.name}</span>
-                      <span className="text-foreground">${d.value.toFixed(2)}</span>
+                      <span className="text-foreground">${num(d.value, 2)}</span>
                     </div>
                     <div className="h-1.5 bg-avaira-surface">
                       <div className="h-full transition-all duration-500" style={{

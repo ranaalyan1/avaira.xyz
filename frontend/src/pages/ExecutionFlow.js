@@ -5,8 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 
 import { API } from "@/lib/api";
+import ConsoleError from "@/components/ConsoleError";
 
 import { DARK } from "@/lib/palette";
+import { num, text, timeLabel, dateLabel, toNumber } from "@/lib/format";
 
 const STEP_ICONS = { request_submitted: Send, risk_validation: Shield, execution: Zap, fee_deducted: Clock };
 
@@ -25,14 +27,14 @@ const TimelineStep = ({ step, isLast }) => {
         <div className="flex items-center gap-2">
           <Icon size={12} strokeWidth={1.5} className={isComplete ? 'text-avaira-primary' : isFailed ? 'text-avaira-red' : 'text-avaira-muted'} />
           <span className="font-mono text-xs uppercase tracking-wider" style={{ color: isComplete ? DARK.accent : isFailed ? DARK.danger : DARK.textMuted }}>
-            {step.step.replace(/_/g, ' ')}
+            {text(step.step, "step").replace(/_/g, ' ')}
           </span>
           <span className={`font-mono text-[10px] px-1.5 py-0.5 border ${isComplete ? 'border-green-500/30 text-green-400' : isFailed ? 'border-red-500/30 text-red-400' : 'border-white/10 text-avaira-muted'}`}>
             {step.status}
           </span>
         </div>
         <p className="font-mono text-[11px] text-avaira-muted mt-1">{step.details}</p>
-        <p className="font-mono text-[9px] text-avaira-dim mt-0.5">{new Date(step.timestamp).toLocaleString()}</p>
+        <p className="font-mono text-[9px] text-avaira-dim mt-0.5">{dateLabel(step.timestamp, { withTime: true })}</p>
       </div>
     </div>
   );
@@ -42,9 +44,13 @@ export default function ExecutionFlow() {
   const [executions, setExecutions] = useState([]);
   const [agents, setAgents] = useState([]);
   const [selectedExec, setSelectedExec] = useState(null);
-  const [searchTerm, setSearch_term] = useState("");
+  const [loadError, setLoadError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ agent_id: "", action: "swap", target_address: "", value: "1.0", chain_id: "43113" });
+  /* Robinhood Chain testnet — the chain every deployment in this repository
+   * lives on. The form used to default to 43113 (Avalanche Fuji), so a request
+   * created from the console named a chain the contracts are not on. */
+  const [form, setForm] = useState({ agent_id: "", action: "swap", target_address: "", value: "1.0", chain_id: "46630" });
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,7 +60,8 @@ export default function ExecutionFlow() {
       ]);
       setExecutions(execRes.data);
       setAgents(agentRes.data);
-    } catch (e) { console.error(e); }
+      setLoadError(null);
+    } catch (e) { setLoadError(e?.message || "The executions API did not respond."); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -78,9 +85,10 @@ export default function ExecutionFlow() {
     }
   };
 
-  const statusColor = (s) => {
-    if (s === 'completed') return DARK.success;
-    if (s.includes('rejected') || s.includes('invalid')) return DARK.danger;
+  const statusColor = (status) => {
+    const value = text(status, "");
+    if (value === 'completed') return DARK.success;
+    if (value.includes('rejected') || value.includes('invalid')) return DARK.danger;
     return DARK.warning;
   };
 
@@ -97,7 +105,7 @@ export default function ExecutionFlow() {
               type="text"
               placeholder="Search audit IDs..."
               value={searchTerm}
-              onChange={(e) => setSearch_term(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-black border border-avaira-border px-3 py-1.5 font-mono text-[10px] text-white w-48 outline-none focus:border-avaira-primary"
             />
           </div>
@@ -173,6 +181,13 @@ export default function ExecutionFlow() {
         </div>
       </div>
 
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Execution data unavailable"
+        testid="executions-error"
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Execution List */}
         <div className="lg:col-span-2 cyber-card p-4">
@@ -199,18 +214,18 @@ export default function ExecutionFlow() {
                   {executions.filter(ex => !searchTerm || (ex.audit_id && ex.audit_id.toLowerCase().includes(searchTerm.toLowerCase()))).map(ex => (
                     <tr key={ex.id} className="cursor-pointer" onClick={() => setSelectedExec(ex)} data-testid={`exec-row-${ex.id}`}>
                       <td className="text-foreground">
-                        {ex.agent_name}
+                        {text(ex.agent_name, "unknown")}
                         {ex.audit_id && <span className="block text-[8px] text-avaira-dim">{ex.audit_id}</span>}
                       </td>
-                      <td className="uppercase text-avaira-primary">{ex.action}</td>
-                      <td className="text-right text-foreground">{ex.value.toFixed(4)}</td>
-                      <td className="text-right text-avaira-yellow">{ex.fee_deducted.toFixed(6)}</td>
+                      <td className="uppercase text-avaira-primary">{text(ex.action, "—")}</td>
+                      <td className="text-right text-foreground">{num(ex.value, 4)}</td>
+                      <td className="text-right text-avaira-yellow">{num(ex.fee_deducted, 6)}</td>
                       <td>
                         <span className="font-mono text-[10px] px-1.5 py-0.5 border" style={{ borderColor: statusColor(ex.status) + '40', color: statusColor(ex.status) }}>
-                          {ex.status.replace(/_/g, ' ').toUpperCase()}
+                          {text(ex.status, "unknown").replace(/_/g, ' ').toUpperCase()}
                         </span>
                       </td>
-                      <td className="text-avaira-dim">{new Date(ex.created_at).toLocaleTimeString()}</td>
+                      <td className="text-avaira-dim">{timeLabel(ex.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -225,9 +240,9 @@ export default function ExecutionFlow() {
           {selectedExec ? (
             <div data-testid="execution-timeline">
               <div className="mb-3 pb-3 border-b border-avaira-border">
-                <p className="font-mono text-xs text-avaira-primary">{selectedExec.agent_name}</p>
+                <p className="font-mono text-xs text-avaira-primary">{text(selectedExec.agent_name, "unknown")}</p>
                 <div className="flex justify-between items-center mt-1">
-                   <p className="font-mono text-[10px] text-avaira-muted">ID: {selectedExec.id.slice(0, 8)}...</p>
+                   <p className="font-mono text-[10px] text-avaira-muted">ID: {text(selectedExec.id, "—").slice(0, 8)}...</p>
                    {selectedExec.audit_id && (
                      <span className="font-mono text-[9px] px-1.5 py-0.5 bg-avaira-primary/10 text-avaira-primary border border-avaira-primary/20">
                         {selectedExec.audit_id}
@@ -236,8 +251,8 @@ export default function ExecutionFlow() {
                 </div>
               </div>
               <div className="relative">
-                {selectedExec.lifecycle.map((step, i) => (
-                  <TimelineStep key={i} step={step} isLast={i === selectedExec.lifecycle.length - 1} />
+                {(selectedExec.lifecycle || []).map((step, i) => (
+                  <TimelineStep key={i} step={step} isLast={i === (selectedExec.lifecycle || []).length - 1} />
                 ))}
               </div>
 

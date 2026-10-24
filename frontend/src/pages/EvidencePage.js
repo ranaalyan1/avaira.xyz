@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { usePageTitle } from "@/lib/pageTitle";
 import { EvidenceTable } from "@/components/marketing/SpecBlocks";
 import {
   ConsoleActions,
@@ -40,6 +41,7 @@ const REPORTS = [
 export default function EvidencePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  usePageTitle("Evidence ledger — AVAIRA");
   const reveal = useReveal({ step: 60 });
 
   const goToConsole = () => {

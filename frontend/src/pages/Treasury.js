@@ -5,7 +5,9 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis
 
 import { API } from "@/lib/api";
 
+import ConsoleError from "@/components/ConsoleError";
 import { DARK } from "@/lib/palette";
+import { num, text, timeLabel, toNumber } from "@/lib/format";
 
 const STREAM_ICONS = { zap: Zap, shield: Shield, scissors: Scissors, database: Database };
 const STREAM_COLORS = [DARK.info, DARK.violet, DARK.warning, DARK.success];
@@ -26,6 +28,7 @@ export default function Treasury() {
   const [transactions, setTransactions] = useState([]);
   const [revenueStreams, setRevenueStreams] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -38,8 +41,9 @@ export default function Treasury() {
       setStats(statsRes.data);
       setTransactions(txRes.data);
       setRevenueStreams(revRes.data);
+      setLoadError(null);
     } catch (e) {
-      console.error(e);
+      setLoadError(e?.message || "The treasury API did not respond.");
     } finally {
       setLoading(false);
     }
@@ -48,16 +52,18 @@ export default function Treasury() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const splitData = stats ? [
-    { name: 'TrustPool (75%)', value: stats.total_trust_pool },
-    { name: 'Revenue (25%)', value: stats.total_protocol_revenue }
+    { name: 'TrustPool (75%)', value: toNumber(stats.total_trust_pool) || 0 },
+    { name: 'Revenue (25%)', value: toNumber(stats.total_protocol_revenue) || 0 }
   ].filter(d => d.value > 0) : [];
 
   const barData = transactions.slice(0, 20).reverse().map((tx, i) => ({
     name: `TX${i + 1}`,
-    trust: tx.trust_pool_share,
-    revenue: tx.protocol_revenue_share,
-    total: tx.total_fee
+    trust: toNumber(tx.trust_pool_share) || 0,
+    revenue: toNumber(tx.protocol_revenue_share) || 0,
+    total: toNumber(tx.total_fee) || 0
   }));
+
+  const streams = Array.isArray(revenueStreams?.streams) ? revenueStreams.streams : [];
 
   return (
     <div className="page-shell animate-slide-in" data-testid="treasury-page">
@@ -70,6 +76,13 @@ export default function Treasury() {
           <RefreshCw size={14} />
         </button>
       </div>
+
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Treasury data unavailable"
+        testid="treasury-error"
+      />
 
       {loading && !stats ? (
         <div className="cyber-card p-12 text-center mb-6">
@@ -87,7 +100,7 @@ export default function Treasury() {
               <Wallet size={14} className="text-avaira-primary" strokeWidth={1.5} />
               <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Total Fees</span>
             </div>
-            <p className="font-heading font-bold text-xl text-avaira-primary" data-testid="total-fees-value">{stats.total_fees.toFixed(6)}</p>
+            <p className="font-heading font-bold text-xl text-avaira-primary" data-testid="total-fees-value">{num(stats.total_fees, 6)}</p>
             <p className="font-mono text-[10px] text-avaira-dim">USD</p>
           </div>
           <div className="cyber-card p-4">
@@ -95,7 +108,7 @@ export default function Treasury() {
               <TrendingUp size={14} className="text-avaira-primary" strokeWidth={1.5} />
               <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Trust Pool</span>
             </div>
-            <p className="font-heading font-bold text-xl text-avaira-green" data-testid="trust-pool-value">{stats.total_trust_pool.toFixed(6)}</p>
+            <p className="font-heading font-bold text-xl text-avaira-green" data-testid="trust-pool-value">{num(stats.total_trust_pool, 6)}</p>
             <p className="font-mono text-[10px] text-avaira-dim">75% of fees</p>
           </div>
           <div className="cyber-card p-4">
@@ -103,7 +116,7 @@ export default function Treasury() {
               <ArrowUpRight size={14} className="text-avaira-purple" strokeWidth={1.5} />
               <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Protocol Revenue</span>
             </div>
-            <p className="font-heading font-bold text-xl text-avaira-purple" data-testid="revenue-value">{stats.total_protocol_revenue.toFixed(6)}</p>
+            <p className="font-heading font-bold text-xl text-avaira-purple" data-testid="revenue-value">{num(stats.total_protocol_revenue, 6)}</p>
             <p className="font-mono text-[10px] text-avaira-dim">25% of fees</p>
           </div>
           <div className="cyber-card p-4">
@@ -111,18 +124,18 @@ export default function Treasury() {
               <Wallet size={14} className="text-avaira-yellow" strokeWidth={1.5} />
               <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Transactions</span>
             </div>
-            <p className="font-heading font-bold text-xl text-foreground" data-testid="tx-count-value">{stats.transaction_count}</p>
+            <p className="font-heading font-bold text-xl text-foreground" data-testid="tx-count-value">{text(stats.transaction_count, "0")}</p>
             <p className="font-mono text-[10px] text-avaira-dim">fee events</p>
           </div>
         </div>
       )}
 
       {/* 4 Revenue Streams */}
-      {revenueStreams && (
+      {revenueStreams && streams.length > 0 && (
         <div className="mb-6">
           <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">Revenue Streams</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {revenueStreams.streams.map((stream, i) => {
+            {streams.map((stream, i) => {
               const Icon = STREAM_ICONS[stream.icon] || Zap;
               return (
                 <div key={stream.name} className="cyber-card p-4" data-testid={`stream-${i}`}>
@@ -130,16 +143,16 @@ export default function Treasury() {
                     <Icon size={14} style={{ color: STREAM_COLORS[i] }} strokeWidth={1.5} />
                     <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">{stream.name}</span>
                   </div>
-                  <p className="font-heading font-bold text-lg" style={{ color: STREAM_COLORS[i] }}>${stream.amount.toFixed(2)}</p>
+                  <p className="font-heading font-bold text-lg" style={{ color: STREAM_COLORS[i] }}>${num(stream.amount, 2)}</p>
                   <p className="font-mono text-[10px] text-avaira-dim mt-1">{stream.description}</p>
-                  <p className="font-mono text-[10px] text-avaira-dim mt-0.5">{stream.transactions} events</p>
+                  <p className="font-mono text-[10px] text-avaira-dim mt-0.5">{text(stream.transactions, "0")} events</p>
                 </div>
               );
             })}
           </div>
           <div className="mt-3 p-3 border border-avaira-primary/20 bg-avaira-primary/5">
             <span className="font-mono text-xs text-avaira-muted">TOTAL PROTOCOL REVENUE: </span>
-            <span className="font-heading font-bold text-lg text-avaira-primary">${revenueStreams.total_revenue.toFixed(2)}</span>
+            <span className="font-heading font-bold text-lg text-avaira-primary">${num(revenueStreams.total_revenue, 2)}</span>
           </div>
         </div>
       )}
@@ -206,12 +219,12 @@ export default function Treasury() {
               {transactions.slice(0, 15).map(tx => (
                 <div key={tx.id} className="p-2 hover:bg-white/[0.02] border-b border-white/[0.04]" data-testid={`treasury-tx-${tx.id}`}>
                   <div className="flex justify-between font-mono text-xs">
-                    <span className="text-foreground">${tx.total_fee.toFixed(2)}</span>
-                    <span className="text-avaira-dim">{new Date(tx.timestamp).toLocaleTimeString()}</span>
+                    <span className="text-foreground">${num(tx.total_fee, 2)}</span>
+                    <span className="text-avaira-dim">{timeLabel(tx.timestamp)}</span>
                   </div>
                   <div className="flex gap-4 mt-0.5 font-mono text-[10px]">
-                    <span className="text-avaira-primary">TP: {tx.trust_pool_share.toFixed(6)}</span>
-                    <span className="text-avaira-purple">REV: {tx.protocol_revenue_share.toFixed(6)}</span>
+                    <span className="text-avaira-primary">TP: {num(tx.trust_pool_share, 6)}</span>
+                    <span className="text-avaira-purple">REV: {num(tx.protocol_revenue_share, 6)}</span>
                   </div>
                 </div>
               ))}

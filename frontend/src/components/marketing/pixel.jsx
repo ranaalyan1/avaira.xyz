@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Github, LogIn } from "lucide-react";
+import { useAuth } from "@/App";
 
 /* ── brand type ───────────────────────────────────────────────────────────
  * Doto (dot matrix) for display, IBM Plex Mono for machine text. Loaded from
@@ -90,6 +91,9 @@ const NAV = [
 export function PixelNav({ onLaunch, onSignIn }) {
   const navRef = useRef(null);
   const { pathname } = useLocation();
+  /* A signed-in visitor should not be offered "Sign in" again — that button
+   * sent them back to a login page they had already cleared. */
+  const { user } = useAuth();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -137,11 +141,13 @@ export function PixelNav({ onLaunch, onSignIn }) {
         </div>
 
         <div className="px-nav-actions">
-          <button className="px-btn px-btn-quiet" data-testid="nav-login-btn" onClick={onSignIn}>
-            Sign in
-          </button>
+          {!user && (
+            <button className="px-btn px-btn-quiet" data-testid="nav-login-btn" onClick={onSignIn}>
+              Sign in
+            </button>
+          )}
           <button className="px-btn px-btn-accent" data-testid="launch-protocol-btn" onClick={onLaunch}>
-            Console
+            {user ? "Open console" : "Console"}
           </button>
         </div>
       </div>
@@ -183,8 +189,8 @@ export function PixelFooter() {
           <nav className="px-footer-col" aria-label="Build">
             <h4>Build</h4>
             <Link to="/docs#sdk">Integration</Link>
-            <Link to="/#pillars">Pillars</Link>
-            <Link to="/#faq">Questions</Link>
+            <Link to="/#boundary">The boundary</Link>
+            <Link to="/#cta">Get started</Link>
             <Link to="/sdk">Console docs</Link>
             <a href="https://github.com/ranaalyan1/avaira.xyz">Source</a>
             <a href="https://github.com/ranaalyan1/avaira.xyz/blob/main/SECURITY.md">Security</a>

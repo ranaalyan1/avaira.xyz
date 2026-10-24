@@ -75,7 +75,7 @@ export default function Landing() {
     return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
   }, []);
 
-  const go = (path) => () => navigate(user ? path : "/login");
+  const go = (path) => () => navigate(user ? path : `/login?redirect=${encodeURIComponent(path)}`);
   const { openAuth } = useAuthUI();
 
   return (
@@ -189,7 +189,7 @@ export default function Landing() {
         </section>
 
         {/* Act VIII — the invitation */}
-        <section className="imm-cta" data-testid="cta-section" aria-labelledby="cta-h">
+        <section className="imm-cta" id="cta" data-testid="cta-section" aria-labelledby="cta-h">
           <div>
             <p className="imm-label">Act 08 <em>— the invitation</em></p>
             <h2 className="imm-h2" id="cta-h" style={{ margin: "0.8rem 0 1rem" }} data-reveal>

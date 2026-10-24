@@ -426,14 +426,25 @@ All metrics are measured from real Foundry test and benchmark runs stored in [`c
 
 ---
 
-## 🖥️ Protocol Control Center & Dashboard
+## 🖥️ Frontend: Immersive Landing + Protocol Console
 
-The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/)) provides real-time visibility into agent telemetry, risk envelopes, execution lifecycles, underwriter pools, slashing events, and reputation heatmaps.
+The [`frontend/`](frontend/) serves two surfaces at **https://avaira-pi.vercel.app**:
 
-**Design system.** The marketing site is an immersive, scroll-driven experience: a 3D **execution boundary** scene built with React Three Fiber and GSAP ScrollTrigger (near-black canvas, one neon-lime accent, Space Grotesk display type, pill CTAs) that walks a request through the gate in narrative acts; three.js code-splits out of the entry bundle so text paints first. The operator console behind the login keeps the dense mono-telemetry language. The brand mark (`assets/logo.png`) drives the favicon, the boot loader and the nav. See `frontend/src/pages/landing-immersive.css` for the tokens and `frontend/src/pages/design.smoke.test.js` for the executable half of the contract.
+- **The immersive landing** (public) — a scroll-driven narrative built on **React Three Fiber + GSAP ScrollTrigger**. A 3D *execution boundary* (three machined hex apertures around a faceted intent core, a neon permit beam, a travelling scan ring) walks a request through the gate in narrative acts: thesis, anatomy of a refusal, the nine codes, evidence, decision, invitation. Near-black canvas, one neon-lime accent, Space Grotesk display type, pill CTAs with a breathing glow, count-up evidence receipts. three.js code-splits out of the entry bundle so text paints first, the WebGL scene pauses offscreen, and `prefers-reduced-motion` gets a static pose.
+- **The protocol console** (behind [Dynamic](https://dynamic.xyz) wallet/email auth) — React 19 + Tailwind CSS + Radix UI, real-time agent telemetry, risk envelopes, execution lifecycles, underwriter pools, slashing events, and reputation heatmaps.
 
-> **These screenshots are stale** — they show the previous dark/cyberpunk styling, captured before the
-> dual-theme redesign. Regenerate them with one command:
+**Brand.** The protocol mark ([`assets/logo.png`](assets/logo.png)) drives the favicon, the boot loader, the nav/footer wordmarks and the social share cards — pure black, crisp white, one neon accent. First paint is a brand-matched loader, so there is no unstyled or legacy flash while the bundle streams. See `frontend/src/pages/landing-immersive.css` for the tokens and `frontend/src/pages/design.smoke.test.js` for the executable half of the contract.
+
+<div align="center">
+
+<img src="verification/landing-immersive.png" alt="The Avaira landing: 3D execution boundary scene, near-black with neon lime accents" width="90%" />
+
+<sub>The immersive landing at avaira-pi.vercel.app — the execution boundary walks a request through the gate.</sub>
+
+</div>
+
+> **Console screenshots** — captured against a local build with no backend attached, so the protected
+> routes show the sign-in screen (the truthful picture of a deploy with no API). Regenerate any time:
 >
 > ```bash
 > make screenshots              # public routes: landing, gate, score, evidence, docs
@@ -441,8 +452,6 @@ The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/))
 > ```
 >
 > It builds `frontend/`, serves it on `:3000`, captures with Playwright and tears the server down.
-> The console routes sit behind `ProtectedRoute`, so without a backend those two captures show the
-> sign-in page — which is the truthful picture of a deploy with no API attached.
 
 <div align="center">
 <table>
@@ -513,7 +522,10 @@ avaira.xyz/
 │   ├── core/                         # OPA Rego rules, local SLM, TEE identity, ZK vault, SlashEngine
 │   ├── grpc_server/                  # Rust tonic gRPC Trust Engine server
 │   └── server.py                     # REST API endpoints, telemetry & simulation engine
-├── frontend/                         # React 19 + Tailwind CSS + Shadcn/Radix UI Protocol Dashboard
+├── frontend/                         # CRA frontend: R3F/GSAP immersive landing + Tailwind/Radix console
+│   ├── public/logo.png               # Brand mark (favicon, boot loader, share cards)
+│   └── src/pages/Landing.js          # Scroll-driven landing (GateScene lazy-loaded)
+
 ├── deployments/                      # Canonical chain deployment manifests
 ├── docs/                             # Architecture Decision Records & Cognitive OS v5 specification
 └── tests/                            # Python unit, integration & Cognitive OS test suites

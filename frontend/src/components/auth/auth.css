@@ -144,3 +144,53 @@
 @media (prefers-reduced-motion: reduce) {
   .imm-auth-card { animation: none; }
 }
+
+/* social provider row */
+.imm-auth-social {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.55rem;
+}
+.imm-auth-sbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #050505;
+  border: 1px solid rgba(244, 244, 239, 0.18);
+  color: rgba(244, 244, 239, 0.82);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  padding: 0.62rem 0.5rem;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+.imm-auth-sbtn:hover { border-color: #ccff00; color: #ccff00; }
+.imm-auth-sbtn:disabled { opacity: 0.55; cursor: wait; }
+.imm-auth-sbtn svg { font-size: 1rem; flex: none; }
+
+/* last odd button (X) spans full width */
+.imm-auth-social .imm-auth-sbtn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.imm-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+}
+.imm-auth-divider::before,
+.imm-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(244, 244, 239, 0.12);
+}
+.imm-auth-divider span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 239, 0.38);
+  white-space: nowrap;
+}

@@ -1,123 +1,121 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Unplug } from "lucide-react";
-import { API } from "@/lib/api";
+import { useEffect, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/App";
-import { animate, stagger, useEnterAnimation, usePointerTilt } from "@/lib/motion";
-import { Glyph } from "@/components/marketing/pixel";
+import { useReveal } from "@/lib/motion";
+import { useAuthUI } from "@/components/auth/AuthUIContext";
+import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/shell";
+
+/* Sign-in, in the immersive language. The heavy Dynamic SDK stays at the app
+ * root; this page only opens the shared sign-in modal (and auto-opens it once
+ * for a visitor who landed here on purpose). The old backend-OAuth buttons are
+ * gone: there is no session backend on this deployment, so they could only
+ * redirect into the SPA's own 404. */
 
 export default function Login() {
   const navigate = useNavigate();
-  // Set by App when /api/* comes back as the SPA's own HTML, which means this
-  // deployment has no backend: the OAuth buttons below would navigate to
-  // `${API}/auth/...`, be answered by the SPA rewrite, and dump the visitor on
-  // the app's 404 page. Say what is actually wrong instead.
-  const { backendMisconfigured } = useAuth();
-  const cardTilt = usePointerTilt({ max: 3 });
-  const entrance = useEnterAnimation((_scope, root) => {
-    animate(root.querySelectorAll("[data-login-enter]"), {
-      opacity: [0, 1],
-      translateY: [12, 0],
-      duration: 520,
-      delay: stagger(80),
-      ease: "out(3)",
-    });
-  });
+  const [params] = useSearchParams();
+  const redirect = params.get("redirect") || "/dashboard";
+  const { user } = useAuth();
+  const { openAuth, walletAddress, authConfigured } = useAuthUI();
+  const revealRoot = useReveal();
+  const opened = useRef(false);
+  usePageTitle("Sign in — AVAIRA");
 
-  const handleGoogleLogin = () => {
-    if (backendMisconfigured) return;
-    const redirectUrl = window.location.origin + "/dashboard";
-    window.location.href = `${API}/auth/google/login?redirect=${encodeURIComponent(redirectUrl)}`;
-  };
+  /* a visitor who chose /login gets the modal without an extra click */
+  useEffect(() => {
+    if (opened.current || !authConfigured || walletAddress) return;
+    opened.current = true;
+    const t = setTimeout(openAuth, 650);
+    return () => clearTimeout(t);
+  }, [authConfigured, walletAddress, openAuth]);
 
-  const handleXLogin = () => {
-    if (backendMisconfigured) return;
-    const redirectUrl = window.location.origin + "/dashboard";
-    window.location.href = `${API}/auth/x/login?redirect=${encodeURIComponent(redirectUrl)}`;
-  };
+  /* signed in through the modal → straight to where they were going */
+  useEffect(() => {
+    if (walletAddress) navigate(redirect, { replace: true });
+  }, [walletAddress, navigate, redirect]);
+
+  const signedIn = Boolean(user || walletAddress);
 
   return (
-    <div className="px-site px-login" data-testid="login-page">
-      <div className="px-login-art" aria-hidden="true">
-        <img src="/art/hero.png" alt="A pixel corridor of four gates with a lit card travelling between them" />
-      </div>
-      <span className="px-login-veil" aria-hidden="true" />
+    <div className="landing-immersive" data-testid="login-page" ref={revealRoot}>
+      <ImmersiveNav />
 
-      <div className="px-login-inner" ref={entrance}>
-        <div className="px-login-head" data-login-enter>
-          <span className="px-login-mark" data-testid="login-logo" aria-hidden="true">
-            <Glyph seed="AVAIRA" size={40} solid />
-          </span>
-          <p className="px-label">Execution control protocol</p>
-          <h1 className="px-dot px-h2" style={{ marginTop: "0.75rem" }}>
-            Sign in to Avaira
+      <main className="imm-login">
+        <div className="imm-login-copy">
+          <p className="imm-label">Session <em>— identity</em></p>
+          <h1 data-testid="login-logo">
+            Sign in to the gate<span style={{ color: "var(--imm-lime)" }}>.</span>
           </h1>
+          <p className="imm-body">
+            One identity opens the console: an email, a wallet, or a social
+            login. Every session mints an embedded wallet that holds the
+            ERC-8004 identity your agents act under — the bond, the score and
+            the permits all hang off it.
+          </p>
+          <ul className="imm-meta">
+            <li>Dynamic</li>
+            <li>embedded wallet</li>
+            <li>chain 46630</li>
+          </ul>
         </div>
 
-        <div className="px-login-card" ref={cardTilt}>
-          <div className="px-login-card-head">
-            <span className="px-label">Session</span>
-            <span className="px-mono px-mute">cookie + on-chain mirror</span>
-          </div>
+        <div className="imm-login-card" data-testid="login-card">
+          <p className="imm-label">{signedIn ? "Signed in" : "Sign in"}</p>
+          <h2>{signedIn ? "Identity active" : "Email or social, one tap"}</h2>
 
-          <div className="px-login-card-body" data-testid="login-card" data-login-enter>
-            <button
-              data-testid="google-login-btn"
-              onClick={handleGoogleLogin}
-              disabled={backendMisconfigured}
-              className="px-btn px-btn-lg"
-              style={{ width: "100%" }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-              </svg>
-              Continue with Google
-            </button>
-
-            <button
-              data-testid="x-login-btn"
-              onClick={handleXLogin}
-              disabled={backendMisconfigured}
-              className="px-btn px-btn-lg"
-              style={{ width: "100%" }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              Continue with X
-            </button>
-
-            {backendMisconfigured && (
-              <div className="px-login-note" data-testid="login-backend-missing">
-                <Unplug size={13} strokeWidth={2} className="px-accent-text" />
-                <p className="px-mono px-mute">
-                  No API is attached to this deployment, so sign-in cannot complete. Point
-                  REACT_APP_BACKEND_URL at the Avaira backend and redeploy to enable it.
+          {signedIn ? (
+            <div className="imm-login-row">
+              <p className="imm-body" style={{ margin: 0 }}>
+                {walletAddress
+                  ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`
+                  : "session active"}
+              </p>
+              <button
+                type="button"
+                className="imm-btn imm-btn-primary"
+                onClick={() => navigate(redirect)}
+              >
+                Open the console
+              </button>
+            </div>
+          ) : (
+            <div className="imm-login-row">
+              <button
+                type="button"
+                className="imm-btn imm-btn-primary"
+                data-testid="login-signin-btn"
+                onClick={openAuth}
+              >
+                Continue with email or social
+              </button>
+              {!authConfigured && (
+                <p className="imm-login-note" data-testid="login-auth-missing">
+                  <i>//</i>
+                  <span>
+                    REACT_APP_DYNAMIC_ENV_ID is not set on this deployment, so
+                    sign-in cannot complete. Point it at your Dynamic environment
+                    and redeploy to enable it.
+                  </span>
                 </p>
-              </div>
-            )}
-
-            <div className="px-login-note">
-              <ShieldCheck size={13} strokeWidth={2} className="px-accent-text" />
-              <p className="px-mono px-mute">
-                Sessions are cookie-based and mirrored on-chain. By signing in you agree to the Avaira
-                Protocol terms.
+              )}
+              <p className="imm-login-note">
+                <i>//</i>
+                <span>
+                  Sessions are handled by Dynamic; an embedded wallet is created
+                  per identity. By signing in you agree to the Avaira Protocol
+                  terms.
+                </span>
               </p>
             </div>
-          </div>
-        </div>
+          )}
 
-        <button
-          data-testid="back-home-btn"
-          onClick={() => navigate("/")}
-          className="px-btn px-btn-quiet px-login-back"
-        >
-          <ArrowLeft size={14} strokeWidth={2} />
-          Back to home
-        </button>
-      </div>
+          <Link className="imm-login-back" data-testid="back-home-btn" to="/">
+            ← Back to the boundary
+          </Link>
+        </div>
+      </main>
+
+      <ImmersiveFoot />
     </div>
   );
 }

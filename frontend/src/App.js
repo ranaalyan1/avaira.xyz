@@ -1,6 +1,6 @@
 import "@/App.css";
 import "@/pixel.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
 import axios from "axios";
 import Layout from "@/components/Layout";
@@ -39,11 +39,13 @@ export const useAuth = () => useContext(AuthContext);
 
 function ProtectedRoute({ children }) {
   const { user, authReady } = useAuth();
+  const location = useLocation();
   if (!authReady) {
     return <div className="p-6 font-mono text-xs text-avaira-muted">Checking session...</div>;
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    /* keep where they were going: /login sends them back after sign-in */
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }
   return children;
 }
@@ -93,6 +95,15 @@ function App() {
   const [backendMisconfigured, setBackendMisconfigured] = useState(false);
 
   const checkAuth = useCallback(async () => {
+    /* no REACT_APP_BACKEND_URL means no session backend is attached to this
+       deployment: the probe below would be answered by the SPA rewrite and
+       could never return a session. Skip it instead of firing a doomed
+       request on every page load. */
+    if (!process.env.REACT_APP_BACKEND_URL) {
+      setBackendMisconfigured(true);
+      setAuthReady(true);
+      return;
+    }
     try {
       const res = await axios.get(`${API}/auth/me`, { withCredentials: true });
       // Only a user *object* counts as signed in. On a deployment where the SPA

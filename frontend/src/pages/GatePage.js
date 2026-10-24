@@ -1,23 +1,11 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
-import GatePipeline from "@/components/marketing/GatePipeline";
-import GateTrace from "@/components/marketing/GateTrace";
-import { RefusalTable } from "@/components/marketing/SpecBlocks";
-import {
-  ConsoleActions,
-  Glyph,
-  PageHead,
-  PixelFooter,
-  PixelFrame,
-  PixelNav,
-  SectionIndex,
-  SpecRows,
-} from "@/components/marketing/pixel";
+import { Link } from "react-router-dom";
+import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/shell";
 
-/* The mechanism, end to end. Every label on this page is a name that exists in
- * the contracts: the plane order mirrors IAvaira.sol, the trace fields mirror
- * what the validator records, and the refusal list is the GateReason enum. */
+/* Gate mechanics — the mechanism end to end, in the immersive language. Every
+ * label is a name that exists in the contracts: the plane order mirrors
+ * IAvaira.sol, the trace fields mirror what the validator records, and the
+ * refusal list is the GateReason enum. */
 
 const PLANES = [
   ["01", "Envelope", "The agent declares a spend ceiling and the actions it is allowed to take. Nothing about the envelope is advisory: it is the value every later stage is compared against."],
@@ -51,153 +39,240 @@ const MOATS = [
   },
 ];
 
+const STAGES = ["intent", "envelope", "policy", "prover", "permit"];
+
 const TRACE_FIELDS = [
   ["stage", "envelope, policy, prover, permit — in that order, no skipping"],
   ["ms", "elapsed at that stage, recorded per intent"],
   ["payload", "the value the stage read, and the code it returned when it refused"],
 ];
 
-export default function GatePage() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const reveal = useReveal({ step: 60 });
+const REASONS = [
+  ["ALLOWED", "agent cleared to execute"],
+  ["UNKNOWN_AGENT", "no identity is registered for this address"],
+  ["BANNED", "terminal ban, no path back"],
+  ["SUSPENDED", "slashed into suspension, waiting on collateral"],
+  ["STAKE_TOO_LOW", "bond sits below the minimum the envelope requires"],
+  ["SCORE_TOO_LOW", "Avaira Score under the floor the mission demands"],
+  ["INTENT_NOT_COMMITTED", "no commitment matches the intent hash"],
+  ["INTENT_EXPIRED", "the envelope deadline has passed"],
+  ["INTENT_ALREADY_EXECUTED", "the intent is single use and was already attested"],
+  ["ENVELOPE_MISMATCH", "the stored envelope does not match the committed hash"],
+];
 
-  const goToConsole = () => {
-    if (user) {
-      navigate("/dashboard");
-      return;
-    }
-    navigate("/login?redirect=/dashboard");
-  };
+const PERMITTED_TRACE = {
+  title: "Permitted",
+  intent: "search.market_data",
+  lines: [
+    ["intent", "0.0", "agent atlas-04 declares 12.40 USD to api.marketdata"],
+    ["envelope", "0.3", "max_spend_usd 50.00, within bounds"],
+    ["policy", "0.5", "shield_rules.rego allows search"],
+    ["prover", "0.9", "interval [0.00, 50.00] proves SAFE"],
+    ["permit", "1.2", "EIP-712 signed, single use, deadline set"],
+  ],
+  verdict: "executed with a permit attached",
+};
+
+const REFUSED_TRACE = {
+  title: "Refused",
+  intent: "transfer.usdc",
+  lines: [
+    ["intent", "0.0", "agent orion-11 declares 840.00 USD to 0x9B95"],
+    ["envelope", "0.4", "max_spend_usd 50.00, declared 840.00"],
+    ["policy", "0.6", "shield_rules.rego refuses transfer"],
+    ["prover", "skip", "not reached, gate closed"],
+    ["permit", "none", "ENVELOPE_MISMATCH"],
+  ],
+  verdict: "execute_fn was never called",
+};
+
+function TracePanel({ trace, testid, allowed }) {
+  return (
+    <figure className="imm-verdict imm-trace" data-testid={testid} data-reveal>
+      <div className="imm-trace-head">
+        <strong>{trace.title}</strong>
+        <span>intent {trace.intent}</span>
+      </div>
+      {trace.lines.map(([stage, ms, detail]) => (
+        <div className="imm-trace-row" data-gate={stage} key={stage}>
+          <span>{stage}</span>
+          <span>{ms}</span>
+          <span>{detail}</span>
+        </div>
+      ))}
+      <p className="imm-trace-verdict" style={{ color: allowed ? "var(--imm-lime)" : "var(--imm-paper)" }}>
+        {trace.verdict}
+      </p>
+    </figure>
+  );
+}
+
+export default function GatePage() {
+  const revealRoot = useReveal();
+  usePageTitle("Gate mechanics — AVAIRA");
 
   return (
-    <div className="px-site" ref={reveal}>
-      <PixelNav onLaunch={goToConsole} onSignIn={() => navigate("/login")} />
+    <div className="landing-immersive" data-testid="gate-page" ref={revealRoot}>
+      <ImmersiveNav />
 
-      <PageHead
-        n="02"
-        section="The gate"
-        title="Four planes, passed in order."
-        lede="Before any money moves the intent has to clear an envelope, a policy file, a prover and a permit. The gate either returns a signed permit or the code that says why it could not — there is no third outcome and no review queue."
-        art="/art/hero.png"
-        artGif="/art/hero.gif"
-        artAlt="A pixel corridor of four gates with a lit card travelling between them"
-        meta={
-          <>
-            <span>Pre-execution</span>
-            <span data-sep>/</span>
-            <span>Nine refusal codes</span>
-            <span data-sep>/</span>
-            <span>Deterministic</span>
-          </>
-        }
-      />
+      <header className="imm-pagehead">
+        <p className="imm-label">02 <em>— the gate</em></p>
+        <h1 data-reveal>Four planes, passed in order.</h1>
+        <p className="imm-lead" data-reveal>
+          Before any money moves the intent has to clear an envelope, a policy
+          file, a prover and a permit. The gate either returns a signed permit or
+          the code that says why it could not — there is no third outcome and no
+          review queue.
+        </p>
+        <ul className="imm-meta">
+          <li>pre-execution</li>
+          <li>nine refusal codes</li>
+          <li>deterministic</li>
+        </ul>
+      </header>
 
-      {/* ── the corridor ─────────────────────────────────────── */}
-      <section className="px-section px-section-flat" id="execution" data-testid="how-it-works-section">
-        <div className="px-wrap">
-          <SectionIndex n="02.1" label="Corridor" />
-          <h2 className="px-dot px-h2" style={{ marginTop: "1.25rem", maxWidth: "26ch" }} data-reveal>
-            Two intents, the same gate.
-          </h2>
-          <p className="px-body" style={{ marginTop: "1rem", maxWidth: "62ch" }} data-reveal>
-            Scroll and the intent travels the corridor. The first passes all four planes and leaves with
-            a permit. The second carries a value the envelope never allowed and stops at the policy
-            plane, short of the prover.
-          </p>
-
-          <div className="px-grid-2" style={{ marginTop: "2.5rem", border: 0, background: "transparent", gap: "1rem" }}>
-            <GatePipeline variant="permit" testid="gate-pipeline-permit" />
-            <GatePipeline variant="refuse" testid="gate-pipeline-refuse" />
+      <main className="imm-page">
+        {/* ── the corridor ─────────────────────────────────────── */}
+        <section className="imm-act" id="execution" data-testid="how-it-works-section" aria-labelledby="gate-corridor-h">
+          <div className="imm-act-head">
+            <p className="imm-label">02.1 <em>— corridor</em></p>
+            <h2 className="imm-h2" id="gate-corridor-h" data-reveal>
+              Two intents, the same gate.
+            </h2>
+            <p className="imm-lead" data-reveal>
+              The first intent passes all four planes and leaves with a permit.
+              The second carries a value the envelope never allowed and stops at
+              the policy plane, short of the prover.
+            </p>
           </div>
 
-          <div style={{ marginTop: "1.5rem" }}>
-            <GateTrace />
-          </div>
-        </div>
-      </section>
-
-      {/* ── steps ────────────────────────────────────────────── */}
-      <section className="px-section">
-        <div className="px-wrap">
-          <SectionIndex n="02.2" label="Sequence" />
-          <div className="px-steps" style={{ marginTop: "2.5rem" }}>
-            {PLANES.map(([n, term, body]) => (
-              <article className={`px-step px-step-${n}`} data-testid={`step-${n}`} data-reveal key={term}>
-                <h3 className="px-step-term">{term}</h3>
-                <p className="px-body" style={{ fontSize: "0.875rem" }}>{body}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="px-split" style={{ marginTop: "3rem" }}>
-            <SpecRows title="What a trace records" rows={TRACE_FIELDS} />
-            <PixelFrame
-              src="/art/permit.png"
-              gif="/art/permit.gif"
-              alt="A pixel permit card with a signature drawn across it and a seal stamped into the corner"
-              ratio="16 / 9"
-              caption="Permit"
-              hint="EIP-712 / single use"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── refusals ─────────────────────────────────────────── */}
-      <section className="px-section" id="moats" data-testid="moats-section">
-        <div className="px-wrap">
-          <SectionIndex n="02.3" label="Refusals" />
-          <h2 className="px-dot px-h2" style={{ marginTop: "1.25rem", maxWidth: "26ch" }} data-reveal>
-            Nine ways the gate says no, and one way it says yes.
-          </h2>
-          <p className="px-body" style={{ marginTop: "1rem", maxWidth: "62ch" }} data-reveal>
-            A refusal is a value, not an outage. Every blocked intent carries the code for why, which
-            makes the reason machine-readable for the agent, the operator and the underwriter at the
-            same time.
-          </p>
-
-          <div className="px-split" style={{ marginTop: "2.5rem" }}>
-            <RefusalTable />
-            <div className="px-stack">
-              {MOATS.map(({ term, body }, index) => (
-                <article className="px-cell" data-testid={`moat-${index}`} data-reveal key={term}>
-                  <div className="px-cell-head">
-                    <h3 className="px-h3">{term}</h3>
-                    <Glyph seed={`MOAT ${index}`} size={18} solid />
-                  </div>
-                  <p className="px-body" style={{ fontSize: "0.875rem" }}>{body}</p>
-                </article>
-              ))}
+          <div className="imm-decision">
+            <div className="imm-verdict imm-allowed" data-testid="gate-pipeline-permit" data-reveal>
+              <p className="imm-label" style={{ color: "var(--imm-lime)" }}>Intent 01</p>
+              <h3>search.market_data — 12.40 USD</h3>
+              <p className="imm-body">
+                Declared inside the envelope, allowed by policy, proven safe by
+                interval arithmetic.
+              </p>
+              <div className="imm-stages">
+                {STAGES.map((s) => (
+                  <span className="imm-stage imm-stage-on" key={s}>{s}</span>
+                ))}
+              </div>
+              <p className="imm-trace-verdict" style={{ color: "var(--imm-lime)" }}>
+                ALLOWED — four planes cleared, permit signed, execution proceeds
+                under the declared ceiling
+              </p>
+            </div>
+            <div className="imm-verdict imm-rejected" data-testid="gate-pipeline-refuse" data-reveal>
+              <p className="imm-label">Intent 02</p>
+              <h3>transfer.usdc — 840.00 USD</h3>
+              <p className="imm-body">
+                The declared value never matched the committed envelope, so the
+                corridor closes at the policy plane.
+              </p>
+              <div className="imm-stages">
+                <span className="imm-stage imm-stage-on">intent</span>
+                <span className="imm-stage imm-stage-on">envelope</span>
+                <span className="imm-stage imm-stage-on">policy</span>
+                <span className="imm-stage imm-stage-off">prover</span>
+                <span className="imm-stage imm-stage-off">permit</span>
+              </div>
+              <p className="imm-trace-verdict">
+                ENVELOPE_MISMATCH — the stored envelope never matched the
+                committed hash, so the prover and the permit were not reached
+              </p>
             </div>
           </div>
 
-          <PixelFrame
-            src="/art/refuse.png"
-            gif="/art/refuse.gif"
-            alt="A pixel corridor stopped by a red barrier lowered across it"
-            ratio="21 / 9"
-            caption="ENVELOPE_MISMATCH"
-            hint="GateReason / 9"
-            className="px-mt-lg"
-          />
-        </div>
-      </section>
+          <div className="imm-tracegrid">
+            <TracePanel trace={PERMITTED_TRACE} testid="trace-permitted" allowed />
+            <TracePanel trace={REFUSED_TRACE} testid="trace-refused" />
+          </div>
+        </section>
 
-      {/* ── close ────────────────────────────────────────────── */}
-      <section className="px-section">
-        <div className="px-wrap">
-          <h2 className="px-dot px-h2" style={{ maxWidth: "24ch" }} data-reveal>
-            Watch it happen on a live intent.
-          </h2>
-          <p className="px-body" style={{ marginTop: "1rem", maxWidth: "52ch" }} data-reveal>
-            The console runs the same gate against the API and shows each stage as it resolves.
-          </p>
-          <ConsoleActions onLaunch={goToConsole} />
-        </div>
-      </section>
+        {/* ── the planes ───────────────────────────────────────── */}
+        <section className="imm-act" aria-labelledby="gate-planes-h">
+          <div className="imm-act-head">
+            <p className="imm-label">02.2 <em>— sequence</em></p>
+            <h2 className="imm-h2" id="gate-planes-h" data-reveal>
+              Six named steps, none of them optional.
+            </h2>
+          </div>
+          <div className="imm-pipeline">
+            {PLANES.map(([no, term, body]) => (
+              <div key={no} className="imm-step" data-testid={`step-${no}`} data-reveal>
+                <p className="imm-step-no">{`Plane ${no}`}</p>
+                <h3>{term}</h3>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
 
-      <PixelFooter />
+          <div className="imm-specgrid" style={{ marginTop: "2.6rem" }} data-reveal>
+            {TRACE_FIELDS.map(([term, body]) => (
+              <div className="imm-spec" key={term}>
+                <h4>{term}</h4>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── refusals ─────────────────────────────────────────── */}
+        <section className="imm-act" id="moats" data-testid="moats-section" aria-labelledby="gate-refusal-h">
+          <div className="imm-act-head">
+            <p className="imm-label">02.3 <em>— refusals</em></p>
+            <h2 className="imm-h2" id="gate-refusal-h" data-reveal>
+              Nine ways the gate says no, and one way it says yes.
+            </h2>
+            <p className="imm-lead" data-reveal>
+              A refusal is a value, not an outage. Every blocked intent carries
+              the code for why, which makes the reason machine-readable for the
+              agent, the operator and the underwriter at the same time.
+            </p>
+          </div>
+
+          <div className="imm-table" data-testid="refusal-table" data-reveal>
+            {REASONS.map(([code, meaning], i) => (
+              <div className="imm-layer" key={code} data-reveal>
+                <span className="imm-layer-no">{String(i + 1).padStart(2, "0")}</span>
+                <span className={code === "ALLOWED" ? "imm-layer-on" : undefined}>{code}</span>
+                <span>{meaning}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="imm-receipts" style={{ marginTop: "2.6rem" }}>
+            {MOATS.map(({ term, body }, index) => (
+              <div className="imm-receipt" data-testid={`moat-${index}`} key={term} data-reveal>
+                <h3>{term}</h3>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── close ────────────────────────────────────────────── */}
+        <section className="imm-cta" data-testid="cta-section" aria-labelledby="gate-next-h">
+          <div>
+            <p className="imm-label">Next <em>— see it live</em></p>
+            <h2 className="imm-h2" id="gate-next-h" style={{ margin: "0.8rem 0 1rem" }} data-reveal>
+              The contracts are deployed. Read the evidence.
+            </h2>
+          </div>
+          <div className="imm-cta-actions" data-reveal>
+            <Link className="imm-btn imm-btn-primary" to="/evidence">
+              See the evidence
+            </Link>
+            <Link className="imm-btn imm-btn-ghost" to="/execution">
+              The lifecycle
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      <ImmersiveFoot />
     </div>
   );
 }

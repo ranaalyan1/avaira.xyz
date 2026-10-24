@@ -101,7 +101,7 @@ const PAGES = [
     ],
     ids: ["execution", "moats"],
     copy: ["ENVELOPE_MISMATCH", "INTENT_ALREADY_EXECUTED", 'data-gate="envelope"', 'data-gate="permit"'],
-    art: ["/art/permit.png", "/art/refuse.png"],
+    art: [],
   },
   {
     name: "score",
@@ -109,7 +109,7 @@ const PAGES = [
     testids: ["score-weights", "score-ladder", "penalty-ladder", "revenue-section"],
     ids: ["revenue", "penalty"],
     copy: ["orion-11 87.4", "85 / 10 / 5", "150% collateral terms"],
-    art: ["/art/score.png", "/art/burn.png", "/art/network.png"],
+    art: [],
   },
   {
     name: "ledger",
@@ -117,7 +117,7 @@ const PAGES = [
     testids: ["evidence-table"],
     ids: ["top"],
     copy: ["make verify", "make redteam", "verification/reports/parity.json", "audit/specs"],
-    art: ["/art/ledger.png"],
+    art: [],
   },
   {
     name: "docs",
@@ -128,6 +128,8 @@ const PAGES = [
     art: [],
   },
 ];
+
+const ART_DIR_PUBLIC = path.resolve(__dirname, "..", "..", "public");
 
 describe("marketing site", () => {
   it.each(PAGES)("$name keeps its hooks", ({ element, testids }) => {
@@ -155,10 +157,10 @@ describe("marketing site", () => {
     for (const needle of copy) has(html, needle);
   });
 
-  it.each(PAGES)("$name is in its declared scope", ({ name, element }) => {
-    // the narrative routes are immersive; the reference pages keep the pixel scope.
-    if (["home", "execution", "evidence"].includes(name)) has(render(element), 'class="landing-immersive"');
-    else has(render(element), 'class="px-site"');
+  it.each(PAGES)("$name is in its declared scope", ({ element }) => {
+    // every marketing route is immersive now — the pixel scope survives only
+    // inside the console (Layout), which is a different surface.
+    has(render(element), 'class="landing-immersive"');
   });
 
   // The page carries no pricing surface and no revenue projections: a figure a
@@ -187,43 +189,15 @@ describe("marketing site", () => {
     }
   });
 
-  /* The plates are animated: each one ships as a still for the markup and a
-   * looping sequence for the client. Both files have to exist on disk, the pair
-   * has to be the same scene, and the still is what a crawler reads — so a
-   * missing gif is a broken page, not a cosmetic problem. */
-  const ART_DIR = path.resolve(__dirname, "..", "..", "public", "art");
-  const stills = [];
-  const motions = [];
-
-  it.each(PAGES)("$name pairs every plate with an existing sequence", ({ element }) => {
-    for (const match of render(element).matchAll(/<img[^>]*data-px-art=""[^>]*>/g)) {
-      const tag = match[0];
-      const still = /data-px-still="([^"]*)"/.exec(tag);
-      const motion = /data-px-motion="([^"]*)"/.exec(tag);
-      expect(still).not.toBeNull();
-      expect(fs.existsSync(path.join(ART_DIR, path.basename(still[1])))).toBe(true);
-      if (motion) {
-        expect(motion[1]).toMatch(/\.gif$/);
-        expect(fs.existsSync(path.join(ART_DIR, path.basename(motion[1])))).toBe(true);
-        motions.push(motion[1]);
-      } else {
-        stills.push(still[1]);
-      }
+  /* The pixel art plates were retired with the pixel pages: the immersive
+   * routes render 3D scenes and typographic figures instead of GIF plates.
+   * What stays enforced is that any image a page ships is described. */
+  it.each(PAGES)("$name describes every image it ships", ({ element }) => {
+    for (const match of render(element).matchAll(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"/g)) {
+      expect(match[1].length).toBeGreaterThan(0);
+      expect(match[2].length).toBeGreaterThan(0);
+      expect(fs.existsSync(path.join(ART_DIR_PUBLIC, path.basename(match[1])))).toBe(true);
     }
-  });
-
-  it("animates the art the marketing site is built around", () => {
-    const unique = [...new Set(motions)];
-    for (const gif of ["/art/score.gif", "/art/permit.gif", "/art/refuse.gif"]) {
-      expect(unique).toContain(gif);
-    }
-    expect(unique.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it("still ships a static frame for every plate", () => {
-    // the login plate is the one deliberate exception: it is background, and it
-    // is described anyway. The immersive home renders 3D, not plates.
-    expect(stills.length + motions.length).toBeGreaterThanOrEqual(8);
   });
 
   // Count-ups, corridor stages and the score marker all render their final
@@ -245,33 +219,31 @@ describe("marketing site", () => {
 /* ── the two light pages ────────────────────────────────────────────────── */
 
 describe("sign-in and 404", () => {
-  it("login keeps its hooks in the pixel scope", () => {
+  it("login keeps its hooks in the immersive scope", () => {
     const html = render(<Login />);
-    has(html, 'class="px-site px-login"');
-    for (const id of ["login-page", "login-logo", "login-card", "google-login-btn", "x-login-btn", "back-home-btn"]) {
+    has(html, 'class="landing-immersive"');
+    for (const id of ["login-page", "login-logo", "login-card", "back-home-btn"]) {
       has(html, `data-testid="${id}"`);
     }
   });
 
-  it("explains a deployment with no backend instead of dead-ending", () => {
-    // Without a backend, `${API}/auth/google/login` is answered by the SPA
-    // rewrite, so the visitor lands on the app's own 404 page with no clue why.
-    const html = render(<Login />, { ...ANON, backendMisconfigured: true });
-
-    has(html, 'data-testid="login-backend-missing"');
-    has(html, "REACT_APP_BACKEND_URL");
-    // The buttons stay where they are (a crawler and a reader both see them), but
-    // they cannot fire a redirect that can only 404.
-    has(html, 'data-testid="google-login-btn"');
-    has(html, 'data-testid="x-login-btn"');
-    expect(html).toContain("disabled");
+  it("offers the Dynamic flow instead of dead backend OAuth buttons", () => {
+    // the old page pointed at `${API}/auth/google/login`, which the SPA rewrite
+    // answers with the app's own 404. The new page opens the shared sign-in
+    // modal; the trigger hook is what the rest of the site binds to.
+    const html = render(<Login />);
+    has(html, 'data-testid="login-signin-btn"');
+    expect(html).not.toContain("google");
+    expect(html).not.toContain("auth/x/login");
   });
 
-  it("says nothing about a missing backend when the API is reachable", () => {
+  it("explains an unconfigured Dynamic environment instead of dead-ending", () => {
+    // jest runs without REACT_APP_DYNAMIC_ENV_ID, so the default auth-UI
+    // context reports authConfigured=false — the same state a bare deployment
+    // would ship.
     const html = render(<Login />);
-
-    expect(html).not.toContain('data-testid="login-backend-missing"');
-    expect(html).not.toContain("disabled");
+    has(html, 'data-testid="login-auth-missing"');
+    has(html, "REACT_APP_DYNAMIC_ENV_ID");
   });
 
   it("not found", () => {
@@ -280,8 +252,6 @@ describe("sign-in and 404", () => {
     has(html, "No route here");
   });
 });
-
-/* ── the console ────────────────────────────────────────────────────────── */
 
 describe("console shell", () => {
   const html = render(<Layout />);

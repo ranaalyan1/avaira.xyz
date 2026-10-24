@@ -1,62 +1,41 @@
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { ArrowUpRight, Github } from "lucide-react";
-import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
-import {
-  ConsoleActions,
-  Glyph,
-  PageHead,
-  PixelFooter,
-  PixelNav,
-  SectionIndex,
-  SpecRows,
-} from "@/components/marketing/pixel";
+import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/shell";
 
-/* Integration. The snippets are the ones the repository ships; the envelope
- * fields are the fields the gate actually reads. */
+/* Integration, in the immersive language. The snippets are the ones the
+ * repository ships; the envelope fields are the fields the gate actually
+ * reads. */
 
-const TS_SNIPPET = `import { Avaira, loadDeployment } from "@avaira/sdk";
+const TS_SNIPPET = [
+  ['import { Avaira, loadDeployment } from "@avaira/sdk";'],
+  ["const deployment = loadDeployment(46630);           // Robinhood Testnet"],
+  ["const avaira = new Avaira({ chainId: 46630, rpcUrl: \"https://rpc.testnet.chain.robinhood.com\", privateKey: process.env.AGENT_PRIVATE_KEY, contracts: deployment });"],
+  ["// The callback only runs when the gate returns a signed permit."],
+  ["const result = await avaira.run("],
+  ["  1n,                                               // ERC-8004 agentId"],
+  ['  { task: "reconcile-invoice", invoiceId: "INV-4821" },'],
+  ["  async ({ audit }) => { return reconcile(\"INV-4821\", { onStep: audit }); },"],
+  [");"],
+  ['console.log(result.status);                         // "completed" | "blocked"'],
+];
 
-const deployment = loadDeployment(46630);           // Robinhood Testnet
+const PY_SNIPPET = [
+  ["from avaira import AvairaClient, AvairaConfig, RiskEnvelope"],
+  ["envelope = RiskEnvelope(max_spend_usd=50.0, allowed_actions=[\"search\"])"],
+  ['avaira = AvairaClient(AvairaConfig(api_key="...", risk_envelope=envelope))'],
+  ["# execute_fn is only reached when the gate returns a signed permit"],
+  ["result = await avaira.run("],
+  ['    task="Search for YC news",'],
+  ['    execute_fn=lambda: my_agent.run("Search for YC news"),'],
+  [")"],
+  ['print(result["status"])   # "completed" or "blocked"'],
+];
 
-const avaira = new Avaira({
-  chainId: 46630,
-  rpcUrl: "https://rpc.testnet.chain.robinhood.com",
-  privateKey: process.env.AGENT_PRIVATE_KEY,
-  contracts: deployment,
-});
-
-// The callback only runs when the gate returns a signed permit.
-const result = await avaira.run(
-  1n,                                               // ERC-8004 agentId
-  { task: "reconcile-invoice", invoiceId: "INV-4821" },
-  async ({ audit }) => {
-    return reconcile("INV-4821", { onStep: audit });
-  },
-);
-
-console.log(result.status);                         // "completed" | "blocked"`;
-
-const PY_SNIPPET = `from avaira import AvairaClient, AvairaConfig, RiskEnvelope
-
-envelope = RiskEnvelope(max_spend_usd=50.0, allowed_actions=["search"])
-avaira = AvairaClient(AvairaConfig(api_key="...", risk_envelope=envelope))
-
-# execute_fn is only reached when the gate returns a signed permit
-result = await avaira.run(
-    task="Search for YC news",
-    execute_fn=lambda: my_agent.run("Search for YC news"),
-)
-
-print(result["status"])   # "completed" or "blocked"`;
-
-const FRAMEWORK_SNIPPET = `from avaira_shield import AvairaClient, protect_agent, protect_crew
-
-client = AvairaClient(api_key="avk_live_...", agent_id="agent-alpha")
-
-protected_executor = protect_agent(langchain_executor, client)  # wraps every tool
-protected_crew     = protect_crew(crewai_instance, client)      # wraps every agent`;
+const FRAMEWORK_SNIPPET = [
+  ["from avaira_shield import AvairaClient, protect_agent, protect_crew"],
+  ['client = AvairaClient(api_key="avk_live_...", agent_id="agent-alpha")'],
+  ["protected_executor = protect_agent(langchain_executor, client)  // wraps every tool"],  // py comment → use #
+  ["protected_crew     = protect_crew(crewai_instance, client)      # wraps every agent"],
+];
 
 const ENVELOPE = [
   ["max_spend_usd", "ceiling for a single intent; the value the prover checks against"],
@@ -81,125 +60,152 @@ const SURFACES = [
   ["Self-hosting", "API, policy engine, database and the anchoring job from the compose file"],
 ];
 
-export default function DocsPage() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const reveal = useReveal({ step: 60 });
+function Window({ title, lines, testid }) {
+  return (
+    <div className="imm-window" data-testid={testid} data-reveal>
+      <div className="imm-window-bar">
+        <i /><i /><i />
+        <span>{title}</span>
+      </div>
+      <pre>
+        {lines.map((l, i) => (
+          <span key={i}>
+            {l[0]}
+            {"\n"}
+          </span>
+        ))}
+      </pre>
+    </div>
+  );
+}
 
-  const goToConsole = () => {
-    if (user) {
-      navigate("/dashboard");
-      return;
-    }
-    navigate("/login?redirect=/dashboard");
-  };
+export default function DocsPage() {
+  const revealRoot = useReveal();
+  usePageTitle("Docs and SDK — AVAIRA");
 
   return (
-    <div className="px-site" ref={reveal}>
-      <PixelNav onLaunch={goToConsole} onSignIn={() => navigate("/login")} />
+    <div className="landing-immersive" data-testid="docs-page" ref={revealRoot}>
+      <ImmersiveNav />
 
-      <PageHead
-        n="05"
-        section="Integration"
-        title="One call around the function that spends."
-        lede="The integration point is the callable, not the model. Wrap the function that performs the action and the gate handles the envelope, the policy check, the permit and the audit entry."
-        meta={
-          <>
-            <span>TypeScript</span>
-            <span data-sep>/</span>
-            <span>Python</span>
-            <span data-sep>/</span>
-            <span>Rust</span>
-            <span data-sep>/</span>
-            <span>LangChain + CrewAI</span>
-          </>
-        }
-      />
+      <header className="imm-pagehead" id="top">
+        <p className="imm-label">05 <em>— integration</em></p>
+        <h1 data-reveal>One call around the function that spends.</h1>
+        <p className="imm-lead" data-reveal>
+          The integration point is the callable, not the model. Wrap the
+          function that performs the action and the gate handles the envelope,
+          the policy check, the permit and the audit entry.
+        </p>
+        <ul className="imm-meta">
+          <li>typescript</li>
+          <li>python</li>
+          <li>rust</li>
+          <li>langchain + crewai</li>
+        </ul>
+      </header>
 
-      <section className="px-section px-section-flat" id="sdk" data-testid="sdk-section">
-        <div className="px-wrap">
-          <SectionIndex n="05.1" label="Wrap the call" />
-          <h2 className="px-dot px-h2" style={{ marginTop: "1.25rem", maxWidth: "26ch" }} data-reveal>
-            The callback decides nothing. The gate does.
-          </h2>
-          <p className="px-body" style={{ marginTop: "1rem", maxWidth: "62ch" }} data-reveal>
-            Declare the envelope once, then hand the agent's action to the SDK. If the gate refuses, the
-            callback never runs and the result carries the refusal code instead.
-          </p>
-
-          <div className="px-grid-2" style={{ marginTop: "2.5rem" }}>
-            <div className="mk-window" data-reveal>
-              <div className="mk-window-bar">
-                <Glyph seed="TS" size={13} />
-                <span className="mk-window-title">agent.ts</span>
-              </div>
-              <pre className="mk-code">{TS_SNIPPET}</pre>
-            </div>
-
-            <div className="mk-window" data-reveal>
-              <div className="mk-window-bar">
-                <Glyph seed="PY" size={13} />
-                <span className="mk-window-title">agent.py</span>
-              </div>
-              <pre className="mk-code">{PY_SNIPPET}</pre>
-            </div>
+      <main className="imm-page">
+        {/* ── sdk ─────────────────────────────────────────────── */}
+        <section className="imm-act" id="sdk" data-testid="sdk-section" aria-labelledby="docs-sdk-h">
+          <div className="imm-act-head">
+            <p className="imm-label">05.1 <em>— wrap the call</em></p>
+            <h2 className="imm-h2" id="docs-sdk-h" data-reveal>
+              The callback decides nothing. The gate does.
+            </h2>
+            <p className="imm-lead" data-reveal>
+              Declare the envelope once, then hand the agent's action to the
+              SDK. If the gate refuses, the callback never runs and the result
+              carries the refusal code instead.
+            </p>
           </div>
-        </div>
-      </section>
 
-      <section className="px-section">
-        <div className="px-wrap">
-          <SectionIndex n="05.2" label="Frameworks" />
-          <div className="px-split" style={{ marginTop: "2rem" }}>
-            <div>
-              <h2 className="px-dot px-h2" style={{ maxWidth: "22ch" }} data-reveal>
-                Two lines for LangChain and CrewAI.
-              </h2>
-              <p className="px-body" style={{ marginTop: "1rem", maxWidth: "48ch" }} data-reveal>
-                The wrappers intercept tool and agent calls and route them through the same gate, so a
-                framework integration does not need its own policy path.
+          <div className="imm-tracegrid">
+            <Window title="@avaira/sdk — typescript" lines={TS_SNIPPET} testid="docs-ts-window" />
+            <Window title="avaira — python" lines={PY_SNIPPET} testid="docs-py-window" />
+          </div>
+
+          <div className="imm-specgrid" style={{ marginTop: "2.4rem" }}>
+            {ENVELOPE.map(([term, body]) => (
+              <div className="imm-spec" key={term}>
+                <h4>{term}</h4>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── frameworks ──────────────────────────────────────── */}
+        <section className="imm-act" id="frameworks" aria-labelledby="docs-frameworks-h">
+          <div className="imm-act-head">
+            <p className="imm-label">05.2 <em>— frameworks</em></p>
+            <h2 className="imm-h2" id="docs-frameworks-h" data-reveal>
+              Shields for LangChain and CrewAI.
+            </h2>
+          </div>
+
+          <div className="imm-tracegrid">
+            <Window title="avaira_shield" lines={FRAMEWORK_SNIPPET} testid="docs-framework-window" />
+            <div className="imm-verdict imm-trace" data-reveal>
+              <div className="imm-trace-head">
+                <strong>What gets wrapped</strong>
+              </div>
+              <p className="imm-body" style={{ fontSize: "0.85rem" }}>
+                <code>protect_agent</code> wraps every tool call a LangChain
+                executor makes; <code>protect_crew</code> wraps every agent in
+                a CrewAI instance. Spend attempts outside the envelope return
+                the refusal code to the framework instead of executing.
               </p>
-              <SpecRows title="Envelope" rows={ENVELOPE} />
+              <p className="imm-trace-verdict" style={{ color: "var(--imm-lime)" }}>
+                EIP-712 permit or a named refusal — nothing in between
+              </p>
             </div>
+          </div>
+        </section>
 
-            <div className="mk-window" data-reveal>
-              <div className="mk-window-bar">
-                <Glyph seed="SHIELD" size={13} />
-                <span className="mk-window-title">shield.py</span>
+        {/* ── standards and surfaces ──────────────────────────── */}
+        <section className="imm-act" id="standards" aria-labelledby="docs-standards-h">
+          <div className="imm-act-head">
+            <p className="imm-label">05.3 <em>— standards</em></p>
+            <h2 className="imm-h2" id="docs-standards-h" data-reveal>
+              Built on named standards, not private plumbing.
+            </h2>
+          </div>
+
+          <div className="imm-specgrid">
+            {STANDARDS.map(([term, body]) => (
+              <div className="imm-spec" key={term}>
+                <h4>{term}</h4>
+                <p>{body}</p>
               </div>
-              <pre className="mk-code">{FRAMEWORK_SNIPPET}</pre>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-section">
-        <div className="px-wrap">
-          <SectionIndex n="05.3" label="Standards and surfaces" />
-          <div className="px-split" style={{ marginTop: "2rem" }}>
-            <SpecRows title="Standards" rows={STANDARDS} />
-            <SpecRows title="Where to go next" rows={SURFACES} />
+            ))}
           </div>
 
-          <div className="px-hero-actions" style={{ marginTop: "2.5rem" }}>
-            <a className="px-btn px-btn-accent" href="https://github.com/ranaalyan1/avaira.xyz" target="_blank" rel="noreferrer">
-              <Github size={14} strokeWidth={2} />
-              Read the source
+          <div className="imm-specgrid" style={{ marginTop: "1.2rem" }}>
+            {SURFACES.map(([term, body]) => (
+              <div className="imm-spec" key={term}>
+                <h4>{term}</h4>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── close ─────────────────────────────────────────────── */}
+        <section className="imm-cta" data-testid="cta-section" aria-labelledby="docs-next-h">
+          <div>
+            <p className="imm-label">Next <em>— start</em></p>
+            <h2 className="imm-h2" id="docs-next-h" style={{ margin: "0.8rem 0 1rem" }} data-reveal>
+              The SDK is published. The gate is deployed.
+            </h2>
+          </div>
+          <div className="imm-cta-actions" data-reveal>
+            <a className="imm-btn imm-btn-primary" href="https://github.com/ranaalyan1/avaira.xyz" target="_blank" rel="noreferrer">
+              Read the repository
             </a>
-            <Link className="px-btn" to="/sdk">
-              Console SDK reference
-              <ArrowUpRight size={14} strokeWidth={2} />
-            </Link>
-            <Link className="px-btn px-btn-quiet" to="/evidence">
-              Verification numbers
-            </Link>
           </div>
+        </section>
+      </main>
 
-          <ConsoleActions onLaunch={goToConsole} />
-        </div>
-      </section>
-
-      <PixelFooter />
+      <ImmersiveFoot />
     </div>
   );
 }

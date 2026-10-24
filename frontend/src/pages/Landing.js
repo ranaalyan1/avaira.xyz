@@ -2,7 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/App";
 import { useReveal, prefersReducedMotion } from "@/lib/motion";
-import BoundaryScene from "@/components/marketing/immersive/BoundaryScene";
+import { lazy, Suspense } from "react";
+/* the 3D gate code-splits with the R3F/three payload — the page text paints
+ * first, jest static renders never evaluate WebGL, and a failed chunk load
+ * degrades to the CSS poster below. */
+const GateScene = lazy(() => import("@/components/marketing/immersive/GateScene"));
+const GatePoster = () => (
+  <div className="imm-canvas-poster" aria-hidden="true"><span /><span /><span /></div>
+);
+import { useHeroChoreo } from "@/lib/choreo";
 import "./landing-immersive.css";
 import { useAuthUI } from "@/components/auth/AuthUIContext";
 
@@ -78,12 +86,24 @@ export default function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const revealRoot = useReveal();
+  useHeroChoreo(revealRoot);
 
   /* scrollytelling state — refs, not re-renders, at 60fps */
   const trackRef = useRef(null);
   const explodedRef = useRef(0);
   const barRef = useRef(null);
   const [layer, setLayer] = useState(0);
+  /* the sticky Act III scene mounts only on >=768px viewports — on small
+   * screens the layers read in sequence as plain cards (see the CSS) */
+  const [wideBoundary, setWideBoundary] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(min-width: 768px)").matches);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const on = () => setWideBoundary(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -108,6 +128,35 @@ export default function Landing() {
     onScroll();
     return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
   }, []);
+
+  /* Robinhood-style stat callouts: the receipt numbers count up once when the
+   * row scrolls into view. Reduced motion and SSR render the final values. */
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
+    const root = revealRoot.current;
+    const row = root?.querySelector(".imm-receipts");
+    if (!row || prefersReducedMotion()) return undefined;
+    let cancelled = false;
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      row.querySelectorAll("strong").forEach((el) => {
+        const final = parseInt(el.textContent, 10);
+        if (!Number.isFinite(final)) return;
+        const start = performance.now();
+        const tick = (now) => {
+          if (cancelled) return;
+          const t = Math.min(1, (now - start) / 1400);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = String(Math.round(eased * final));
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.4 });
+    io.observe(row);
+    return () => { cancelled = true; io.disconnect(); };
+  }, [revealRoot]);
 
   const go = (path) => () => navigate(user ? path : "/login");
   const { openAuth, walletAddress } = useAuthUI();
@@ -156,7 +205,9 @@ export default function Landing() {
       {/* Act I — the thesis */}
       <header className="imm-hero" id="hero" data-testid="hero-section">
         <div className="imm-hero-canvas">
-          <BoundaryScene exploded={0} />
+          <Suspense fallback={<GatePoster />}>
+            <GateScene progressRef={explodedRef} />
+          </Suspense>
         </div>
         <div className="imm-hud" aria-hidden="true">
           <p>ROBINHOOD TESTNET <b>/ CHAIN 46630</b></p>
@@ -199,7 +250,7 @@ export default function Landing() {
       <div className="imm-ticker" aria-label="The nine refusal codes" role="img">
         <div className="imm-ticker-track">
           {[0, 1].map((dup) => (
-            <span key={dup}>
+            <span key={dup} aria-hidden={dup === 1 ? "true" : undefined}>
               {REFUSALS.map((code) => (
                 <span key={code}>{code} <i>{"//"}</i> </span>
               ))}
@@ -235,7 +286,11 @@ export default function Landing() {
         <div className="imm-boundary-track" ref={trackRef}>
           <div className="imm-boundary-stage">
             <div className="imm-boundary-canvas">
-              <BoundaryScene exploded={explodedRef} />
+              {wideBoundary ? (
+                <Suspense fallback={<GatePoster />}>
+                  <GateScene progressRef={explodedRef} />
+                </Suspense>
+              ) : null}
             </div>
             <div className="imm-progress" aria-hidden="true">
               {LAYERS.map((l, i) => (

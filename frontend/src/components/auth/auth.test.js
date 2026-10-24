@@ -1,11 +1,11 @@
 /**
- * Dynamic auth modal — smoke tests.
+ * Dynamic auth modal — smoke tests (configured state).
  *
  * House style: renderToStaticMarkup, matching design.smoke.test.js.
- * The SDK modules are virtual-mocked (jest cannot resolve their
- * subpath exports); these tests pin our UI contract: closed by
- * default, the unconfigured fallback state, and the testids the
- * chrome tests rely on.
+ * frontend/.env sets REACT_APP_DYNAMIC_ENV_ID, so in jest the modal
+ * takes its live shape: social providers + email OTP. The fallback
+ * card is covered in auth-unconfigured.test.js. SDK modules are
+ * virtual-mocked (jest cannot resolve their subpath exports).
  */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -20,6 +20,7 @@ jest.mock("@dynamic-labs-sdk/react-hooks", () => ({
   useSendEmailOTP: () => ({ mutate: () => {}, data: undefined, isPending: false, error: null }),
   useVerifyOTP: () => ({ mutate: () => {}, isPending: false, error: null }),
   useLogout: () => ({ mutate: () => {} }),
+  useSignInWithSocialPopUp: () => ({ mutate: () => {}, isPending: false, error: null }),
 }), { virtual: true });
 jest.mock("@dynamic-labs-sdk/client/waas", () => ({
   createWaasWalletAccounts: jest.fn(),
@@ -37,23 +38,28 @@ function chrome(initialOpen) {
   );
 }
 
-describe("the sign-in modal", () => {
+const PROVIDERS = ["google", "apple", "discord", "github", "twitter"];
+
+describe("the sign-in modal (configured)", () => {
   it("renders nothing when closed", () => {
     expect(chrome(false)).not.toContain("auth-modal");
   });
 
-  it("shows the unconfigured state when no environment ID is set", () => {
+  it("offers every social provider above the email flow", () => {
     const html = chrome(true);
     expect(html).toContain('data-testid="auth-modal"');
-    expect(html).toContain('data-testid="auth-unconfigured"');
-    expect(html).toContain("REACT_APP_DYNAMIC_ENV_ID");
-    expect(html).toContain("Dynamic console");
+    expect(html).toContain('data-testid="auth-social-row"');
+    PROVIDERS.forEach((p) => {
+      expect(html).toContain(`data-testid="auth-social-${p}"`);
+    });
+    expect(html).toContain("or with email");
+    // the unconfigured card must NOT render
+    expect(html).not.toContain("auth-unconfigured");
   });
 
-  it("keeps the flow inaccessible until the environment ID exists", () => {
-    // without configuration the OTP form must NOT render (no email input)
+  it("shows the email OTP form once configured", () => {
     const html = chrome(true);
-    expect(html).not.toContain('id="auth-email"');
-    expect(html).not.toContain('id="auth-code"');
+    expect(html).toContain('id="auth-email"');
+    expect(html).toContain('data-testid="auth-send-code"');
   });
 });

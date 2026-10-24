@@ -21,7 +21,15 @@ import Underwriters from "@/pages/Underwriters";
 import SDKDocs from "@/pages/SDKDocs";
 import HardeningReport from "@/pages/HardeningReport";
 import { Toaster } from "sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthUIProvider, useAuthUI } from "@/components/auth/AuthUIContext";
+import { DynamicAuthLayer } from "@/components/auth/DynamicAuth";
+import SignInModal from "@/components/auth/SignInModal";
+import { dynamicAuthConfigured } from "@/dynamicClient";
 import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
+
+/* one query client for the whole app (required by the Dynamic hooks) */
+const queryClient = new QueryClient();
 
 export const AuthContext = createContext({ user: null, authReady: false, setUser: () => {}, logout: () => {}, backendMisconfigured: false });
 export const useAuth = () => useContext(AuthContext);
@@ -102,7 +110,25 @@ function App() {
   };
 
   return (
-    <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
+    <AuthUIProvider>
+      <AppShell user={user} setUser={setUser} authReady={authReady} logout={logout} backendMisconfigured={backendMisconfigured} />
+    </AuthUIProvider>
+  );
+}
+
+/* The tree under the light auth-UI context: TanStack Query outside,
+   DynamicProvider (when configured) inside, modal + routes last. */
+function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
+  const { setDynamicAuth } = useAuthUI();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DynamicAuthLayer onState={setDynamicAuth}>
+        {/* full email-OTP + embedded-wallet flow when configured */}
+        <SignInModal />
+      </DynamicAuthLayer>
+      {/* graceful shell when the environment ID is missing */}
+      {!dynamicAuthConfigured && <SignInModal />}
+      <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>
           <AppRoutes />
@@ -123,7 +149,8 @@ function App() {
           }}
         />
       </div>
-    </AuthContext.Provider>
+      </AuthContext.Provider>
+    </QueryClientProvider>
   );
 }
 

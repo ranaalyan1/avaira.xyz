@@ -4,6 +4,7 @@ import { useAuth } from "@/App";
 import { useReveal, prefersReducedMotion } from "@/lib/motion";
 import BoundaryScene from "@/components/marketing/immersive/BoundaryScene";
 import "./landing-immersive.css";
+import { useAuthUI } from "@/components/auth/AuthUIContext";
 
 /* The immersive landing — one connected narrative, eight acts, one 3D object.
  *
@@ -109,6 +110,10 @@ export default function Landing() {
   }, []);
 
   const go = (path) => () => navigate(user ? path : "/login");
+  const { openAuth, walletAddress } = useAuthUI();
+  const shortWallet = walletAddress
+    ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`
+    : null;
 
   return (
     <div className="landing-immersive" data-testid="landing-page" ref={revealRoot}>
@@ -131,9 +136,15 @@ export default function Landing() {
             </button>
           ) : (
             <>
-              <button type="button" className="imm-btn imm-btn-ghost" data-testid="nav-login-btn" onClick={go("/login")}>
-                Sign in
-              </button>
+              {shortWallet ? (
+                <button type="button" className="imm-nav-wallet" data-testid="nav-wallet-btn" onClick={openAuth} title="Wallet identity">
+                  <i aria-hidden="true" /> {shortWallet}
+                </button>
+              ) : (
+                <button type="button" className="imm-btn imm-btn-ghost" data-testid="nav-login-btn" onClick={openAuth}>
+                  Sign in
+                </button>
+              )}
               <button type="button" className="imm-btn imm-btn-primary" data-testid="launch-protocol-btn" onClick={go("/dashboard")}>
                 Open console
               </button>
@@ -175,7 +186,7 @@ export default function Landing() {
                 Open console
               </button>
             ) : (
-              <button type="button" className="imm-btn imm-btn-ghost" data-testid="hero-login-btn" onClick={go("/login")}>
+              <button type="button" className="imm-btn imm-btn-ghost" data-testid="hero-login-btn" onClick={openAuth}>
                 Sign in
               </button>
             )}

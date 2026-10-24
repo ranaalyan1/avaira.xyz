@@ -27,7 +27,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthUIProvider, useAuthUI } from "@/components/auth/AuthUIContext";
 import { DynamicAuthLayer } from "@/components/auth/DynamicAuth";
 import SignInModal from "@/components/auth/SignInModal";
-import { dynamicAuthConfigured } from "@/dynamicClient";
 import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
 import { ScrollTop } from "@/pages/immersive/shell";
 
@@ -143,8 +142,6 @@ function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
         {/* full email-OTP + embedded-wallet flow when configured */}
         <SignInModal />
       </DynamicAuthLayer>
-      {/* graceful shell when the environment ID is missing */}
-      {!dynamicAuthConfigured && <SignInModal />}
       <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>

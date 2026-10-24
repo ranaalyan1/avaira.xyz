@@ -1,20 +1,26 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { Code, Terminal, Copy, Check, ChevronRight } from "lucide-react";
+import { Code, Terminal, Copy, Check, ChevronRight, RefreshCw, Unplug } from "lucide-react";
 import { toast } from "sonner";
 
 import { API } from "@/lib/api";
 
 import { DARK } from "@/lib/palette";
+import { copyText } from "@/lib/clipboard";
 
 const CopyBtn = ({ text }) => {
   const [copied, setCopied] = useState(false);
-  const handle = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      toast.success("Copied to clipboard");
-    });
+  const handle = async () => {
+    /* copyText resolves false instead of rejecting when the clipboard API is
+     * missing (plain-http deployments) or the copy is blocked. */
+    const ok = await copyText(text);
+    if (!ok) {
+      toast.error("Could not copy — select the snippet and copy it manually");
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Copied to clipboard");
   };
   return (
     <button data-testid="copy-btn" onClick={handle} className="p-1 text-avaira-muted hover:text-avaira-primary transition-colors">
@@ -36,16 +42,58 @@ const CodeBlock = ({ code, lang = "typescript" }) => (
 export default function SDKDocs() {
   const [docs, setDocs] = useState(null);
   const [activeFunc, setActiveFunc] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    axios.get(`${API}/sdk/docs`).then(res => setDocs(res.data)).catch(console.error);
-  }, []);
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    axios
+      .get(`${API}/sdk/docs`)
+      .then((res) => { if (!cancelled) setDocs(res.data); })
+      .catch((err) => {
+        /* Previously this only logged: with no backend the request fails and
+         * the page pulses "Loading SDK docs…" forever. */
+        if (!cancelled) setError(err?.message || "The SDK docs request failed.");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [attempt]);
 
-  if (!docs) return (
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+  useEffect(() => { setActiveFunc(0); }, [docs]);
+
+  if (loading && !docs) return (
     <div className="flex items-center justify-center h-64">
       <p className="font-mono text-xs text-avaira-muted animate-glow-pulse">Loading SDK docs…</p>
     </div>
   );
+
+  if (error && !docs) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-3" data-testid="sdk-docs-error">
+      <Unplug size={28} className="text-avaira-red" strokeWidth={1.5} />
+      <p className="text-[15px] font-medium text-avaira-muted">SDK reference unavailable</p>
+      <p className="max-w-md text-center font-mono text-xs text-avaira-dim">
+        The reference is served by <code>GET /api/sdk/docs</code>, which this deployment did not answer.
+        {error ? ` ${error}` : ""}
+      </p>
+      <button
+        type="button"
+        onClick={retry}
+        data-testid="sdk-docs-retry"
+        className="cyber-btn mt-1 flex items-center gap-2 px-3 py-1.5 font-mono text-[11px]"
+      >
+        <RefreshCw size={12} /> Retry
+      </button>
+    </div>
+  );
+
+  /* A back end that answers with a partial document must not crash the page. */
+  const install = docs?.install || {};
+  const functions = Array.isArray(docs?.functions) ? docs.functions : [];
 
   return (
     <div className="page-shell animate-slide-in" data-testid="sdk-docs-page">
@@ -63,14 +111,14 @@ export default function SDKDocs() {
             <Terminal size={14} className="text-avaira-primary" />
             <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">TypeScript Installation</span>
           </div>
-          <CodeBlock code={docs.install.typescript} lang="bash" />
+          <CodeBlock code={install.typescript || ""} lang="bash" />
         </div>
         <div className="cyber-card p-4">
           <div className="flex items-center gap-2 mb-3">
             <Terminal size={14} className="text-avaira-primary" />
             <span className="font-mono text-[10px] text-avaira-muted uppercase tracking-widest">Rust Installation</span>
           </div>
-          <CodeBlock code={docs.install.rust} lang="bash" />
+          <CodeBlock code={install.rust || ""} lang="bash" />
         </div>
       </div>
 
@@ -79,7 +127,7 @@ export default function SDKDocs() {
         <h2 className="text-[13px] font-semibold tracking-tight text-avaira-primary mb-3 flex items-center gap-2">
           <Code size={14} /> Quick Start
         </h2>
-        <CodeBlock code={docs.quick_start} lang="typescript" />
+        <CodeBlock code={docs?.quick_start || ""} lang="typescript" />
       </div>
 
       {/* Function Reference */}
@@ -87,7 +135,7 @@ export default function SDKDocs() {
         {/* Function Nav */}
         <div className="space-y-1.5">
           <h2 className="text-[13px] font-semibold tracking-tight text-avaira-muted mb-3">API reference</h2>
-          {docs.functions.map((fn, i) => (
+          {functions.map((fn, i) => (
             <button
               key={fn.name}
               data-testid={`sdk-func-${fn.name}`}
@@ -107,18 +155,18 @@ export default function SDKDocs() {
 
         {/* Function Detail */}
         <div className="lg:col-span-2 cyber-card p-4">
-          {docs.functions[activeFunc] && (
+          {functions[activeFunc] && (
             <div data-testid="sdk-func-detail">
               <div className="flex items-center gap-3 mb-4">
-                <span className="font-heading font-bold text-2xl text-avaira-primary">.{docs.functions[activeFunc].name}()</span>
+                <span className="font-heading font-bold text-2xl text-avaira-primary">.{functions[activeFunc].name}()</span>
               </div>
-              <p className="font-body text-sm text-avaira-muted mb-4">{docs.functions[activeFunc].description}</p>
+              <p className="font-body text-sm text-avaira-muted mb-4">{functions[activeFunc].description || ""}</p>
 
               {/* Parameters */}
               <div className="mb-4">
                 <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Parameters</h3>
                 <div className="space-y-1">
-                  {docs.functions[activeFunc].params.map((p, i) => (
+                  {(functions[activeFunc].params || []).map((p, i) => (
                     <div key={i} className="flex items-center gap-3 p-2 bg-black/40">
                       <code className="font-mono text-xs text-avaira-primary">{p.name}</code>
                       <code className="font-mono text-[10px] text-avaira-purple">{p.type}</code>
@@ -131,14 +179,14 @@ export default function SDKDocs() {
               <div className="mb-4">
                 <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Returns</h3>
                 <div className="p-2 bg-black/40">
-                  <code className="font-mono text-xs text-avaira-green">{docs.functions[activeFunc].returns}</code>
+                  <code className="font-mono text-xs text-avaira-green">{functions[activeFunc].returns || "—"}</code>
                 </div>
               </div>
 
               {/* Example */}
               <div>
                 <h3 className="text-[11px] font-semibold tracking-tight text-avaira-muted mb-2">Example</h3>
-                <CodeBlock code={docs.functions[activeFunc].example} />
+                <CodeBlock code={functions[activeFunc].example || ""} />
               </div>
             </div>
           )}

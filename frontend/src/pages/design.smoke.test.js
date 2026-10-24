@@ -144,6 +144,35 @@ describe("marketing site", () => {
     for (const id of ids) has(html, `id="${id}"`);
   });
 
+  /* Every in-app deep link has to land on a section that exists. The footer
+   * shipped two anchors (/#pillars, /#faq) for sections no page renders, so the
+   * links were dead; this walks the links and checks the target markup. */
+  it("only deep-links to sections that exist", () => {
+    const routes = {
+      "/": <Home />,
+      "/execution": <ExecutionPage />,
+      "/evidence": <ImmersiveEvidence />,
+      "/gate": <GatePage />,
+      "/score": <ScorePage />,
+      "/ledger": <EvidencePage />,
+      "/docs": <DocsPage />,
+    };
+    const rendered = Object.fromEntries(
+      Object.entries(routes).map(([route, element]) => [route, render(element)]),
+    );
+
+    let checked = 0;
+    for (const [route, html] of Object.entries(rendered)) {
+      for (const match of html.matchAll(/href="(\/[^"#]*)?#([^"]+)"/g)) {
+        const target = match[1] || route;
+        expect(rendered[target]).toBeDefined();
+        has(rendered[target], `id="${match[2]}"`);
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+
   it("the chrome deep-links into every narrative page", () => {
     // the top nav is the page selector; the landing links every sibling route
     for (const link of ["/", "/execution", "/evidence", "/docs", "/gate"]) {
@@ -269,9 +298,19 @@ describe("console shell", () => {
   });
 
   it("keeps every nav route hook", () => {
-    for (const route of ["dashboard", "agents", "executions", "underwriters", "freeze", "treasury", "reputation", "sdk"]) {
+    for (const route of ["dashboard", "agents", "executions", "underwriters", "freeze", "treasury", "reputation", "sdk", "hardening-report"]) {
       has(html, `data-testid="nav-${route}"`);
     }
+  });
+
+  it("gives the sidebar search hint a control that opens the palette", () => {
+    // The hint used to sit on a button with no handler at all.
+    has(html, 'data-testid="open-command-palette"');
+    has(html, 'aria-haspopup="dialog"');
+    has(html, 'aria-expanded="false"');
+    has(html, 'aria-controls="console-sidebar"');
+    // the palette itself is not mounted until it is opened
+    expect(html).not.toContain('data-testid="command-palette"');
   });
 
   it("stays out of the marketing pixel scope", () => {

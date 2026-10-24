@@ -285,7 +285,7 @@ export default function AgentDashboard() {
               {lifecycleResult.lifecycle.map((step) => (
                 <div key={`${step.stage}-${step.name}`} className="border border-avaira-border p-3 bg-avaira-surface/50 animate-slide-in hologram-effect">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-heading text-sm uppercase tracking-[0.18em] text-foreground">{step.stage}. {step.name.replace(/_/g, " ")}</p>
+                    <p className="font-heading text-sm uppercase tracking-[0.18em] text-foreground">{step.stage}. {String(step.name || "step").replace(/_/g, " ")}</p>
                     <StatusBadge status={step.status === "failed" ? "rejected" : step.status} />
                   </div>
                   <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-[11px] text-avaira-dim">{JSON.stringify(step.details, null, 2)}</pre>

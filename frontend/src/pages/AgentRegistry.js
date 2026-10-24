@@ -8,7 +8,10 @@ import { useAuth } from "@/App";
 import { API } from "@/lib/api";
 
 
+import ConsoleError from "@/components/ConsoleError";
 import { DARK, gradeColor } from "@/lib/palette";
+import { dateLabel, num, text, toNumber } from "@/lib/format";
+import { copyText } from "@/lib/clipboard";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -51,7 +54,7 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
           </div>
           <div>
             <h3 className={`text-[15px] font-semibold tracking-tight text-foreground ${isFrozen ? 'text-avaira-red' : ''}`}>{agent.name}</h3>
-            <p className="font-mono text-[10px] text-avaira-dim">ID: {agent.id.slice(0, 8)}</p>
+            <p className="font-mono text-[10px] text-avaira-dim">ID: {text(agent.id, "—").slice(0, 8)}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -70,8 +73,8 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
         </div>
         <div className="flex justify-between">
           <span className="text-avaira-muted">REPUTATION</span>
-          <span style={{ color: agent.reputation >= 80 ? DARK.success : agent.reputation >= 50 ? DARK.warning : DARK.danger }}>
-            {agent.reputation.toFixed(0)}
+          <span style={{ color: (toNumber(agent.reputation) || 0) >= 80 ? DARK.success : (toNumber(agent.reputation) || 0) >= 50 ? DARK.warning : DARK.danger }}>
+            {num(agent.reputation, 0)}
           </span>
         </div>
         <div className="flex justify-between">
@@ -85,7 +88,7 @@ const AgentCard = ({ agent, onRefresh, scores, canManage }) => {
       </div>
       <div className="mt-3 pt-3 border-t border-avaira-border flex items-center justify-between">
         <span className="font-mono text-[10px] text-avaira-dim">
-          {new Date(agent.registered_at).toLocaleDateString()}
+          {dateLabel(agent.registered_at)}
         </span>
         <div className="flex items-center gap-3">
           <button
@@ -108,6 +111,7 @@ export default function AgentRegistry() {
   const [agents, setAgents] = useState([]);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [open, setOpen] = useState(false);
   const [newKey, setNewKey] = useState(null);
   const [form, setForm] = useState({
@@ -125,8 +129,9 @@ export default function AgentRegistry() {
       ]);
       setAgents(aRes.data);
       setScores(sRes.data);
+      setLoadError(null);
     } catch (e) {
-      console.error(e);
+      setLoadError(e?.message || "The registry API did not respond.");
     } finally {
       setLoading(false);
     }
@@ -170,7 +175,7 @@ export default function AgentRegistry() {
         onChange={(e) => setForm(prev => ({ ...prev, [name]: e.target.value }))}
         placeholder={placeholder}
         min={min}
-        required={name === "name" || name === "mission_intent"}
+        required={name === "name" || name === "goal"}
         className="w-full bg-black border border-white/20 focus:border-avaira-primary text-white font-mono text-sm p-2 outline-none transition-colors"
       />
     </div>
@@ -231,9 +236,10 @@ export default function AgentRegistry() {
             <p className="font-mono text-xs text-foreground">
               This is the only time your API key will be shown. Store it securely.
             </p>
-            <div className="bg-black border border-avaira-primary p-3 font-mono text-sm text-avaira-primary break-all select-all cursor-pointer" title="Click to copy" onClick={() => {
-              navigator.clipboard.writeText(newKey);
-              toast.success("API Key copied to clipboard");
+            <div className="bg-black border border-avaira-primary p-3 font-mono text-sm text-avaira-primary break-all select-all cursor-pointer" title="Click to copy" onClick={async () => {
+              const copied = await copyText(newKey);
+              if (copied) toast.success("API key copied to clipboard");
+              else toast.error("Could not copy — select the key and copy it manually");
             }}>
               {newKey}
             </div>
@@ -246,6 +252,13 @@ export default function AgentRegistry() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchAgents}
+        title="Agent registry unavailable"
+        testid="agents-error"
+      />
 
       {loading ? (
         <div className="cyber-card p-12 text-center">

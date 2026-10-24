@@ -1,53 +1,44 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard, UserCheck, Workflow, ShieldOff, Wallet, TrendingUp, BookOpen,
-  Menu, X, Users, LogOut, ChevronRight, Search,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Menu, X, LogOut, ChevronRight, Search } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/App";
 import { animate, prefersReducedMotion } from "@/lib/motion";
-
-const NAV_GROUPS = [
-  {
-    label: "Monitor",
-    items: [
-      { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { path: "/agents", label: "Agent registry", icon: UserCheck },
-      { path: "/executions", label: "Execution flow", icon: Workflow },
-      { path: "/reputation", label: "Reputation", icon: TrendingUp },
-    ],
-  },
-  {
-    label: "Control",
-    items: [
-      { path: "/underwriters", label: "Underwriters", icon: Users },
-      { path: "/freeze", label: "Freeze / slash", icon: ShieldOff },
-      { path: "/treasury", label: "Treasury", icon: Wallet },
-      { path: "/sdk", label: "SDK docs", icon: BookOpen },
-    ],
-  },
-];
-
-const NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
-
-const PAGE_META = {
-  "/dashboard": "Protocol telemetry and live state",
-  "/agents": "Registration, risk envelopes, and status control",
-  "/executions": "Lifecycle traces and trust verification",
-  "/underwriters": "Mission markets and underwriting coverage",
-  "/freeze": "Policy enforcement, freeze and slash actions",
-  "/treasury": "Fee capture, split accounting, and treasury flow",
-  "/reputation": "Score engine, rank movement, and trust data",
-  "/sdk": "Developer integration docs and references",
-};
+import { NAV_GROUPS, NAV_ITEMS, PAGE_META } from "@/lib/navigation";
+import CommandPalette from "@/components/CommandPalette";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const currentNav = NAV_ITEMS.find((item) => item.path === location.pathname);
   const contentRef = useRef(null);
+
+  /* Close the drawer on navigation — on a phone the overlay would otherwise
+   * stay on top of the page that was just opened. */
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  /* ⌘K / Ctrl-K opens the palette; the sidebar hint is not decorative. */
+  const togglePalette = useCallback(() => setPaletteOpen((open) => !open), []);
+  useEffect(() => {
+    const onKey = (event) => {
+      if ((event.metaKey || event.ctrlKey) && String(event.key).toLowerCase() === "k") {
+        event.preventDefault();
+        togglePalette();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [togglePalette]);
+
+  /* Escape closes the mobile drawer, the same way it closes the palette. */
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const onKey = (event) => { if (event.key === "Escape") setMobileOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
 
   // Console pages settle in rather than snapping: a short opacity ramp on the
   // content surface whenever the route changes. Opacity only — a transform here
@@ -69,7 +60,9 @@ export default function Layout() {
       {/* Mobile toggle */}
       <button
         data-testid="mobile-menu-toggle"
-        aria-label="Toggle navigation"
+        aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={mobileOpen}
+        aria-controls="console-sidebar"
         className="fixed left-4 top-3.5 z-50 rounded-lg border border-avaira-border bg-avaira-card p-2 lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
@@ -78,6 +71,7 @@ export default function Layout() {
 
       {/* Sidebar */}
       <aside
+        id="console-sidebar"
         data-testid="sidebar"
         className={`fixed inset-y-0 left-0 z-40 flex w-[236px] flex-col border-r border-avaira-border bg-avaira-card/70 backdrop-blur-xl transition-transform duration-300 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -97,10 +91,17 @@ export default function Layout() {
         </div>
 
         <div className="px-3 pb-2">
-          <button className="flex w-full items-center gap-2 rounded-lg border border-avaira-border bg-avaira-inset px-2.5 py-1.5 text-left text-[12px] text-avaira-dim transition-colors hover:border-avaira-primary/40 hover:text-avaira-muted">
+          <button
+            type="button"
+            data-testid="open-command-palette"
+            aria-haspopup="dialog"
+            aria-expanded={paletteOpen}
+            onClick={() => setPaletteOpen(true)}
+            className="flex w-full items-center gap-2 rounded-lg border border-avaira-border bg-avaira-inset px-2.5 py-1.5 text-left text-[12px] text-avaira-dim transition-colors hover:border-avaira-primary/40 hover:text-avaira-muted"
+          >
             <Search size={13} />
             <span className="flex-1">Search</span>
-            <span className="font-mono text-[10px] tracking-wider text-avaira-dim">Cmd K</span>
+            <kbd className="font-mono text-[10px] tracking-wider text-avaira-dim">Ctrl K</kbd>
           </button>
         </div>
 
@@ -205,8 +206,14 @@ export default function Layout() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          aria-hidden="true"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
 }

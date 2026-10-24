@@ -29,9 +29,14 @@ jest.mock(
     const React = require("react");
     const Passthrough = ({ children }) => React.createElement(React.Fragment, null, children);
     // A router Link renders an anchor with an href — mirror that, so tests can
-    // assert on the destination the way a crawler would see it.
-    const Anchor = ({ children, to, ...rest }) =>
-      React.createElement("a", { ...rest, href: typeof to === "string" ? to : rest.href }, children);
+    // assert on the destination the way a crawler would see it. Router-only
+    // props are resolved here too: `end` is a NavLink matching flag (React warns
+    // if it reaches the DOM) and NavLink's `className` is a function.
+    const Anchor = ({ children, to, end, className, ...rest }) => {
+      const target = typeof to === "string" ? to : rest.href;
+      const resolved = typeof className === "function" ? className({ isActive: false, isPending: false }) : className;
+      return React.createElement("a", { ...rest, href: target, className: resolved }, children);
+    };
     return {
       BrowserRouter: Passthrough,
       MemoryRouter: Passthrough,

@@ -6,12 +6,15 @@ import { toast } from "sonner";
 import { useAuth } from "@/App";
 
 import { API } from "@/lib/api";
+import ConsoleError from "@/components/ConsoleError";
+import { dateLabel, num, text, toNumber } from "@/lib/format";
 
 export default function FreezeSlash() {
   const { user } = useAuth();
   const isAdmin = !!user?.is_admin;
   const [events, setEvents] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [freezeOpen, setFreezeOpen] = useState(false);
   const [slashOpen, setSlashOpen] = useState(false);
   const [freezeForm, setFreezeForm] = useState({ agent_id: "", reason: "" });
@@ -25,7 +28,8 @@ export default function FreezeSlash() {
       ]);
       setEvents(evRes.data);
       setAgents(agRes.data);
-    } catch (e) { console.error(e); }
+      setLoadError(null);
+    } catch (e) { setLoadError(e?.message || "The enforcement API did not respond."); }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -143,7 +147,7 @@ export default function FreezeSlash() {
                     className="w-full bg-black border border-white/20 focus:border-avaira-yellow text-white font-mono text-sm p-2 outline-none"
                   >
                     <option value="">Select agent...</option>
-                    {agents.map(a => <option key={a.id} value={a.id}>{a.name} (${a.collateral_remaining.toFixed(2)})</option>)}
+                    {agents.map(a => <option key={a.id} value={a.id}>{a.name} (${num(a.collateral_remaining, 2)})</option>)}
                   </select>
                 </div>
                 <div>
@@ -177,6 +181,13 @@ export default function FreezeSlash() {
         </div>
       </div>
 
+      <ConsoleError
+        message={loadError}
+        onRetry={fetchData}
+        title="Freeze and slash data unavailable"
+        testid="freeze-error"
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Frozen Agents */}
         <div className="cyber-card p-4">
@@ -194,8 +205,8 @@ export default function FreezeSlash() {
                     <span className="status-dot frozen" />
                   </div>
                   <div className="font-mono text-[10px] text-avaira-muted mt-1 space-y-0.5">
-                    <p>REP: <span className="text-avaira-red">{a.reputation.toFixed(0)}</span></p>
-                    <p>COLLATERAL: <span className="text-foreground">${a.collateral_remaining.toFixed(2)}</span></p>
+                    <p>REP: <span className="text-avaira-red">{num(a.reputation, 0)}</span></p>
+                    <p>COLLATERAL: <span className="text-foreground">${num(a.collateral_remaining, 2)}</span></p>
                   </div>
                 </div>
               ))}
@@ -230,10 +241,10 @@ export default function FreezeSlash() {
                           ev.type === 'freeze' ? 'border-red-500/30 text-red-400' : 'border-yellow-500/30 text-yellow-400'
                         }`}>{ev.type}</span>
                       </td>
-                      <td className="text-foreground">{ev.agent_name}</td>
+                      <td className="text-foreground">{text(ev.agent_name, "unknown")}</td>
                       <td className="text-avaira-muted max-w-[200px] truncate">{ev.reason}</td>
-                      <td className="text-right text-avaira-yellow">{ev.collateral_slashed > 0 ? `${ev.collateral_slashed.toFixed(4)}` : '-'}</td>
-                      <td className="text-avaira-dim">{new Date(ev.timestamp).toLocaleString()}</td>
+                      <td className="text-right text-avaira-yellow">{toNumber(ev.collateral_slashed) > 0 ? num(ev.collateral_slashed, 4) : '-'}</td>
+                      <td className="text-avaira-dim">{dateLabel(ev.timestamp, { withTime: true })}</td>
                     </tr>
                   ))}
                 </tbody>

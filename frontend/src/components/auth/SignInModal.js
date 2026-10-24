@@ -98,9 +98,11 @@ function OtpFlow() {
           stake, and the gate reads it onchain.
         </p>
         <div className="imm-auth-actions">
+          {/* The console lives at /dashboard; /gate is the public explainer. */}
           <a
             className="imm-btn imm-btn-primary"
-            href="/gate"
+            href="/dashboard"
+            data-testid="auth-open-console"
             onClick={closeAuth}
           >
             Open the console

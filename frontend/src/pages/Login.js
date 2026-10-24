@@ -4,6 +4,7 @@ import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
 import { useAuthUI } from "@/components/auth/AuthUIContext";
 import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/shell";
+import { safeInternalPath } from "@/lib/navigation";
 
 /* Sign-in, in the immersive language. The heavy Dynamic SDK stays at the app
  * root; this page only opens the shared sign-in modal (and auto-opens it once
@@ -14,7 +15,8 @@ import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/she
 export default function Login() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const redirect = params.get("redirect") || "/dashboard";
+  /* validated: the target cannot leave the origin (from #51) */
+  const redirect = safeInternalPath(params.get("redirect"));
   const { user } = useAuth();
   const { openAuth, walletAddress, authConfigured } = useAuthUI();
   const revealRoot = useReveal();

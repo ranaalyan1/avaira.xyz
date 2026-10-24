@@ -5,6 +5,8 @@ import { useEffect, useState, createContext, useContext, useCallback } from "rea
 import axios from "axios";
 import Layout from "@/components/Layout";
 import Landing from "@/pages/Landing";
+import ExecutionPage from "@/pages/ExecutionPage";
+import EvidenceImmersive from "@/pages/EvidenceImmersive";
 import GatePage from "@/pages/GatePage";
 import ScorePage from "@/pages/ScorePage";
 import EvidencePage from "@/pages/EvidencePage";
@@ -27,6 +29,7 @@ import { DynamicAuthLayer } from "@/components/auth/DynamicAuth";
 import SignInModal from "@/components/auth/SignInModal";
 import { dynamicAuthConfigured } from "@/dynamicClient";
 import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
+import { ScrollTop } from "@/pages/immersive/shell";
 
 /* one query client for the whole app (required by the Dynamic hooks) */
 const queryClient = new QueryClient();
@@ -48,11 +51,14 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
   return (
     <>
+      <ScrollTop />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/execution" element={<ExecutionPage />} />
+        <Route path="/evidence" element={<EvidenceImmersive />} />
         <Route path="/gate" element={<GatePage />} />
         <Route path="/score" element={<ScorePage />} />
-        <Route path="/evidence" element={<EvidencePage />} />
+        <Route path="/ledger" element={<EvidencePage />} />
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/login" element={<Login />} />
         <Route

@@ -71,7 +71,8 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "postbuild": "craco test --watchAll=false --testPathPattern prerender.pages"
   },
   "browserslist": {
     "production": [

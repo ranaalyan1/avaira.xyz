@@ -43,11 +43,8 @@ function ProtectedRoute({ children }) {
     return <div className="p-6 font-mono text-xs text-avaira-muted">Checking session...</div>;
   }
   if (!user) {
-    /* Remember where the visitor was going, so signing in returns them there
-     * instead of always dropping them on /dashboard. */
-    const next = `${location.pathname}${location.search}`;
-    const target = next && next !== "/" ? `/login?redirect=${encodeURIComponent(next)}` : "/login";
-    return <Navigate to={target} replace />;
+    /* keep where they were going: /login sends them back after sign-in */
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   }
   return children;
 }
@@ -97,6 +94,15 @@ function App() {
   const [backendMisconfigured, setBackendMisconfigured] = useState(false);
 
   const checkAuth = useCallback(async () => {
+    /* no REACT_APP_BACKEND_URL means no session backend is attached to this
+       deployment: the probe below would be answered by the SPA rewrite and
+       could never return a session. Skip it instead of firing a doomed
+       request on every page load. */
+    if (!process.env.REACT_APP_BACKEND_URL) {
+      setBackendMisconfigured(true);
+      setAuthReady(true);
+      return;
+    }
     try {
       const res = await axios.get(`${API}/auth/me`, { withCredentials: true });
       // Only a user *object* counts as signed in. On a deployment where the SPA
@@ -132,11 +138,8 @@ function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
   const { setDynamicAuth } = useAuthUI();
   return (
     <QueryClientProvider client={queryClient}>
-      {/* DynamicAuthLayer renders children untouched when no environment is
-       * configured, so the modal is mounted exactly once either way. Mounting a
-       * second copy in the unconfigured branch used to stack two dialogs and
-       * duplicate every testid/id in the sign-in flow. */}
       <DynamicAuthLayer onState={setDynamicAuth}>
+        {/* full email-OTP + embedded-wallet flow when configured */}
         <SignInModal />
       </DynamicAuthLayer>
       <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>

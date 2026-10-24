@@ -48,6 +48,7 @@ jest.mock(
       NavLink: Anchor,
       useNavigate: () => () => {},
       useLocation: () => ({ pathname: "/" }),
+      useSearchParams: () => [new URLSearchParams(""), null],
     };
   },
   { virtual: true }

@@ -1,0 +1,24 @@
+{
+  "name": "@avaira/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Avaira Gateway — the pre-execution circuit breaker between agent frameworks and the on-chain gate (HMAC auth, replay guard, breaker, checkGate relay).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts serve",
+    "eval": "tsx src/index.ts eval",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@avaira/sdk": "file:../../sdk/typescript",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

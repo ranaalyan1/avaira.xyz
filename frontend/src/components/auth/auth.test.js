@@ -2,10 +2,11 @@
  * Dynamic auth modal — smoke tests (configured state).
  *
  * House style: renderToStaticMarkup, matching design.smoke.test.js.
- * frontend/.env sets REACT_APP_DYNAMIC_ENV_ID, so in jest the modal
- * takes its live shape: social providers + email OTP. The fallback
- * card is covered in auth-unconfigured.test.js. SDK modules are
- * virtual-mocked (jest cannot resolve their subpath exports).
+ * The configuration is mocked explicitly (see the `@/dynamicClient` mock
+ * below) rather than read from an untracked frontend/.env: a clean checkout
+ * has no .env, and this file must not depend on one to reach the configured
+ * shape. The fallback card is covered in auth-unconfigured.test.js. SDK
+ * modules are virtual-mocked (jest cannot resolve their subpath exports).
  */
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -26,6 +27,13 @@ jest.mock("@dynamic-labs-sdk/client/waas", () => ({
   createWaasWalletAccounts: jest.fn(),
   getChainsMissingWaasWalletAccounts: () => [],
 }), { virtual: true });
+/* Configured deployment. Env vars in this repo are not committed, so the state
+ * has to be stated by the test instead of inherited from `.env`. */
+jest.mock("@/dynamicClient", () => ({
+  DYNAMIC_ENV_ID: "test-environment-id",
+  dynamicAuthConfigured: true,
+  default: {},
+}));
 
 import { AuthUIProvider } from "./AuthUIContext";
 import SignInModal from "./SignInModal";

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { usePageTitle } from "@/lib/pageTitle";
 import { PenaltyLadder, ScoreLadder, ScoreWeights } from "@/components/marketing/SpecBlocks";
 import {
   ConsoleActions,
@@ -57,6 +58,7 @@ const LADDER = [
 export default function ScorePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  usePageTitle("The Avaira score — AVAIRA");
   const reveal = useReveal({ step: 60 });
 
   const goToConsole = () => {

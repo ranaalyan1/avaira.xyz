@@ -1,6 +1,6 @@
 import "@/App.css";
 import "@/pixel.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
 import axios from "axios";
 import Layout from "@/components/Layout";
@@ -27,7 +27,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthUIProvider, useAuthUI } from "@/components/auth/AuthUIContext";
 import { DynamicAuthLayer } from "@/components/auth/DynamicAuth";
 import SignInModal from "@/components/auth/SignInModal";
-import { dynamicAuthConfigured } from "@/dynamicClient";
 import { API, HTML_RESPONSE, normalizeSessionUser } from "@/lib/api";
 import { ScrollTop } from "@/pages/immersive/shell";
 
@@ -39,11 +38,16 @@ export const useAuth = () => useContext(AuthContext);
 
 function ProtectedRoute({ children }) {
   const { user, authReady } = useAuth();
+  const location = useLocation();
   if (!authReady) {
     return <div className="p-6 font-mono text-xs text-avaira-muted">Checking session...</div>;
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    /* Remember where the visitor was going, so signing in returns them there
+     * instead of always dropping them on /dashboard. */
+    const next = `${location.pathname}${location.search}`;
+    const target = next && next !== "/" ? `/login?redirect=${encodeURIComponent(next)}` : "/login";
+    return <Navigate to={target} replace />;
   }
   return children;
 }
@@ -128,12 +132,13 @@ function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
   const { setDynamicAuth } = useAuthUI();
   return (
     <QueryClientProvider client={queryClient}>
+      {/* DynamicAuthLayer renders children untouched when no environment is
+       * configured, so the modal is mounted exactly once either way. Mounting a
+       * second copy in the unconfigured branch used to stack two dialogs and
+       * duplicate every testid/id in the sign-in flow. */}
       <DynamicAuthLayer onState={setDynamicAuth}>
-        {/* full email-OTP + embedded-wallet flow when configured */}
         <SignInModal />
       </DynamicAuthLayer>
-      {/* graceful shell when the environment ID is missing */}
-      {!dynamicAuthConfigured && <SignInModal />}
       <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>

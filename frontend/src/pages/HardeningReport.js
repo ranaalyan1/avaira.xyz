@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, CheckCircle2, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { copyText } from "@/lib/clipboard";
 
 export default function HardeningReport() {
   const [copied, setCopied] = useState(false);
@@ -32,8 +34,17 @@ export default function HardeningReport() {
     ]
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText("https://avaira.io/hardening-report/pr-302");
+  /* Share the page that actually exists: the old string pointed at avaira.io
+   * (not this project's domain) and at a /pr-302 path no route serves. */
+  const handleShare = async () => {
+    const url = typeof window !== "undefined"
+      ? `${window.location.origin}/hardening-report`
+      : "/hardening-report";
+    const ok = await copyText(url);
+    if (!ok) {
+      toast.error("Could not copy the link");
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -51,9 +62,21 @@ export default function HardeningReport() {
             <span className="px-2 py-0.5 font-mono text-[10px] bg-avaira-green/20 text-avaira-green uppercase">
               {reportData.readinessStatus}
             </span>
+            <span
+              className="px-2 py-0.5 font-mono text-[10px] bg-avaira-surface text-avaira-dim uppercase border border-avaira-border"
+              data-testid="hardening-sample-badge"
+            >
+              Sample data
+            </span>
           </div>
           <p className="font-mono text-xs text-avaira-muted mt-1">
             Evaluated Pull Request {reportData.prsEvaluated} for agent <span className="text-foreground">{reportData.agentName}</span>
+          </p>
+          {/* The rows below are a static transcript, not an API response. Say it
+              on the page: every other number in the console is live. */}
+          <p className="mt-2 max-w-xl font-mono text-[10px] leading-relaxed text-avaira-dim">
+            Sample transcript — this view is not connected to an audit run. It shows the shape of a
+            hardening report; the counts below are illustrative.
           </p>
         </div>
 
@@ -91,7 +114,7 @@ export default function HardeningReport() {
         <div className="p-5 border border-avaira-green/40 bg-avaira-green/10">
           <p className="font-mono text-[10px] text-avaira-green tracking-wider uppercase">PRODUCTION READINESS</p>
           <p className="font-mono text-3xl font-bold text-avaira-green mt-2">{reportData.safetyScore}</p>
-          <p className="font-mono text-[10px] text-avaira-green mt-1">100% Safe to Merge ✓</p>
+          <p className="font-mono text-[10px] text-avaira-green mt-1">100% safe to merge</p>
         </div>
       </div>
 

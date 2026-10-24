@@ -11,7 +11,7 @@ export default function TrustHeatmap({ agentId }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const newTrace = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).slice(2, 11),
         intent: "Search DeFi yield benchmarks",
         status: Math.random() > 0.1 ? "approved" : "flagged",
         timestamp: new Date().toLocaleTimeString(),
@@ -34,6 +34,12 @@ export default function TrustHeatmap({ agentId }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-heading font-semibold text-sm uppercase tracking-wider text-avaira-muted flex items-center gap-2">
           <ShieldCheck size={14} className="text-avaira-primary" /> Sentinel Trust Heatmap
+          {/* This panel is a local simulation: there is no /sentinel endpoint in
+              the API, so the traces below are generated in the browser. Say so
+              rather than presenting synthetic rows as protocol activity. */}
+          <span className="rounded border border-avaira-border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-avaira-dim">
+            sample feed
+          </span>
         </h2>
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase text-avaira-muted">Behavioral Drift:</span>
@@ -46,7 +52,7 @@ export default function TrustHeatmap({ agentId }) {
               }}
             />
           </div>
-          <span className={`font-mono text-[10px] uppercase ${drift.trend === 'dangerous' ? 'text-avaira-error' : 'text-avaira-muted'}`}>
+          <span className={`font-mono text-[10px] uppercase ${drift.trend === 'deviating' ? 'text-avaira-red' : 'text-avaira-muted'}`}>
             {drift.trend}
           </span>
         </div>
@@ -61,7 +67,7 @@ export default function TrustHeatmap({ agentId }) {
               <div key={log.id} className="flex justify-between items-center text-[10px] font-mono border-b border-white/5 pb-1">
                 <span className="text-foreground truncate max-w-[150px]">{log.intent}</span>
                 <div className="flex items-center gap-2">
-                  <span className={log.status === 'approved' ? 'text-avaira-primary' : 'text-avaira-error'}>
+                  <span className={log.status === 'approved' ? 'text-avaira-primary' : 'text-avaira-red'}>
                     {log.status.toUpperCase()}
                   </span>
                   <span className="text-avaira-dim">{log.timestamp}</span>

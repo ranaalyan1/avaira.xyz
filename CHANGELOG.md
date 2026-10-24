@@ -3,6 +3,58 @@
 ## [Unreleased]
 
 ### Added
+- **Console command palette (Ctrl/⌘ K).** The sidebar had advertised "Search · Cmd K"
+  on a button with no handler; the hint is now a real dialog that jumps to any
+  console route or public page and is keyboard-driven (arrows, Enter, Escape).
+- **`ConsoleError` banner.** Console views that failed to reach the API used to
+  render their empty state ("0 agents", "NO FEE DATA"), which read as an idle
+  protocol rather than an outage. They now name the failure and offer a retry.
+- **`src/lib/format.js`, `src/lib/clipboard.js`, `src/lib/pageTitle.js`,
+  `src/lib/navigation.js`** — shared helpers plus tests, so number/date
+  formatting, clipboard writes, page titles and `?redirect=` validation have one
+  implementation instead of one per page.
+
+### Fixed
+- **Two sign-in modals.** With no `REACT_APP_DYNAMIC_ENV_ID` configured, `App`
+  mounted `SignInModal` twice (once through `DynamicAuthLayer`, which already
+  passes children through, and once in the unconfigured fallback), stacking two
+  dialogs and duplicating every id/testid in the flow.
+- **Sign-in tests depended on an untracked `frontend/.env`.** `auth.test.js`
+  assumed `.env` set the Dynamic environment, so a clean checkout failed 2
+  tests. The configured state is now mocked in the test, like the unconfigured
+  one already was.
+- **`/login?redirect=` was ignored.** The marketing pages passed it and
+  `ProtectedRoute` dropped it. The destination is now preserved (validated by
+  `safeInternalPath`, so a crafted `?redirect=` cannot leave the origin), and an
+  already-signed-in visitor is forwarded instead of shown the card again.
+- **Deep links to sections did nothing.** `ScrollTop` forced every route change
+  to the top, and two footer links (`/#pillars`, `/#faq`) pointed at sections no
+  page rendered. Hash routes now scroll to their target and the two dead links
+  point at `/#boundary` and `/#cta` (added).
+- **Reputation chart used a 0–200 domain** for a 0–100 score, so every bar drew
+  at half scale; a zero-delta history row also rendered a red down arrow.
+- **SDK docs spun forever** when `/api/sdk/docs` failed instead of reporting it,
+  and a partial document crashed the page.
+- **Execution requests defaulted to chain 43113** (Avalanche Fuji) in the
+  console form while every deployment in the repository is on 46630.
+- **Missing fields unmounted the page.** `.toFixed()` / `.toUpperCase()` on an
+  absent API field threw inside render; numbers, dates and labels now degrade to
+  a placeholder (Dashboard, Reputation, Treasury, Underwriters, Freeze/Slash,
+  Execution flow, Agent registry, Agent runtime, SDK docs).
+- **Clipboard writes were unhandled promises.** A blocked or unavailable
+  clipboard (plain-http deployments) rejected, and the UI still said "Copied".
+- **Hardening report share link** copied `https://avaira.io/hardening-report/pr-302`
+  — the wrong domain and a path no route serves; it now copies this page, and
+  the page labels its static transcript as sample data instead of implying a
+  live audit.
+- **Missing page titles** on `/gate`, `/score`, `/ledger`, `/docs`, `/login` and
+  the 404 page, which all shared one browser-tab title at runtime.
+- **Trust heatmap** used non-existent `avaira-error` tokens and a `dangerous`
+  trend state that could never be produced; its simulated feed is now labelled.
+- **Prerender/test mocks** passed `end` and a function `className` through to
+  `<a>`, which React warned about on every prerender run.
+
+### Added
 - **`setup.sh` — one-command, self-verifying setup.** `./setup.sh` takes a clean
   clone to a *proven* state in ~7s with no keys, no wallet, no database and no
   `sudo`: it creates `.venv`, installs the handful of small core dependencies,

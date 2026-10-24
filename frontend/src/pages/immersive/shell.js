@@ -78,26 +78,72 @@ export const NAV_LINKS = [
 ];
 
 /* one place sets the tab title so prerendered pages carry their own <title> */
-export const usePageTitle = (title) => {
-  useEffect(() => {
-    if (typeof document !== "undefined" && document.title !== title) document.title = title;
-  }, [title]);
-};
+export { usePageTitle } from "@/lib/pageTitle";
 
-/* route changes land at the top without a jumpy anchor restore */
+/**
+ * Route changes land at the top — except when the link carries a hash, in which
+ * case they land on that section.
+ *
+ * The footer and the nav link to anchors (`/gate#moats`, `/#boundary`, …). The
+ * browser cannot honour those on its own because the target element does not
+ * exist yet when the route changes, and the previous implementation scrolled to
+ * the top unconditionally, so every one of those links silently did nothing.
+ */
 export const ScrollTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
-  }, [pathname]);
+    if (typeof window === "undefined") return undefined;
+    const jumpToTop = () => window.scrollTo({ top: 0, behavior: "auto" });
+
+    if (!hash || hash === "#") {
+      jumpToTop();
+      return undefined;
+    }
+
+    /* A malformed hash (`#%`) must not throw inside the route tree. */
+    let id = hash.replace(/^#/, "");
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      /* keep the raw fragment */
+    }
+    if (!id) {
+      jumpToTop();
+      return undefined;
+    }
+
+    /* The page paints after the route changes, so wait for the frame (and then
+     * one more) before looking the anchor up. Falls back to the top when the
+     * target does not exist, instead of leaving the visitor mid-page. */
+    let inner = 0;
+    const outer = window.requestAnimationFrame(() => {
+      inner = window.requestAnimationFrame(() => {
+        const target = document.getElementById(id);
+        if (!target) {
+          jumpToTop();
+          return;
+        }
+        const reduced = typeof window.matchMedia === "function"
+          && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(outer);
+      if (inner) window.cancelAnimationFrame(inner);
+    };
+  }, [pathname, hash]);
   return null;
 };
 
 export function ImmersiveNav() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const go = (path) => () => navigate(user ? path : "/login");
+  /* Keep the destination when the visitor has to sign in first, so the console
+   * opens after auth instead of dropping them on the dashboard default. */
+  const go = (path) => () =>
+    navigate(user ? path : `/login?redirect=${encodeURIComponent(path)}`);
   const { openAuth, walletAddress } = useAuthUI();
   const shortWallet = walletAddress
     ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`

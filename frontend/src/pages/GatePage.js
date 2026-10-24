@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/App";
 import { useReveal } from "@/lib/motion";
+import { usePageTitle } from "@/lib/pageTitle";
 import GatePipeline from "@/components/marketing/GatePipeline";
 import GateTrace from "@/components/marketing/GateTrace";
 import { RefusalTable } from "@/components/marketing/SpecBlocks";
@@ -60,6 +61,7 @@ const TRACE_FIELDS = [
 export default function GatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  usePageTitle("Gate mechanics — AVAIRA");
   const reveal = useReveal({ step: 60 });
 
   const goToConsole = () => {

@@ -184,7 +184,18 @@
   color: var(--imm-paper);
   text-decoration: none;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
 }
+.landing-immersive .imm-wordmark img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: block;
+  transition: transform 0.25s ease;
+}
+.landing-immersive .imm-wordmark:hover img { transform: rotate(-6deg) scale(1.06); }
 .landing-immersive .imm-wordmark span { color: var(--imm-lime); }
 .landing-immersive .imm-nav-links { display: flex; gap: 1.6rem; }
 .landing-immersive .imm-nav-links a {

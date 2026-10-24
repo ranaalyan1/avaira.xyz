@@ -18,10 +18,9 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Franaalyan1%2Favaira.xyz&project-name=avaira&repository-name=avaira&root-directory=frontend)
 
-<sub>The site is **not live yet** — `avaira.vercel.app` currently returns Vercel's 404, because the
-project is no longer connected to this repository. The button above (or the
-[deploy runbook](docs/deploy-vercel.md)) is the one step that fixes it; `make verify-deploy`
-then proves the URL is serving the app.</sub>
+<sub>The site is **live** at **https://avaira-pi.vercel.app** — auto-deployed from `main`
+on every push (Vercel project `avaira`, root `frontend/`). `make verify-deploy`
+proves the URL is serving the app.</sub>
 
 [**Overview**](#-why-avaira) •
 [**3-Layer Architecture**](#-three-layer-architecture) •
@@ -75,7 +74,7 @@ before it does.
 
 | What | Where | Status |
 | :--- | :--- | :--- |
-| **Site** | https://avaira.vercel.app | ⏳ **TODO — not live yet.** The Vercel project is not connected to this repo. One click: the *Deploy with Vercel* button at the top of this page, or rename the existing `avaira-v2` project to `avaira` and redeploy. Then `make verify-deploy` prints 11/11 PASS. |
+| **Site** | https://avaira-pi.vercel.app | ✅ **Live** — auto-deploys from `main`; 69/69 frontend tests gate every merge. |
 | **Contracts** | Robinhood Testnet `46630` | ✅ **Deployed 2026-10-24** — 7/7 contracts live and wired, liveness-verified. Addresses below render from `contracts/deployments/46630.json`. |
 | **Local, right now** | your machine | ✅ `git clone … && ./setup.sh` — ~7s, four proof artifacts, 21 kernel tests. No keys, no wallet, no database. |
 
@@ -431,7 +430,7 @@ All metrics are measured from real Foundry test and benchmark runs stored in [`c
 
 The React 19 + Tailwind CSS + Radix UI control center ([`frontend/`](frontend/)) provides real-time visibility into agent telemetry, risk envelopes, execution lifecycles, underwriter pools, slashing events, and reputation heatmaps.
 
-**Design system.** AVAIRA renders two surfaces from one component layer: a **light marketing site** (white canvas, hairline dividers, indigo calls to action, pastel glows) and a **dark operator console** (blueprint-tinted neutrals, dense mono telemetry) — the same split developer tools use for `site` versus `app`. Colours live as RGB-channel CSS variables in [`frontend/src/index.css`](frontend/src/index.css) (`:root` = console, `.theme-marketing` = marketing), mirrored in [`frontend/src/lib/palette.js`](frontend/src/lib/palette.js) for charts and mirrored back into the pre-render in `frontend/public/index.html`. **Red is reserved for danger** (frozen agents, slashed collateral, blocked intents); indigo carries every other primary action. See [`docs/design-system.md`](docs/design-system.md) for the tokens and the rules, and `frontend/src/pages/design.smoke.test.js` for the executable half of the contract.
+**Design system.** The marketing site is an immersive, scroll-driven experience: a 3D **execution boundary** scene built with React Three Fiber and GSAP ScrollTrigger (near-black canvas, one neon-lime accent, Space Grotesk display type, pill CTAs) that walks a request through the gate in narrative acts; three.js code-splits out of the entry bundle so text paints first. The operator console behind the login keeps the dense mono-telemetry language. The brand mark (`assets/logo.png`) drives the favicon, the boot loader and the nav. See `frontend/src/pages/landing-immersive.css` for the tokens and `frontend/src/pages/design.smoke.test.js` for the executable half of the contract.
 
 > **These screenshots are stale** — they show the previous dark/cyberpunk styling, captured before the
 > dual-theme redesign. Regenerate them with one command:

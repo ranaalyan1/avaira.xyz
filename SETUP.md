@@ -177,3 +177,40 @@ paste into an issue: <https://github.com/ranaalyan1/avaira.xyz/issues>.
 
 Anything less exits non-zero and prints the failing command's output. That is why
 the same script is safe for CI, for your laptop, and for an AI agent.
+
+
+## Dynamic.xyz wallet sign-in
+
+The marketing site signs users in with [Dynamic](https://dynamic.xyz): email OTP
+in, embedded (WaaS) wallet out — the wallet becomes the visitor's identity
+surface for the protocol. The console pages keep the existing backend OAuth
+session; the two layers are independent.
+
+Setup (5 minutes, one env var):
+
+1. Create a project at https://console.dynamic.xyz and copy the
+   **environment ID** (Dashboard > Developers > API & SDK Keys).
+2. Set `REACT_APP_DYNAMIC_ENV_ID` in `frontend/.env` (or the host's env vars)
+   and rebuild. With the variable absent, sign-in renders a clear
+   "not configured" card and nothing else breaks.
+3. In the Dynamic dashboard, enable:
+   - **Sign-in Methods > Email** (email OTP)
+   - **Wallets > Embedded Wallets** (WaaS)
+   - **Chains & Networks**: the EVM networks you want embedded wallets on.
+     Robinhood Chain testnet (chain id 46630) is custom — add it as a custom
+     EVM network if you want contract reads bound to the same chain.
+   - **Security > Allowed Origins**: `http://localhost:3000` and the deployed
+     origin (e.g. `https://avaira.vercel.app`), including the port.
+
+Architecture notes (see `frontend/src/components/auth/`):
+
+- `dynamicClient.js` — module-level singleton; registers the EVM extension
+  immediately after `createDynamicClient()`; fully bypassed when the env ID
+  is missing so tests and backend-only deploys keep working.
+- `AuthUIContext.js` — light context, no SDK imports; any page can call
+  `useAuthUI().openAuth()`.
+- `DynamicAuth.js` — `<DynamicAuthLayer>` wraps the app root in
+  `DynamicProvider`; `<WaasBootstrap>` creates embedded wallet accounts on
+  `userChanged` (unconditionally — a stale account list must not skip it).
+- `SignInModal.js` — headless email-OTP flow in the site's design language:
+  email -> code -> signed-in readout with the wallet address and sign-out.

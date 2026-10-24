@@ -1,0 +1,146 @@
+/* The Avaira sign-in modal — black, lime, IBM Plex Mono */
+
+.imm-auth-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: rgba(3, 3, 3, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.imm-auth-card {
+  position: relative;
+  width: min(26rem, 100%);
+  background: #0a0a0a;
+  border: 1px solid rgba(244, 244, 239, 0.12);
+  border-top: 2px solid #ccff00;
+  padding: 2rem 1.8rem 1.8rem;
+  animation: imm-auth-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes imm-auth-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.imm-auth-head { position: relative; margin-bottom: 1.4rem; }
+.imm-auth-kicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 239, 0.42);
+  margin: 0 0 0.4rem;
+}
+.imm-auth-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f4f4ef;
+  margin: 0;
+}
+.imm-auth-title span { color: #ccff00; }
+
+.imm-auth-x {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(244, 244, 239, 0.5);
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+}
+.imm-auth-x:hover { color: #ccff00; border-color: rgba(244, 244, 239, 0.2); }
+
+.imm-auth-body { display: grid; gap: 0.9rem; }
+.imm-auth-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 239, 0.45);
+  margin: 0.2rem 0;
+}
+.imm-auth-addr {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  color: #f4f4ef;
+  margin: 0;
+  word-break: break-all;
+}
+.imm-auth-addr-lime { color: #ccff00; }
+.imm-auth-note {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(244, 244, 239, 0.62);
+  margin: 0;
+}
+.imm-auth-note b { color: #f4f4ef; font-weight: 500; }
+.imm-auth-code {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  color: #ccff00;
+  background: rgba(204, 255, 0, 0.07);
+  padding: 0.1rem 0.35rem;
+}
+
+.imm-auth-form { display: grid; gap: 0.45rem; margin-top: 0.4rem; }
+.imm-auth-input {
+  width: 100%;
+  background: #050505;
+  border: 1px solid rgba(244, 244, 239, 0.18);
+  color: #f4f4ef;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  padding: 0.7rem 0.8rem;
+  outline: none;
+  transition: border-color 140ms ease;
+}
+.imm-auth-input:focus { border-color: #ccff00; }
+.imm-auth-input::placeholder { color: rgba(244, 244, 239, 0.28); }
+
+.imm-auth-form .imm-btn { margin-top: 0.7rem; }
+
+.imm-auth-error {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  color: #ff5f56;
+  margin: 0.2rem 0 0;
+  word-break: break-word;
+}
+
+.imm-auth-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
+.imm-auth-actions .imm-btn { margin-top: 0.6rem; }
+
+/* nav wallet chip */
+.imm-nav-wallet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(204, 255, 0, 0.45);
+  color: #ccff00;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 0.42rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(204, 255, 0, 0.05);
+  cursor: pointer;
+}
+.imm-nav-wallet:hover { background: rgba(204, 255, 0, 0.12); }
+.imm-nav-wallet i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ccff00;
+  box-shadow: 0 0 8px rgba(204, 255, 0, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imm-auth-card { animation: none; }
+}

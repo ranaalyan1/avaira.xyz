@@ -37,10 +37,16 @@ const queryClient = new QueryClient();
 export const AuthContext = createContext({ user: null, authReady: false, setUser: () => {}, logout: () => {}, backendMisconfigured: false });
 export const useAuth = () => useContext(AuthContext);
 
-function ProtectedRoute({ children }) {
+export function ProtectedRoute({ children }) {
   const { user, authReady } = useAuth();
+  const { authConfigured, dynamicReady } = useAuthUI();
   const location = useLocation();
-  if (!authReady) {
+  /* Two things can still be settling: the session-backend probe
+     (authReady) and the Dynamic session restore (dynamicReady). While
+     either is in flight we must NOT redirect — deciding "no user" too
+     early is what sent /dashboard and /login into the infinite
+     navigate loop that froze the console. */
+  if (!authReady || (authConfigured && !dynamicReady)) {
     return <div className="p-6 font-mono text-xs text-avaira-muted">Checking session...</div>;
   }
   if (!user) {
@@ -136,14 +142,40 @@ function App() {
 /* The tree under the light auth-UI context: TanStack Query outside,
    DynamicProvider (when configured) inside, modal + routes last. */
 function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
-  const { setDynamicAuth } = useAuthUI();
+  const { setDynamicAuth, dynamicUser, walletAddress, registerDynamicLogout, callDynamicLogout } = useAuthUI();
+
+  /* With a session backend attached, `user` (from /auth/me) is the source of
+   * truth and the Dynamic identity is just the wallet. With NO backend —
+   * this deployment — the Dynamic session IS the console identity: without
+   * this merge, ProtectedRoute always saw user=null and bounced every
+   * console page to /login, which immediately navigated back on the live
+   * wallet. That loop is what froze the tab as a "crash". */
+  const effectiveUser = user || (
+    backendMisconfigured && (dynamicUser || walletAddress)
+      ? {
+          name: [dynamicUser?.firstName, dynamicUser?.lastName].filter(Boolean).join(" ")
+            || dynamicUser?.email?.split("@")[0]
+            || (walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "Operator"),
+          email: dynamicUser?.email || null,
+          picture: dynamicUser?.profilePictureURL || null,
+        }
+      : null
+  );
+
+  /* Signing out must end whichever session actually exists: the Dynamic
+   * login when there is no backend, the backend session when there is one. */
+  const handleLogout = async () => {
+    if (backendMisconfigured) callDynamicLogout();
+    await logout();
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
-      <DynamicAuthLayer onState={setDynamicAuth}>
+      <DynamicAuthLayer onState={setDynamicAuth} registerLogout={registerDynamicLogout}>
         {/* full email-OTP + embedded-wallet flow when configured */}
         <SignInModal />
       </DynamicAuthLayer>
-      <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
+      <AuthContext.Provider value={{ user: effectiveUser, authReady, setUser, logout: handleLogout, backendMisconfigured }}>
       <ErrorBoundary>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>

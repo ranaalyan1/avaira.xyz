@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { useEffect, useState, createContext, useContext, useCallback } from "react";
 import axios from "axios";
 import Layout from "@/components/Layout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Landing from "@/pages/Landing";
 import ExecutionPage from "@/pages/ExecutionPage";
 import EvidenceImmersive from "@/pages/EvidenceImmersive";
@@ -143,6 +144,7 @@ function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
         <SignInModal />
       </DynamicAuthLayer>
       <AuthContext.Provider value={{ user, authReady, setUser, logout, backendMisconfigured }}>
+      <ErrorBoundary>
       <div className="min-h-screen bg-avaira-bg">
         <BrowserRouter>
           <AppRoutes />
@@ -163,6 +165,7 @@ function AppShell({ user, setUser, authReady, logout, backendMisconfigured }) {
           }}
         />
       </div>
+      </ErrorBoundary>
       </AuthContext.Provider>
     </QueryClientProvider>
   );

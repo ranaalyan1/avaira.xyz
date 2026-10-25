@@ -13,6 +13,7 @@
 import fs from "fs";
 import path from "path";
 import { createElement, Fragment } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { renderToStaticMarkup } from "react-dom/server";
 
 /* the static-render world (router, axios, sonner, API mocks) is shared with the
@@ -349,4 +350,40 @@ describe("palette", () => {
     expect(statusColor("something-new")).toEqual(DARK.textMuted);
     expect(statusColor("completed")).toEqual(DARK.success);
   });
+});
+
+/* ── the error boundary: a render crash must never white-screen the app ── */
+
+function BoundaryBomb({ boom }) {
+  if (boom) throw new Error("OTP wallet detonated at render");
+  return createElement("p", { "data-testid": "boundary-child" }, "alive");
+}
+
+it("renders children untouched when nothing throws", () => {
+  const html = render(
+    createElement(ErrorBoundary, null, createElement(BoundaryBomb, { boom: false })),
+  );
+  has(html, 'data-testid="boundary-child"');
+  expect(html).not.toContain('data-testid="app-error-boundary"');
+});
+
+it("puts the failure on screen instead of unmounting the app", () => {
+  // React's server renderer does not run error boundaries, so the fallback is
+  // asserted the way the client reaches it: an error already caught in state.
+  expect(ErrorBoundary.getDerivedStateFromError(new Error("x")).error.message).toBe("x");
+
+  class PrimedBoundary extends ErrorBoundary {
+    constructor(props) {
+      super(props);
+      this.state = { error: new Error("OTP wallet detonated at render") };
+    }
+  }
+  const html = render(
+    createElement(PrimedBoundary, null, createElement(BoundaryBomb, { boom: false })),
+  );
+  has(html, 'data-testid="app-error-boundary"');
+  has(html, "OTP wallet detonated at render");
+  // the crashed subtree is gone; the reload affordance is there
+  expect(html).not.toContain('data-testid="boundary-child"');
+  has(html, 'data-testid="app-error-reload"');
 });

@@ -2,7 +2,7 @@
 
     from avaira import Avaira, RiskEnvelope
 
-    avaira = Avaira.from_deployment(chain_id=46630, private_key=os.environ["AGENT_KEY"])
+    avaira = Avaira.from_deployment(chain_id=4663, private_key=os.environ["AGENT_KEY"])
 
     result = avaira.run(
         agent_id,
@@ -138,7 +138,7 @@ class Avaira:
     @classmethod
     def from_deployment(
         cls,
-        chain_id: int = 46630,
+        chain_id: int = 4663,
         private_key: str | None = None,
         rpc_url: str | None = None,
         manifest_path: str | Path | None = None,

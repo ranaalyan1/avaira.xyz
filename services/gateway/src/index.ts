@@ -16,7 +16,7 @@ import { createServer } from "node:http";
 import { RobinhoodGateClient, vaultFromManifest, reasonName } from "./gate.js";
 import { Gateway, type ExecuteRequest } from "./server.js";
 
-const DEFAULT_MANIFEST = "../../contracts/deployments/46630.json";
+const DEFAULT_MANIFEST = "../../contracts/deployments/4663.json";
 
 function loadManifest(path: string): { chainId: number; intentVault: string } {
   const m = JSON.parse(readFileSync(path, "utf8"));

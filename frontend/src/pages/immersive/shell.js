@@ -9,7 +9,7 @@ import "../landing-immersive.css";
  * scroll; it is now four routes (boundary, execution, evidence, docs) sharing
  * this nav + footer, so each act deep-links, prerenders and titles on its own. */
 
-export const EXPLORER = "https://explorer.testnet.chain.robinhood.com/address";
+export const EXPLORER = "https://robinhoodchain.blockscout.com/address";
 
 export const DEPLOYMENTS = [
   ["IdentityRegistry", "0xBAd4cb2Ec6667674b2B61B1d4C8FFfbF7FE64040"],
@@ -257,7 +257,7 @@ export function ImmersiveFoot() {
       </div>
       <div className="imm-foot-bottom">
         <p>{`(c) 2026 Avaira — an independent project, not affiliated with Robinhood`}</p>
-        <p>{`Testnet build / chain 46630 / contracts deployed 2026-10-24`}</p>
+        <p>{`Mainnet build / chain 4663 / contracts deployed 2026-10-25`}</p>
       </div>
     </footer>
   );

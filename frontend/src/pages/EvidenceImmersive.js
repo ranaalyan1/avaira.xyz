@@ -56,19 +56,18 @@ export default function EvidencePage() {
               Deployed, wired, and verifiable from the explorer.
             </h2>
             <p className="imm-lead" data-reveal>
-              {`Robinhood Chain testnet, chain id 46630, deployed 2026-10-24.
-                Every address below is live and liveness-checked by a make target
-                in the repository. Testnet means testnet: this is not a mainnet
-                launch claim.`}
+              {`Robinhood Chain mainnet, chain id 4663. Every address below is live
+                and liveness-checked by a make target in the repository. Real
+                chain, real stakes.`}
             </p>
           </div>
           <div style={{ overflowX: "auto" }} data-reveal>
             <table className="imm-table" data-testid="evidence-table">
-              <caption className="sr-only">Avaira contracts deployed on Robinhood Chain testnet</caption>
+              <caption className="sr-only">Avaira contracts deployed on Robinhood Chain mainnet</caption>
               <thead>
                 <tr>
                   <th scope="col">Contract</th>
-                  <th scope="col">Address (chain 46630)</th>
+                  <th scope="col">Address (chain 4663)</th>
                   <th scope="col">Explorer</th>
                 </tr>
               </thead>

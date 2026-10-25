@@ -46,7 +46,7 @@ function candidates(chainId: number, explicit?: string): string[] {
   return out;
 }
 
-export function loadDeployment(chainId = 46630, explicitPath?: string): DeploymentManifest {
+export function loadDeployment(chainId = 4663, explicitPath?: string): DeploymentManifest {
   for (const path of candidates(chainId, explicitPath)) {
     if (existsSync(path)) {
       const manifest = JSON.parse(readFileSync(path, "utf8")) as DeploymentManifest;

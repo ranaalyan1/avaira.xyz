@@ -14,6 +14,7 @@ import {
   useUser,
   useGetWalletAccounts,
   useOnEvent,
+  useLogout,
 } from "@dynamic-labs-sdk/react-hooks";
 import {
   createWaasWalletAccounts,
@@ -21,15 +22,29 @@ import {
 } from "@dynamic-labs-sdk/client/waas";
 import dynamicClient, { dynamicAuthConfigured } from "@/dynamicClient";
 
-/* mirrors live Dynamic state into the light context */
+/* mirrors live Dynamic state into the light context. `isLoading` is the
+ * SDK's session-restore flag: false once it knows whether a user exists.
+ * ProtectedRoute waits on it so a direct console load does not bounce
+ * through /login while the stored session is still being read. */
 function DynamicScope({ onState }) {
-  const { data: user } = useUser();
+  const { data: user, isLoading } = useUser();
   const { data: accounts = [] } = useGetWalletAccounts();
 
   useEffect(() => {
-    onState(user || null, accounts[0]?.address || null);
-  }, [user, accounts, onState]);
+    onState(user || null, accounts[0]?.address || null, isLoading === false);
+  }, [user, accounts, isLoading, onState]);
 
+  return null;
+}
+
+/* The real Dynamic logout lives behind the SDK hooks, which only exist
+ * inside <DynamicProvider>. This bridge hands the callback out to the
+ * light context so the app root can sign the Dynamic session out. */
+function LogoutBridge({ registerLogout }) {
+  const { mutate } = useLogout();
+  useEffect(() => {
+    registerLogout(() => mutate());
+  }, [mutate, registerLogout]);
   return null;
 }
 
@@ -53,12 +68,13 @@ export function WaasBootstrap() {
   return null;
 }
 
-export function DynamicAuthLayer({ onState, children }) {
+export function DynamicAuthLayer({ onState, registerLogout, children }) {
   if (!dynamicAuthConfigured) return children || null;
   return (
     <DynamicProvider client={dynamicClient}>
       <WaasBootstrap />
       <DynamicScope onState={onState} />
+      <LogoutBridge registerLogout={registerLogout} />
       {children}
     </DynamicProvider>
   );

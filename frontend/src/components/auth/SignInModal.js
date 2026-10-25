@@ -29,6 +29,64 @@ const PROVIDERS = [
   { id: "twitter", label: "X" },
 ];
 
+/* ── enabled social providers ──────────────────────────────────────
+ *
+ * The buttons must match what the Dynamic environment actually allows:
+ * a provider that is not toggled on in the Dynamic dashboard fails at
+ * click time with a generic SDK error. The public SDK settings endpoint
+ * (the same one the SDK itself reads) lists the enabled providers, so
+ * the modal renders exactly those — and none when the environment has
+ * social sign-in turned off entirely.
+ *
+ * Fetched once per page load, cached at module scope so every open of
+ * the modal reuses it. */
+let socialProvidersCache = null;
+let socialProvidersPromise = null;
+
+export function fetchEnabledSocialProviders(envId) {
+  if (socialProvidersPromise) return socialProvidersPromise;
+  socialProvidersPromise = fetch(
+    `https://app.dynamic.xyz/api/v0/sdk/${envId}/settings`,
+  )
+    .then((r) => (r.ok ? r.json() : null))
+    .then((settings) => {
+      const list = settings?.sdk?.socialSignIn?.providers || [];
+      /* entries are provider ids ("google"); tolerate {id: "google"} */
+      const ids = list
+        .map((entry) => (typeof entry === "string" ? entry : entry?.id))
+        .filter(Boolean);
+      socialProvidersCache = ids;
+      return ids;
+    })
+    .catch(() => {
+      socialProvidersCache = [];
+      return [];
+    });
+  return socialProvidersPromise;
+}
+
+/* eslint-disable no-underscore-dangle */
+export function resetSocialProvidersCacheForTests() {
+  socialProvidersCache = null;
+  socialProvidersPromise = null;
+}
+
+function useEnabledSocialProviders(envId) {
+  const [ids, setIds] = useState(socialProvidersCache || []);
+  useEffect(() => {
+    let live = true;
+    if (socialProvidersCache) {
+      setIds(socialProvidersCache);
+      return undefined;
+    }
+    fetchEnabledSocialProviders(envId).then((found) => {
+      if (live) setIds(found);
+    });
+    return () => { live = false; };
+  }, [envId]);
+  return ids;
+}
+
 function ProviderIcon({ id }) {
   const common = { width: "1em", height: "1em", viewBox: "0 0 24 24", fill: "currentColor" };
   switch (id) {
@@ -49,7 +107,7 @@ function ProviderIcon({ id }) {
     );
   }
 }
-import { dynamicAuthConfigured } from "@/dynamicClient";
+import { dynamicAuthConfigured, DYNAMIC_ENV_ID } from "@/dynamicClient";
 import "./auth.css";
 import { useAuthUI } from "./AuthUIContext";
 
@@ -78,6 +136,12 @@ function OtpFlow() {
   useEffect(() => {
     if (otpVerification && codeRef.current) codeRef.current.focus();
   }, [otpVerification]);
+
+  /* only render providers that are actually enabled on the environment */
+  const enabledSocial = useEnabledSocialProviders(DYNAMIC_ENV_ID);
+  const socialButtons = PROVIDERS.filter(
+    (p) => enabledSocial.includes(p.id) || (p.id === "twitter" && enabledSocial.includes("x")),
+  );
 
   const rawError = verifyError || sendError || socialError;
   useEffect(() => {
@@ -119,23 +183,27 @@ function OtpFlow() {
   if (!otpVerification) {
     return (
       <div className="imm-auth-body">
-        <div className="imm-auth-social" data-testid="auth-social-row">
-          {PROVIDERS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className="imm-auth-sbtn"
-              data-testid={`auth-social-${p.id}`}
-              title={`Continue with ${p.label}`}
-              disabled={socialPending}
-              onClick={() => { setPendingProvider(p.id); socialSignIn({ provider: p.id }); }}
-            >
-              <ProviderIcon id={p.id} />
-              <span>{pendingProvider === p.id && socialPending ? "Opening…" : p.label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="imm-auth-divider"><span>or with email</span></div>
+        {socialButtons.length > 0 && (
+          <div className="imm-auth-social" data-testid="auth-social-row">
+            {socialButtons.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className="imm-auth-sbtn"
+                data-testid={`auth-social-${p.id}`}
+                title={`Continue with ${p.label}`}
+                disabled={socialPending}
+                onClick={() => { setPendingProvider(p.id); socialSignIn({ provider: p.id }); }}
+              >
+                <ProviderIcon id={p.id} />
+                <span>{pendingProvider === p.id && socialPending ? "Opening…" : p.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {socialButtons.length > 0 && (
+          <div className="imm-auth-divider"><span>or with email</span></div>
+        )}
         <p className="imm-auth-note">
           One email, one code, one embedded wallet. No extension, no seed
           phrase — the wallet is created for you and bound to your account.

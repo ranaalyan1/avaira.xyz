@@ -36,7 +36,10 @@ jest.mock("@/dynamicClient", () => ({
 }));
 
 import { AuthUIProvider } from "./AuthUIContext";
-import SignInModal from "./SignInModal";
+import SignInModal, {
+  fetchEnabledSocialProviders,
+  resetSocialProvidersCacheForTests,
+} from "./SignInModal";
 
 function chrome(initialOpen) {
   return renderToStaticMarkup(
@@ -48,24 +51,60 @@ function chrome(initialOpen) {
 
 const PROVIDERS = ["google", "apple", "discord", "github", "twitter"];
 
+/* The modal renders only social providers enabled on the Dynamic
+ * environment (read from the public SDK settings endpoint). The module
+ * cache is primed per-test with a mocked fetch. */
+async function primeProviders(providerIds) {
+  resetSocialProvidersCacheForTests();
+  global.fetch = jest.fn(() => Promise.resolve({
+    ok: true,
+    json: async () => ({ sdk: { socialSignIn: { providers: providerIds } } }),
+  }));
+  await fetchEnabledSocialProviders("test-environment-id");
+}
+
+afterEach(() => {
+  resetSocialProvidersCacheForTests();
+  global.fetch = undefined;
+});
+
 describe("the sign-in modal (configured)", () => {
-  it("renders nothing when closed", () => {
+  it("renders nothing when closed", async () => {
+    await primeProviders(["google"]);
     expect(chrome(false)).not.toContain("auth-modal");
   });
 
-  it("offers every social provider above the email flow", () => {
+  it("offers only the providers enabled on the environment", async () => {
+    await primeProviders(["google", "github"]);
     const html = chrome(true);
     expect(html).toContain('data-testid="auth-modal"');
     expect(html).toContain('data-testid="auth-social-row"');
-    PROVIDERS.forEach((p) => {
-      expect(html).toContain(`data-testid="auth-social-${p}"`);
+    expect(html).toContain('data-testid="auth-social-google"');
+    expect(html).toContain('data-testid="auth-social-github"');
+    /* the rest must not render as dead buttons */
+    ["apple", "discord", "twitter"].forEach((p) => {
+      expect(html).not.toContain(`data-testid="auth-social-${p}"`);
     });
     expect(html).toContain("or with email");
     // the unconfigured card must NOT render
     expect(html).not.toContain("auth-unconfigured");
   });
 
-  it("shows the email OTP form once configured", () => {
+  it("renders no social row when the environment has none enabled", async () => {
+    await primeProviders([]);
+    const html = chrome(true);
+    expect(html).toContain('data-testid="auth-modal"');
+    expect(html).not.toContain("auth-social-row");
+    expect(html).not.toContain("or with email");
+    /* every social provider still hidden — no dead buttons */
+    PROVIDERS.forEach((p) => {
+      expect(html).not.toContain(`data-testid="auth-social-${p}"`);
+    });
+    expect(html).not.toContain("auth-unconfigured");
+  });
+
+  it("shows the email OTP form once configured", async () => {
+    await primeProviders([]);
     const html = chrome(true);
     expect(html).toContain('id="auth-email"');
     expect(html).toContain('data-testid="auth-send-code"');

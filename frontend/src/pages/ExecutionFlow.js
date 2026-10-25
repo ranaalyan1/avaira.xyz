@@ -50,7 +50,7 @@ export default function ExecutionFlow() {
   /* Robinhood Chain testnet — the chain every deployment in this repository
    * lives on. The form used to default to 43113 (Avalanche Fuji), so a request
    * created from the console named a chain the contracts are not on. */
-  const [form, setForm] = useState({ agent_id: "", action: "swap", target_address: "", value: "1.0", chain_id: "46630" });
+  const [form, setForm] = useState({ agent_id: "", action: "swap", target_address: "", value: "1.0", chain_id: "4663" });
 
   const fetchData = useCallback(async () => {
     try {

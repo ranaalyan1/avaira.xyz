@@ -9,8 +9,8 @@
  *
  * const avaira = new Avaira({
  *   rpcUrl: "https://rpc.testnet.chain.robinhood.com",
- *   chainId: 46630,
- *   contracts: deployment,          // deployments/46630.json
+ *   chainId: 4663,
+ *   contracts: deployment,          // deployments/4663.json
  *   privateKey: process.env.AVAIRA_PRIVATE_KEY,
  * });
  *

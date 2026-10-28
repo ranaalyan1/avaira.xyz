@@ -9,7 +9,12 @@ import "../landing-immersive.css";
  * scroll; it is now four routes (boundary, execution, evidence, docs) sharing
  * this nav + footer, so each act deep-links, prerenders and titles on its own. */
 
-export const EXPLORER = "https://robinhoodchain.blockscout.com/address";
+/* The explorer of the chain the deployed contracts actually live on (see
+ * contracts/deployments/46630.json). Pointing the evidence links at the
+ * mainnet explorer while the deployment is testnet made every "view" link
+ * dead — the exact kind of unverifiable claim this protocol exists to kill.
+ * When the mainnet (4663) deploy lands, this moves with it. One line. */
+export const EXPLORER = "https://explorer.testnet.chain.robinhood.com/address";
 
 export const DEPLOYMENTS = [
   ["IdentityRegistry", "0xBAd4cb2Ec6667674b2B61B1d4C8FFfbF7FE64040"],
@@ -257,7 +262,7 @@ export function ImmersiveFoot() {
       </div>
       <div className="imm-foot-bottom">
         <p>{`(c) 2026 Avaira — an independent project, not affiliated with Robinhood`}</p>
-        <p>{`Mainnet build / chain 4663 / contracts deployed 2026-10-25`}</p>
+        <p>{`Testnet deployment live / chain 46630 / mainnet 4663 staged`}</p>
       </div>
     </footer>
   );

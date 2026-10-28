@@ -94,7 +94,7 @@ export default function Landing() {
             </Suspense>
           </div>
           <div className="imm-hud" aria-hidden="true">
-            <p>ROBINHOOD MAINNET <b>/ CHAIN 4663</b></p>
+            <p>ROBINHOOD TESTNET <b>/ CHAIN 46630</b></p>
             <p>GATE <b>OPERATIONAL</b> / REFUSALS 9</p>
             <p>SETTLEMENT <b>24H CHALLENGE WINDOW</b></p>
           </div>

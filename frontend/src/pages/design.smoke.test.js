@@ -86,7 +86,7 @@ const PAGES = [
     ],
     ids: ["evidence", "architecture"],
     copy: [
-      "chain id 4663", "157", "0 violations", "IdentityRegistry",
+      "chain id 46630", "157", "0 violations", "IdentityRegistry",
       "Gateway service", "not affiliated with Robinhood",
     ],
     art: [],
@@ -236,7 +236,7 @@ describe("marketing site", () => {
   it("renders every animated figure in its resolved state", () => {
     const evidence = render(<ImmersiveEvidence />);
     has(evidence, "157"); // the Foundry count, in static markup
-    has(evidence, "chain id 4663");
+    has(evidence, "chain id 46630");
 
     const gate = render(<GatePage />);
     has(gate, "four planes cleared");

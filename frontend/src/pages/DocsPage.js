@@ -7,7 +7,7 @@ import { ImmersiveNav, ImmersiveFoot, usePageTitle } from "@/pages/immersive/she
 
 const TS_SNIPPET = [
   ['import { Avaira, loadDeployment } from "@avaira/sdk";'],
-  ["const deployment = loadDeployment(4663);            // Robinhood Mainnet"],
+  ["const deployment = loadDeployment(46630);           // Robinhood Chain testnet"],
   ["const avaira = new Avaira({ chainId: 46630, rpcUrl: \"https://rpc.testnet.chain.robinhood.com\", privateKey: process.env.AGENT_PRIVATE_KEY, contracts: deployment });"],
   ["// The callback only runs when the gate returns a signed permit."],
   ["const result = await avaira.run("],

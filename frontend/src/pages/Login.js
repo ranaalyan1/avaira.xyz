@@ -57,7 +57,7 @@ export default function Login() {
           <ul className="imm-meta">
             <li>Dynamic</li>
             <li>embedded wallet</li>
-            <li>chain 4663</li>
+            <li>chain 46630</li>
           </ul>
         </div>
 

@@ -122,6 +122,12 @@ if "localhost" in mongo_url.lower():
     logger.warning("WARNING: Using local MongoDB. Switch to Atlas for production.")
 
 AVAIRA_ADMIN_KEY = os.environ.get("AVAIRA_ADMIN_KEY", "")
+# The chain execution requests settle on. The old hardcoded default was
+# Avalanche Fuji (43113) — three migrations stale: every request that relied
+# on the default produced permits signed for a chain the protocol has never
+# lived on. Robinhood Chain testnet is the deployed chain today; set
+# AVAIRA_CHAIN_ID=4663 when the mainnet deployment lands.
+AVAIRA_CHAIN_ID = os.environ.get("AVAIRA_CHAIN_ID", "46630")
 PERMIT_SECRET = _get_required_env("PERMIT_SECRET")
 ADMIN_EMAILS = {email.strip().lower() for email in os.environ.get("ADMIN_EMAILS", "").split(",") if email.strip()}
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
@@ -259,7 +265,7 @@ class ExecutionRequestCreate(BaseModel):
     target_address: str = "0x0000000000000000000000000000000000000000"
     value: float = 0.0
     data: str = ""
-    chain_id: str = "43113"
+    chain_id: str = AVAIRA_CHAIN_ID
 
 class FreezeRequest(BaseModel):
     reason: str
@@ -369,7 +375,7 @@ async def _ensure_ai_agent_record(body: AgentThinkRequest, user_id: Optional[str
         "successful_executions": 0,
         "failed_executions": 0,
         "registered_at": timestamp,
-        "chain_id": "43113",
+        "chain_id": AVAIRA_CHAIN_ID,
         "agent_type": "local-runtime",
     }
     await db.agents.insert_one(agent)
@@ -1420,19 +1426,19 @@ async def simulate_protocol_lifecycle(request: Request, admin_user: Dict[str, An
     steps.append({"step": 1, "action": "Agent Registered", "details": f"Agent '{agent['name']}' registered with {agent.get('collateral_amount', 0.1)} USD collateral", "agent_id": agent_id})
 
     # Step 2: Submit valid execution
-    exec_data = ExecutionRequestCreate(agent_id=agent_id, action="swap", target_address="0x" + secrets.token_hex(20), value=2.5, chain_id="43113")
+    exec_data = ExecutionRequestCreate(agent_id=agent_id, action="swap", target_address="0x" + secrets.token_hex(20), value=2.5, chain_id=AVAIRA_CHAIN_ID)
     execution = await create_execution_request(exec_data)
     steps.append({"step": 2, "action": "Execution Completed", "details": f"Swap of 2.5 USD executed successfully. Fee: {execution['fee_deducted']} USD", "execution_id": execution["id"], "status": execution["status"]})
 
     # Step 3: Submit another valid execution
-    exec_data2 = ExecutionRequestCreate(agent_id=agent_id, action="transfer", target_address="0x" + secrets.token_hex(20), value=1.0, chain_id="43113")
+    exec_data2 = ExecutionRequestCreate(agent_id=agent_id, action="transfer", target_address="0x" + secrets.token_hex(20), value=1.0, chain_id=AVAIRA_CHAIN_ID)
     execution2 = await create_execution_request(exec_data2)
     steps.append({"step": 3, "action": "Execution Completed", "details": f"Transfer of 1.0 USD executed. Fee: {execution2['fee_deducted']} USD", "execution_id": execution2["id"], "status": execution2["status"]})
 
     # Step 4: Submit deviation (value exceeds risk envelope)
     # First unfreeze agent if frozen and re-check
     await db.agents.update_one({"id": agent_id}, {"$set": {"status": "active"}})
-    exec_data3 = ExecutionRequestCreate(agent_id=agent_id, action="liquidate", target_address="0x" + secrets.token_hex(20), value=150.0, chain_id="43113")
+    exec_data3 = ExecutionRequestCreate(agent_id=agent_id, action="liquidate", target_address="0x" + secrets.token_hex(20), value=150.0, chain_id=AVAIRA_CHAIN_ID)
     execution3 = await create_execution_request(exec_data3)
     steps.append({"step": 4, "action": "Deviation Detected", "details": f"Action 'liquidate' outside risk envelope. Agent FROZEN.", "execution_id": execution3["id"], "status": execution3["status"]})
 

@@ -34,6 +34,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: python -m pip install -r verification/requirements.txt --break-system-packages
+      # tools/compile.mjs reads solc-js from tools/node_modules and @openzeppelin/contracts
+      # from contracts/node_modules; neither is committed.
+      - run: npm ci --prefix tools
+      - run: npm ci --prefix contracts
       - run: node tools/compile.mjs
       - name: Run the shards
         env:

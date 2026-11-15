@@ -70,7 +70,7 @@ packaging==26.0
 pandas==3.0.1
 passlib==1.7.4
 pathspec==1.0.4
-pillow==12.1.1
+pillow==13.0.0
 platformdirs==4.9.2
 pluggy==1.6.0
 propcache==0.4.1

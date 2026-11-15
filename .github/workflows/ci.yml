@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege for every job (audit F-32). Jobs that need more must opt in.
+permissions:
+  contents: read
+
 jobs:
   # Guards the one-command onboarding path: if `./setup.sh` stops taking a clean
   # clone to a verified state on Ubuntu or macOS, this job fails.
@@ -17,8 +21,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: '3.11' }
       - name: One-command setup with structured result
         run: ./setup.sh --yes --json | tee /tmp/setup.json
@@ -46,13 +50,13 @@ jobs:
     name: Contracts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '20' }
       # package.json exists only to vendor @openzeppelin/contracts for the solc
       # remapping; build/test/deploy are Foundry (there is no `compile` script).
       - run: cd contracts && npm ci
-      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1
       - run: cd contracts && forge --version
       - run: cd contracts && forge test
 
@@ -64,14 +68,15 @@ jobs:
         image: mongo:7
         ports: ['27017:27017']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: '3.11' }
-      - run: pip install -r backend/requirements.txt pytest pytest-asyncio pytest-cov --break-system-packages
+      - run: pip install -r backend/requirements.txt pytest pytest-asyncio pytest-cov "mongomock-motor==0.0.36" --break-system-packages
       - name: Backend unit + audit regression suite
         run: |
           pytest tests/test_backend_units.py tests/test_v2_core.py tests/test_cognitive_os.py \
-                 tests/test_audit_security.py tests/test_merkle_parity.py -q --tb=short
+                 tests/test_audit_security.py tests/test_security_remediation.py tests/test_db_regressions.py \
+                 tests/test_merkle_parity.py -q --tb=short
         env:
           MONGO_URL: mongodb://localhost:27017
           DB_NAME: avaira_test
@@ -81,8 +86,8 @@ jobs:
     name: Cognitive OS v5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: '3.11' }
       - name: Install test deps (full suite + demos need the pinned backend deps)
         run: pip install -r backend/requirements.txt pytest pytest-asyncio --break-system-packages
@@ -99,8 +104,8 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'

@@ -52,7 +52,6 @@ jq==1.11.0
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 librt==0.8.1
-litellm==1.80.0
 markdown-it-py==4.0.0
 MarkupSafe==3.0.3
 mangum==0.19.0

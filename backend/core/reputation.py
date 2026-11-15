@@ -153,9 +153,10 @@ class ReputationEngine:
     async def anchor_state(self) -> Dict[str, Any]:
         # Software-defined state anchoring (Chainless)
         # In a real app, this could post to a centralized audit log or a distributed storage like IPFS
-        audit_hash = "sha256:" + os.urandom(32).hex()
+        # Not implemented: nothing is written anywhere. Never report a hash as anchored.
         return {
-            "status": "anchored",
-            "audit_hash": audit_hash,
+            "status": "not_implemented",
+            "anchored": False,
+            "audit_hash": None,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }

@@ -1,4 +1,6 @@
 import json
+
+from .prompt_safety import DATA_ONLY_INSTRUCTION, untrusted_block
 import time
 import anthropic
 import os
@@ -90,8 +92,11 @@ class AvairaValidator:
             compliance_resp = await self.client.messages.create(
                 model=self.model,
                 max_tokens=1000,
-                system="Return ONLY valid JSON.",
-                messages=[{"role": "user", "content": f"Review this intent against envelope: {json.dumps(risk_envelope)} | Intent: {json.dumps(intent)}"}]
+                system=f"Return ONLY valid JSON. {DATA_ONLY_INSTRUCTION}",  # audit F-22
+                messages=[{"role": "user", "content": (
+                    "Review this intent against the envelope. "
+                    f"{untrusted_block({'intent': intent, 'risk_envelope': risk_envelope})}"
+                )}]
             )
             compliance_data = self._extract_json(compliance_resp.content[0].text)
 

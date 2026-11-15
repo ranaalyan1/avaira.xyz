@@ -44,6 +44,7 @@ mock_db.underwriters = get_mock_collection()
 mock_db.user_sessions = get_mock_collection()
 mock_db.users = get_mock_collection()
 mock_db.permit_nonces = get_mock_collection()
+mock_db.oauth_states = get_mock_collection()  # ensure_indexes awaits its create_index
 
 # Fallback for any other access
 mock_db.__getitem__.side_effect = get_mock_collection

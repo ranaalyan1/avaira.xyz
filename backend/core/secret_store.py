@@ -38,6 +38,30 @@ class MissingSecretError(RuntimeError):
     """Raised when no secret can be resolved without falling back to a shared default."""
 
 
+# Values that appear in shipped examples or older repository defaults. Using one of these in
+# a deployment means the key is public (audit F-15). Startup refuses them.
+KNOWN_PLACEHOLDER_SECRETS = frozenset({
+    "keep_this_safe_for_legacy_permits",
+    "default_secret_32_bytes_long_!!!!!",
+    "your_admin_secret_here",
+    "zk-avaira-secret-v2",
+    "hardware-root-of-trust-0x1337",
+})
+
+
+def is_placeholder_secret(value: str) -> bool:
+    normalized = (value or "").strip()
+    return normalized.upper().startswith("CHANGE_ME") or normalized in KNOWN_PLACEHOLDER_SECRETS
+
+
+def reject_placeholder_secret(env_var: str, value: str) -> None:
+    if is_placeholder_secret(value):
+        raise MissingSecretError(
+            f"{env_var} is set to a placeholder/example value. Generate a real one "
+            f"(backend/scripts/generate_secrets.py) before starting."
+        )
+
+
 def data_dir() -> Path:
     override = os.environ.get("AVAIRA_DATA_DIR", "").strip()
     return Path(override) if override else Path.home() / ".avaira"
@@ -64,6 +88,7 @@ def get_or_create_secret(
             raise MissingSecretError(
                 f"{env_var} is too short ({len(value)} chars); use at least {min_length} characters"
             )
+        reject_placeholder_secret(env_var, value)
         return value, "env"
 
     path = data_dir() / filename

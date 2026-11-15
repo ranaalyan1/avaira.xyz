@@ -44,12 +44,15 @@ export interface ExecuteRequest {
 
 export type GatewayResponse =
   | { status: 200; body: { decision: "ALLOWED" | "DENIED"; reason: string; score: number; latencyMs: number; breaker: string } }
+  | { status: 400; body: { error: string } }
   | { status: 401; body: { error: string } }
   | { status: 403; body: { error: string } }
   | { status: 409; body: { error: string } }
   | { status: 423; body: { error: string; breaker: string } }
   | { status: 503; body: { error: string } }
   | { status: 404; body: { error: string } };
+
+const VALID_AGENT_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
 
 export class Gateway {
   private readonly nonces = new NonceRegistry(DRIFT_MS);
@@ -65,7 +68,12 @@ export class Gateway {
   handle(
     method: "POST" | "GET",
     path: string,
-    headers: { signature?: string; "x-admin-signature"?: string },
+    headers: {
+      signature?: string;
+      "x-admin-signature"?: string;
+      "x-admin-timestamp"?: string;
+      "x-admin-nonce"?: string;
+    },
     body: ExecuteRequest,
   ): Promise<GatewayResponse> {
     if (method === "GET" && path === "/health") return Promise.resolve(this.health());
@@ -73,7 +81,12 @@ export class Gateway {
     if (method === "GET" && path.startsWith("/breaker/"))
       return Promise.resolve(this.breakerState(path.slice("/breaker/".length)));
     if (method === "POST" && path.endsWith("/reset") && path.startsWith("/breaker/"))
-      return this.breakerReset(path.split("/")[2] ?? "", headers["x-admin-signature"] ?? "");
+      return this.breakerReset(
+        path.split("/")[2] ?? "",
+        headers["x-admin-signature"] ?? "",
+        headers["x-admin-timestamp"] ?? "",
+        headers["x-admin-nonce"] ?? "",
+      );
     return Promise.resolve({ status: 404, body: { error: "not found" } } as GatewayResponse);
   }
 
@@ -149,7 +162,11 @@ export class Gateway {
   }
 
   private breakerState(agentId: string): GatewayResponse {
-    const b = this.breakers.for(agentId);
+    if (!VALID_AGENT_ID.test(agentId)) {
+      return { status: 400, body: { error: "invalid agent id" } };
+    }
+    // Read-only: a GET for an unknown id must not create a breaker (audit F-18).
+    const b = this.breakers.view(agentId);
     return {
       status: 200,
       body: {
@@ -162,11 +179,30 @@ export class Gateway {
     };
   }
 
-  private async breakerReset(agentId: string, adminSig: string): Promise<GatewayResponse> {
-    const canon = `admin:reset:${agentId}`;
+  private async breakerReset(
+    agentId: string,
+    adminSig: string,
+    timestampHeader: string,
+    nonce: string,
+  ): Promise<GatewayResponse> {
+    if (!VALID_AGENT_ID.test(agentId)) {
+      return { status: 400, body: { error: "invalid agent id" } };
+    }
+    // The signature covers a timestamp and a nonce, and each nonce is accepted once within
+    // the drift window. The old canonical string `admin:reset:<id>` never changed, so one
+    // captured signature could reset the breaker again and again (audit F-17).
+    const timestamp = Number(timestampHeader);
+    if (!Number.isFinite(timestamp) || !nonce || nonce.length > 128) {
+      return { status: 403, body: { error: "admin reset needs a timestamp and nonce" } };
+    }
+    const canon = `admin:reset:${agentId}:${timestamp}:${nonce}`;
     const key = agentKey(this.opts.adminSeed, "admin");
     if (!verifySignature(key, canon, adminSig)) {
       return { status: 403, body: { error: "admin reset requires the admin key" } };
+    }
+    // Verify first, then consume: unauthenticated calls cannot burn nonces.
+    if (!this.nonces.consume("admin-reset", nonce, timestamp, this.now())) {
+      return { status: 403, body: { error: "stale or replayed admin reset" } };
     }
     return {
       status: 200,

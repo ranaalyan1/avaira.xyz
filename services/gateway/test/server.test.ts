@@ -130,12 +130,22 @@ test("admin reset requires the admin seed and clears the breaker", async () => {
     const req = signedReq();
     await gw.execute(sigFor(req), req);
   }
-  const wrongSig = sign(agentKey(SEED, "admin"), "admin:reset:1");
-  const denied = await gw.handle("POST", "/breaker/1/reset", { "x-admin-signature": wrongSig }, {} as never);
+  const ts = Date.now();
+  const nonce = "reset-nonce-1";
+  const resetHeaders = (sig: string, n = nonce) => ({
+    "x-admin-signature": sig,
+    "x-admin-timestamp": String(ts),
+    "x-admin-nonce": n,
+  });
+  const wrongSig = sign(agentKey(SEED, "admin"), `admin:reset:1:${ts}:${nonce}`);
+  const denied = await gw.handle("POST", "/breaker/1/reset", resetHeaders(wrongSig), {} as never);
   assert.equal(denied.status, 403, "the agent seed is not the admin seed");
-  const rightSig = sign(agentKey(ADMIN_SEED, "admin"), "admin:reset:1");
-  const ok = await gw.handle("POST", "/breaker/1/reset", { "x-admin-signature": rightSig }, {} as never);
+  const rightSig = sign(agentKey(ADMIN_SEED, "admin"), `admin:reset:1:${ts}:${nonce}`);
+  const ok = await gw.handle("POST", "/breaker/1/reset", resetHeaders(rightSig), {} as never);
   assert.equal(ok.status, 200);
+  // A captured reset cannot be replayed (audit F-17).
+  const replay = await gw.handle("POST", "/breaker/1/reset", resetHeaders(rightSig), {} as never);
+  assert.equal(replay.status, 403, "a replayed admin reset must be refused");
   if (ok.status !== 200) assert.fail("reset failed");
   const state = await gw.handle("GET", "/breaker/1", {}, {} as never);
   if (state.status !== 200) assert.fail("breaker state read failed");
@@ -147,4 +157,16 @@ test("health reports the vault", async () => {
   const res = await gw.handle("GET", "/health", {}, {} as never);
   if (res.status !== 200) assert.fail("health failed");
   assert.ok(res.body.reason.includes(gate.vaultAddress()));
+});
+
+test("GET /breaker never creates state for unknown agents", async () => {
+  const gate = new StubGateClient([]);
+  const gw = new Gateway({ seed: SEED, adminSeed: ADMIN_SEED, gate });
+  for (let i = 0; i < 50; i++) {
+    const r = await gw.handle("GET", `/breaker/unknown-${i}`, {}, {} as never);
+    assert.equal(r.status, 200);
+  }
+  assert.equal((gw as unknown as { breakers: { size: number } }).breakers.size, 0);
+  const bad = await gw.handle("GET", "/breaker/../../etc", {}, {} as never);
+  assert.equal(bad.status, 400);
 });

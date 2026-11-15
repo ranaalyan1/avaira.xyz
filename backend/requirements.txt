@@ -41,7 +41,7 @@ httpcore==1.0.9
 httplib2==0.32.0
 httpx==0.28.1
 huggingface_hub==1.5.0
-idna==3.11
+idna==3.20
 importlib_metadata==8.7.1
 iniconfig==2.3.0
 isort==8.0.0
@@ -122,3 +122,4 @@ websockets==15.0.1
 yarl==1.25.1
 zipp==3.23.0
 anthropic>=0.45.2
+httpx2==2.16.0

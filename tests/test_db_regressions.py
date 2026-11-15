@@ -326,3 +326,38 @@ def test_validate_endpoint_does_not_500(env):
         "risk_envelope": {"max_spend_usd": 10.0, "allowed_actions": ["swap"]},
     })
     assert r.status_code == 200, r.text
+
+
+# F-12: allowed_targets is enforced on the execution route, not only in the helper.
+def _register_with_targets(e, token, targets):
+    e.as_user(token)
+    r = e.client.post("/api/agents/register", json={
+        "name": "targets-agent", "goal": "probe",
+        "risk_envelope": {"max_spend_usd": 10.0, "allowed_actions": ["swap"], "allowed_targets": targets},
+    })
+    assert r.status_code == 200, r.text
+    return r.json()["agent_id"]
+
+
+def test_execution_to_unlisted_target_is_refused_and_freezes_agent(env):
+    alice = env.make_user("alice", "alice@example.com")
+    agent_id = _register_with_targets(env, alice, ["0xAAAA1111"])
+    env.as_user(alice)
+    r = env.client.post("/api/executions/request", json={
+        "agent_id": agent_id, "action": "swap", "value": 1.0, "target_address": "0xBBBB2222",
+    })
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "rejected_deviation"
+    assert _agent(env, agent_id)["status"] == "frozen"
+
+
+def test_execution_to_listed_target_completes_and_matches_case_insensitively(env):
+    alice = env.make_user("alice", "alice@example.com")
+    agent_id = _register_with_targets(env, alice, ["0xAbC1"])
+    env.as_user(alice)
+    r = env.client.post("/api/executions/request", json={
+        "agent_id": agent_id, "action": "swap", "value": 1.0, "target_address": "0xabc1",
+    })
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "completed"
+    assert _agent(env, agent_id)["status"] == "active"

@@ -41,7 +41,7 @@ jest.mock("@dynamic-labs-sdk/client/waas", () => ({
 }), { virtual: true });
 jest.mock("@/dynamicClient", () => ({
   DYNAMIC_ENV_ID: "test-environment-id",
-  dynamicAuthConfigured: false,
+  dynamicAuthConfigured: true,
   default: {},
 }));
 jest.mock("react-router-dom", () => {
@@ -78,6 +78,16 @@ const wrap = ({ auth = {}, ui = null }) => {
   );
   return renderToStaticMarkup(tree);
 };
+
+/* The gate only waits on a Dynamic restore when Dynamic is configured. That is read from
+ * REACT_APP_DYNAMIC_ENV_ID at render time, which CI leaves unset. Set it for this file so the
+ * restore case exercises the wait branch instead of passing through as "not configured". */
+const PRIOR_DYNAMIC_ENV_ID = process.env.REACT_APP_DYNAMIC_ENV_ID;
+beforeAll(() => { process.env.REACT_APP_DYNAMIC_ENV_ID = "test-environment-id"; });
+afterAll(() => {
+  if (PRIOR_DYNAMIC_ENV_ID === undefined) delete process.env.REACT_APP_DYNAMIC_ENV_ID;
+  else process.env.REACT_APP_DYNAMIC_ENV_ID = PRIOR_DYNAMIC_ENV_ID;
+});
 
 it("waits while the Dynamic session is still restoring", () => {
   // restore in flight: a redirect here is what started the login<->console loop

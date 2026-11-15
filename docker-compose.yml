@@ -36,18 +36,6 @@ services:
       - ./backend:/app
       - ./deployments:/app/deployments:ro
 
-  # Daily cron for optional on-chain anchoring
-  anchor-cron:
-    image: alpine:latest
-    depends_on:
-      - backend
-    command: >
-      sh -c "while true; do
-        wget -qO- http://backend:8001/api/anchor-state || true;
-        sleep 86400;
-      done"
-    restart: unless-stopped
-
   frontend:
     build:
       context: ./frontend
@@ -65,7 +53,7 @@ services:
   opa:
     image: openpolicyagent/opa:latest
     ports:
-      - "8181:8181"
+      - "127.0.0.1:8181:8181"  # loopback only (audit F-23): no network auth on OPA
     volumes:
       - ./backend/core:/policies:ro
     command: "run --server --log-level error /policies/shield_rules.rego"
@@ -75,7 +63,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"  # loopback only (audit F-23): no network auth on Ollama
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped

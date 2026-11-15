@@ -12,15 +12,27 @@ from eth_account.messages import encode_typed_data
 from eth_utils.address import to_checksum_address
 from eth_utils.crypto import keccak
 
+# Imported at module load, not inside consume(): a lazy import would pick up a mocked
+# pymongo and turn a replay rejection into a TypeError (audit regression test isolation).
+from pymongo.errors import DuplicateKeyError
+
 logger = logging.getLogger(__name__)
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
+
+def configured_chain_id() -> int:
+    """The chain this deployment signs for. Permits are bound to it (audit F-14)."""
+    return int(os.environ.get("AVAIRA_CHAIN_ID", "46630").strip() or "46630")
 
 
 def _secret_to_private_key(secret: str) -> str:
     normalized = secret.strip()
     if not normalized:
         raise RuntimeError("PERMIT_SECRET is not configured")
+    from core.secret_store import reject_placeholder_secret  # local import: avoid cycles at import time
+
+    reject_placeholder_secret("PERMIT_SECRET", normalized)
     if normalized.startswith("0x") and len(normalized) == 66:
         return normalized
     return f"0x{keccak(text=normalized).hex()}"
@@ -84,7 +96,8 @@ def _typed_data(agent_address: str, action: str, target: str, value_wei: int, no
     }
 
 
-def generate_permit(agent_address: str, action: str, target: str, value: float | int | str, nonce: int, chain_id: int = 43113) -> Dict[str, Any]:
+def generate_permit(agent_address: str, action: str, target: str, value: float | int | str, nonce: int, chain_id: int | None = None) -> Dict[str, Any]:
+    chain_id = configured_chain_id() if chain_id is None else int(chain_id)
     deadline = int((datetime.now(timezone.utc) + timedelta(minutes=5)).timestamp())
     typed_data = _typed_data(agent_address, action, target, _value_to_wei(value), nonce, deadline, chain_id)
     signable = encode_typed_data(full_message=typed_data)
@@ -94,6 +107,8 @@ def generate_permit(agent_address: str, action: str, target: str, value: float |
         "signature": signed.signature.hex(),
         "deadline": deadline,
         "signer": _permit_signer().address,
+        "chain_id": chain_id,
+        "verifying_contract": typed_data["domain"]["verifyingContract"],
         "typed_data": typed_data,
     }
 
@@ -155,8 +170,9 @@ def verify_permit(
             "domain": {
                 "name": "AvairaProtocol",
                 "version": "1",
-                "chainId": int(permit.get("chainId", 43113) or 43113),
-                "verifyingContract": to_checksum_address(permit.get("verifyingContract") or os.environ.get("EXECUTION_WALLET_ADDRESS", ZERO_ADDRESS) or ZERO_ADDRESS),
+                # Pinned to this deployment, never taken from the untrusted permit body (F-14).
+                "chainId": configured_chain_id(),
+                "verifyingContract": to_checksum_address(os.environ.get("EXECUTION_WALLET_ADDRESS", ZERO_ADDRESS) or ZERO_ADDRESS),
             },
             "message": {
                 "agent": permit_agent,
@@ -191,8 +207,6 @@ class PermitNonceRegistry:
 
     async def consume(self, agent_address: str, nonce: int) -> bool:
         """Atomically mark ``(agent, nonce)`` as used. False means it was already used."""
-        from pymongo.errors import DuplicateKeyError
-
         document = {
             "agent_id": to_checksum_address(agent_address).lower(),
             "nonce": int(nonce),

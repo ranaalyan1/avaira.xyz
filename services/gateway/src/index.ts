@@ -16,7 +16,12 @@ import { createServer } from "node:http";
 import { RobinhoodGateClient, vaultFromManifest, reasonName } from "./gate.js";
 import { Gateway, type ExecuteRequest } from "./server.js";
 
-const DEFAULT_MANIFEST = "../../contracts/deployments/4663.json";
+const DEFAULT_MANIFEST = "../../contracts/deployments/46630.json";
+const MAX_BODY_BYTES = 64 * 1024;
+
+function first(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
 
 function loadManifest(path: string): { chainId: number; intentVault: string } {
   const m = JSON.parse(readFileSync(path, "utf8"));
@@ -72,9 +77,31 @@ export function main(): void {
 
   const port = Number(process.env.GATEWAY_PORT ?? 8787);
   const server = createServer((req, res) => {
+    if (req.method !== "GET" && req.method !== "POST") {
+      req.resume();
+      res.writeHead(405, { allow: "GET, POST", "content-type": "application/json" });
+      res.end(JSON.stringify({ error: "method not allowed" }));
+      return;
+    }
     const chunks: Buffer[] = [];
-    req.on("data", (c) => chunks.push(c));
+    let received = 0;
+    let rejected = false;
+    req.on("error", () => {});
+    req.on("data", (c: Buffer) => {
+      if (rejected) return;
+      received += c.length;
+      if (received > MAX_BODY_BYTES) {
+        // Refuse oversized bodies instead of buffering them (audit F-19).
+        rejected = true;
+        res.writeHead(413, { "content-type": "application/json", connection: "close" });
+        res.end(JSON.stringify({ error: "request body too large" }));
+        req.destroy();
+        return;
+      }
+      chunks.push(c);
+    });
     req.on("end", () => {
+      if (rejected) return;
       let body: ExecuteRequest;
       try {
         body = chunks.length ? JSON.parse(Buffer.concat(chunks).toString()) : {};
@@ -87,12 +114,10 @@ export function main(): void {
           req.method === "GET" ? "GET" : "POST",
           req.url ?? "/",
           {
-            signature: Array.isArray(req.headers["x-avaira-signature"])
-              ? req.headers["x-avaira-signature"][0]
-              : req.headers["x-avaira-signature"],
-            "x-admin-signature": Array.isArray(req.headers["x-avaira-admin-signature"])
-              ? req.headers["x-avaira-admin-signature"][0]
-              : req.headers["x-avaira-admin-signature"],
+            signature: first(req.headers["x-avaira-signature"]),
+            "x-admin-signature": first(req.headers["x-avaira-admin-signature"]),
+            "x-admin-timestamp": first(req.headers["x-avaira-admin-timestamp"]),
+            "x-admin-nonce": first(req.headers["x-avaira-admin-nonce"]),
           },
           body,
         )

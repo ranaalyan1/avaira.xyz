@@ -19,6 +19,18 @@ the TypeScript/Python SDKs, and the scorer service. 93 custom errors are enumera
 build into `build/avaira/error-catalog.json`, so "did anything revert with a Solidity `Panic`?"
 is answered per run, not per hope (`INV-PANIC-01`).
 
+**Scope boundary.** This file covers the contracts, SDKs, and scorer only. The 2026-11 pre-launch
+audit of the backend and deployment (F-01 to F-35) is tracked in `SECURITY.md` and in the regression
+tests `tests/test_db_regressions.py` and `tests/test_security_remediation.py`. This file makes no
+zero-knowledge or TEE claims. The audit's O-5 claim that `SECURITY.md` describes ZK was not found in
+either document.
+
+**Last replay (2026-11-14, branch `arena/7a5a414e-avaira-xyz`):** `tools/avaira_evm/attacks.py` ran
+against the compiled bytecode in `build/avaira` with py-evm 0.12.1b1 and eth-tester 0.14.0b1
+(`verification/requirements.txt`). Result: 12/12 scenarios matched their declared expectation, exit 0.
+Forge was not used. The stake-registry `.call` review for F-35 is covered by AV-010 (BLOCKED) and by
+static review, not by Forge tests.
+
 | id | title | severity | status | proof |
 | --- | --- | --- | --- | --- |
 | [AV-001](#av-001) | int256 overflow in `getSummary` | — | **refuted** | `attacks.py --id AV-001` |

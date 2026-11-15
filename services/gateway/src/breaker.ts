@@ -98,19 +98,40 @@ export class CircuitBreaker {
   }
 }
 
+/** Upper bound on tracked agents. Requests for unknown ids must not grow memory without limit. */
+export const MAX_BREAKERS = 10_000;
+
 /** Per-agent registry. One breaker per agent — one agent's compromise never grounds the fleet. */
 export class BreakerRegistry {
   private readonly breakers = new Map<string, CircuitBreaker>();
 
-  constructor(private readonly cfg: BreakerConfig = DEFAULT_CONFIG) {}
+  constructor(
+    private readonly cfg: BreakerConfig = DEFAULT_CONFIG,
+    private readonly maxEntries: number = MAX_BREAKERS,
+  ) {}
 
+  /** Breaker for an agent that is being executed: created on first use. */
   for(agentId: string): CircuitBreaker {
     let b = this.breakers.get(agentId);
     if (!b) {
+      if (this.breakers.size >= this.maxEntries && !this.evictOneClosed()) {
+        // Full of open breakers: do not evict them (that would let anyone re-close another
+        // agent's breaker). Serve a transient breaker that is not stored.
+        return new CircuitBreaker(this.cfg);
+      }
       b = new CircuitBreaker(this.cfg);
       this.breakers.set(agentId, b);
     }
     return b;
+  }
+
+  /** Read-only view for GET requests: never stores state for an unknown id. */
+  view(agentId: string): CircuitBreaker {
+    return this.breakers.get(agentId) ?? new CircuitBreaker(this.cfg);
+  }
+
+  get size(): number {
+    return this.breakers.size;
   }
 
   reset(agentId: string): boolean {
@@ -118,5 +139,16 @@ export class BreakerRegistry {
     if (!b) return false;
     b.reset();
     return true;
+  }
+
+  /** Drop the oldest breaker that is not open. Returns false if there is none. */
+  private evictOneClosed(): boolean {
+    for (const [id, b] of this.breakers) {
+      if (b.state_ !== "OPEN") {
+        this.breakers.delete(id);
+        return true;
+      }
+    }
+    return false;
   }
 }

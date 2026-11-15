@@ -37,6 +37,8 @@ dist
 **/.env.*
 !*.env.example
 !**/.env.example
+# Build flags only, no secrets (audit F-20/F-21). Re-included so the deploy gets them.
+!frontend/.env.production
 
 *token.json*
 *credentials.json*
@@ -104,3 +106,7 @@ build/avaira/
 # them with the command rather than committing a stale copy of someone's run.
 verification/reports/deployed.json
 verification/reports/robinhood.json
+
+# PRIVATE security audit workspace (reports, probes, evidence). Never commit or publish.
+audit-private/
+AUDIT.md.private

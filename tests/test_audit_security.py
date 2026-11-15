@@ -23,6 +23,11 @@ os.environ.setdefault("PERMIT_SECRET", "test-secret-key-avaira-1234567890abcdef"
 # ── secret_store ──────────────────────────────────────────────────────────────
 from core.secret_store import MissingSecretError, get_or_create_secret  # noqa: E402
 
+# Bind the real exception class at import time. tests/test_e2e_flow.py replaces
+# sys.modules['pymongo'] with a mock during collection, so a lazy import inside a test
+# would receive the mock and fail with TypeError (test isolation, not a product bug).
+from pymongo.errors import DuplicateKeyError  # noqa: E402
+
 
 class TestSecretStore:
     def test_env_var_wins(self, monkeypatch):
@@ -115,8 +120,6 @@ class TestPermitNonceRegistry:
             self.seen = set()
 
         async def insert_one(self, document):
-            from pymongo.errors import DuplicateKeyError
-
             key = (document["agent_id"], document["nonce"])
             if key in self.seen:
                 raise DuplicateKeyError("duplicate key")
@@ -398,8 +401,6 @@ class TestOAuthState:
 
     @pytest.mark.asyncio
     async def test_state_can_only_be_consumed_once(self, monkeypatch):
-        from pymongo.errors import DuplicateKeyError
-
         class _States:
             def __init__(self):
                 self.seen = set()

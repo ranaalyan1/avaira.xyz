@@ -122,12 +122,21 @@ if "localhost" in mongo_url.lower():
     logger.warning("WARNING: Using local MongoDB. Switch to Atlas for production.")
 
 AVAIRA_ADMIN_KEY = os.environ.get("AVAIRA_ADMIN_KEY", "")
+if AVAIRA_ADMIN_KEY and (AVAIRA_ADMIN_KEY.upper().startswith("CHANGE_ME") or AVAIRA_ADMIN_KEY == "your_admin_secret_here"):
+    # Shipped example value: refuse to start rather than accept a publicly known admin key (F-15).
+    raise RuntimeError("AVAIRA_ADMIN_KEY is a placeholder. Generate a real key with backend/scripts/generate_secrets.py.")
 # The chain execution requests settle on. The old hardcoded default was
 # Avalanche Fuji (43113) — three migrations stale: every request that relied
 # on the default produced permits signed for a chain the protocol has never
 # lived on. Robinhood Chain testnet is the deployed chain today; set
 # AVAIRA_CHAIN_ID=4663 when the mainnet deployment lands.
 AVAIRA_CHAIN_ID = os.environ.get("AVAIRA_CHAIN_ID", "46630")
+
+# Ceilings for user-supplied economic amounts (audit F-03/F-04). They are simulated
+# ledger values today; the bounds stop a single request from minting arbitrary payouts.
+MAX_COVERAGE_USD = float(os.environ.get("AVAIRA_MAX_COVERAGE_USD", "10000"))
+MAX_MISSION_TARGET_USD = float(os.environ.get("AVAIRA_MAX_MISSION_TARGET_USD", "10000"))
+MAX_UNDERWRITER_CAPITAL_USD = float(os.environ.get("AVAIRA_MAX_UNDERWRITER_CAPITAL_USD", "1000000"))
 PERMIT_SECRET = _get_required_env("PERMIT_SECRET")
 ADMIN_EMAILS = {email.strip().lower() for email in os.environ.get("ADMIN_EMAILS", "").split(",") if email.strip()}
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
@@ -226,15 +235,30 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="AVAIRA Protocol API", lifespan=lifespan)
 
 # ─── PYDANTIC MODELS ────────────────────────────────────────────
+DEFAULT_MAX_SPEND_USD = 10.0
+
 class RiskEnvelope(BaseModel):
-    max_spend_usd: float = 0.0
-    max_spend_per_action_usd: float = 0.0
+    # None means "not declared". An explicit 0 is a real zero-spend cap (audit F-12:
+    # the old `x or default` treated 0 as unset and silently allowed $10).
+    max_spend_usd: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
+    max_spend_per_action_usd: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
     allowed_actions: List[str] = []
     blocked_actions: List[str] = []
     allowed_targets: List[str] = []
     max_concurrent_tasks: int = 1
     require_human_approval_above_usd: float = 100.0
     custom_rules: List[str] = []
+
+def normalize_risk_envelope(envelope: Dict[str, Any]) -> Dict[str, Any]:
+    """Return a copy with a concrete `max_spend_usd` (stored envelopes always carry one)."""
+    env = dict(envelope or {})
+    cap = env.get("max_spend_usd")
+    if cap is None:
+        cap = env.get("max_tx_value")
+    if cap is None:
+        cap = DEFAULT_MAX_SPEND_USD
+    env["max_spend_usd"] = float(cap)
+    return env
 
 class AgentCreate(BaseModel):
     name: str
@@ -263,7 +287,9 @@ class ExecutionRequestCreate(BaseModel):
     agent_id: str
     action: str
     target_address: str = "0x0000000000000000000000000000000000000000"
-    value: float = 0.0
+    # Malformed amounts are rejected here (422), before the envelope check, so bad input
+    # cannot be mistaken for a deviation and freeze the agent (audit F-05).
+    value: float = Field(default=0.0, ge=0, allow_inf_nan=False)
     data: str = ""
     chain_id: str = AVAIRA_CHAIN_ID
 
@@ -272,24 +298,32 @@ class FreezeRequest(BaseModel):
 
 class SlashRequest(BaseModel):
     reason: str
-    amount: Optional[float] = None
+    # Must be positive and finite when given (audit F-09: a negative amount used to
+    # increase collateral). Omit it to slash SLASH_RATE of remaining collateral.
+    amount: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
 
 class UnderwriterCreate(BaseModel):
     name: str
     wallet_address: str = ""
-    capital_amount: float
+    capital_amount: float = Field(gt=0, le=MAX_UNDERWRITER_CAPITAL_USD, allow_inf_nan=False)
 
 class MissionCreate(BaseModel):
     agent_id: str
     description: str
-    target_value: float
-    duration_hours: int = 24
+    target_value: float = Field(gt=0, le=MAX_MISSION_TARGET_USD, allow_inf_nan=False)
+    duration_hours: int = Field(default=24, ge=1, le=24 * 365)
     risk_level: str = "medium"
 
 class MissionStake(BaseModel):
     underwriter_id: str
     amount: float
 
+
+class AgentOutcomeLog(BaseModel):
+    """Agent-reported outcome. Stored separately and never counted as an execution."""
+    intent: Dict[str, Any] = Field(default_factory=dict)
+    status: str = Field(default="reported", max_length=32)
+    result: Optional[str] = Field(default=None, max_length=2000)
 
 class AgentThinkRequest(BaseModel):
     agent_address: str
@@ -341,15 +375,19 @@ async def _normalize_score(agent: Optional[Dict[str, Any]]) -> Dict[str, Any]:
 async def _ensure_ai_agent_record(body: AgentThinkRequest, user_id: Optional[str] = None) -> Dict[str, Any]:
     existing = await db.agents.find_one({"wallet_address": body.agent_address}, {"_id": 0})
     timestamp = datetime.now(timezone.utc).isoformat()
-    if existing and user_id:
+    if existing:
         owner = existing.get("user_id")
-        if owner not in (None, "", "system") and owner != user_id:
+        if not user_id or not owner or owner == "system" or owner != user_id:
             raise HTTPException(403, "You do not own this agent")
+        # Check status before anything is written: a frozen agent's envelope must not be
+        # rewritten by its operator either (audit F-02).
+        if existing.get("status") != "active":
+            raise HTTPException(403, f"Agent is {existing.get('status')}. Only an admin can change this.")
     # body.risk_envelope is a Dict[str, Any] as per AgentThinkRequest model
     if existing:
         updates = {
             "mission_intent": body.mission_goal,
-            "risk_envelope": body.risk_envelope,
+            "risk_envelope": normalize_risk_envelope(body.risk_envelope),
             "updated_at": timestamp,
             "status": existing.get("status", "active"),
         }
@@ -361,11 +399,11 @@ async def _ensure_ai_agent_record(body: AgentThinkRequest, user_id: Optional[str
         "id": str(uuid.uuid4()),
         "name": f"AI Agent {body.agent_address[:6]}",
         "wallet_address": body.agent_address,
-        "user_id": user_id or "system",
+        "user_id": user_id,
         "collateral_amount": 0.1,
         "collateral_remaining": 0.1,
         "mission_intent": body.mission_goal,
-        "risk_envelope": body.risk_envelope,
+        "risk_envelope": normalize_risk_envelope(body.risk_envelope),
         "status": "active",
         "reputation": INITIAL_REPUTATION,
         "avaira_score": 50,
@@ -412,11 +450,31 @@ async def _write_reputation_snapshot(agent: Dict[str, Any], new_score: int, reas
 
 def validate_risk_envelope(request_data: Dict, risk_envelope: Dict) -> Dict:
     violations = []
-    max_spend = risk_envelope.get("max_spend_usd") or risk_envelope.get("max_tx_value", 10.0)
-    if request_data.get("value", 0) > max_spend:
-        violations.append(f"Value {request_data['value']} exceeds max {max_spend}")
-    if request_data.get("action") not in risk_envelope.get("allowed_actions", []):
-        violations.append(f"Action '{request_data['action']}' not in allowed actions")
+    value = request_data.get("value", 0)
+    action = request_data.get("action")
+
+    cap = risk_envelope.get("max_spend_usd")
+    if cap is None:
+        cap = risk_envelope.get("max_tx_value", DEFAULT_MAX_SPEND_USD)
+    if not isinstance(value, (int, float)) or value != value or value in (float("inf"), float("-inf")) or value < 0:
+        violations.append(f"Value {value} must be a finite, non-negative amount")
+    elif value > cap:
+        violations.append(f"Value {value} exceeds max {cap}")
+
+    per_action = risk_envelope.get("max_spend_per_action_usd")
+    if per_action is not None and isinstance(value, (int, float)) and value > per_action:
+        violations.append(f"Value {value} exceeds per-action cap {per_action}")
+
+    if action not in risk_envelope.get("allowed_actions", []):
+        violations.append(f"Action '{action}' not in allowed actions")
+    if action in risk_envelope.get("blocked_actions", []):
+        violations.append(f"Action '{action}' is blocked by the envelope")
+
+    allowed_targets = [t.lower() for t in risk_envelope.get("allowed_targets", []) if t]
+    target = str(request_data.get("target") or "").lower()
+    if allowed_targets and target not in allowed_targets:
+        violations.append(f"Target '{request_data.get('target')}' is not in allowed targets")
+
     return {"valid": len(violations) == 0, "violations": violations}
 
 async def update_reputation(agent_id: str, delta: float, reason: str):
@@ -825,14 +883,13 @@ async def require_agent_access(request: Request, agent: Dict[str, Any]) -> Dict[
     except HTTPException:
         raise HTTPException(401, "Sign in, or provide the agent's X-Avaira-API-Key")
 
+    # Ownership is never claimed implicitly. Anonymous/legacy agents carry an owner of
+    # None, "" or "system"; no signed-in user matches those, so only the agent's own
+    # API key (checked above) can act for them. The old "first caller claims it" branch
+    # let any signed-in user take over anonymously registered agents (audit F-01).
     owner = agent.get("user_id")
-    if owner in (None, "", "system"):
-        # Legacy/unclaimed record (created before ownership was recorded): the first
-        # authenticated caller claims it, instead of it staying world-writable.
-        await db.agents.update_one({"id": agent["id"]}, {"$set": {"user_id": user["user_id"]}})
-        agent["user_id"] = user["user_id"]
-    elif owner != user["user_id"]:
-        raise HTTPException(403, "You do not own this agent")
+    if not owner or owner == "system" or owner != user["user_id"]:
+        raise HTTPException(403, "You do not own this agent. Use the agent's X-Avaira-API-Key.")
     return agent
 
 
@@ -856,13 +913,16 @@ async def register_agent(body: AgentCreate, request: Request):
     # errors (and BaseException), silently registering agents as "system".
     await enforce_rate_limit(request, "agent_register", limit=10, window_seconds=60)
 
-    user_id = "system"
+    # Anonymous agents get no owner (None), not a shared sentinel such as "system". A
+    # sentinel value is a claimable owner waiting to happen; None is refused by every
+    # ownership check, so only the agent's own X-Avaira-API-Key can act for it.
+    user_id = None
     try:
         user = await get_current_user(request)
         user_id = user["user_id"]
     except Exception as exc:  # noqa: BLE001 - registration must not fail on optional auth
         # Anonymous registration is allowed on purpose (agent-first onboarding), so any
-        # failure to resolve a session degrades to `user_id="system"`. Never a bare
+        # failure to resolve a session degrades to an unowned agent. Never a bare
         # `except:`: BaseException (interrupts, shutdowns) must still propagate, and the
         # reason is logged instead of being swallowed silently.
         logger.debug("registration without a resolved session: %s", exc)
@@ -871,8 +931,10 @@ async def register_agent(body: AgentCreate, request: Request):
     api_key = secrets.token_urlsafe(32)
     api_key_hash = _hash_api_key(api_key)
 
+    risk_envelope = normalize_risk_envelope(body.risk_envelope.model_dump())
+
     # Generate Virtual Vault Card for Chainless Spend
-    vault_card = await agent_vault.generate_virtual_card(agent_id, body.risk_envelope.max_spend_usd)
+    vault_card = await agent_vault.generate_virtual_card(agent_id, risk_envelope["max_spend_usd"])
 
     # Generate Hardware-Anchored Identity (TEE-DID)
     did_doc = tee_identity_manager.generate_agent_did(agent_id, api_key_hash)
@@ -884,7 +946,7 @@ async def register_agent(body: AgentCreate, request: Request):
         "did_doc": did_doc.model_dump(),
         "name": body.name,
         "goal": body.goal,
-        "risk_envelope": body.risk_envelope.model_dump(),
+        "risk_envelope": risk_envelope,
         "vault_card": vault_card.model_dump(),
         "webhook_url": body.webhook_url,
         "status": "active",
@@ -904,17 +966,21 @@ async def register_agent(body: AgentCreate, request: Request):
 
 
 
+# Fields that never leave the server on public reads: credential hashes, owner identity,
+# vault card data, DID material and operator webhook URLs (audit F-10).
+PUBLIC_AGENT_PROJECTION = {"_id": 0, "api_key_hash": 0, "user_id": 0, "vault_card": 0, "did_doc": 0, "webhook_url": 0}
+
 @api_router.get("/agents")
 async def list_agents(status: Optional[str] = None, limit: int = Query(100, ge=1, le=500)):
     query = {}
     if status:
         query["status"] = status
-    agents = await db.agents.find(query, {"_id": 0}).sort("registered_at", -1).to_list(limit)
+    agents = await db.agents.find(query, PUBLIC_AGENT_PROJECTION).sort("registered_at", -1).to_list(limit)
     return agents
 
 @api_router.get("/agents/{agent_id}")
 async def get_agent(agent_id: str):
-    agent = await db.agents.find_one({"id": agent_id}, {"_id": 0})
+    agent = await db.agents.find_one({"id": agent_id}, PUBLIC_AGENT_PROJECTION)
     if not agent:
         raise HTTPException(404, "Agent not found")
     return agent
@@ -933,6 +999,8 @@ async def update_agent_status(agent_id: str, request: Request, status: str = Que
 @api_router.post("/executions/request")
 async def create_execution_request(body: ExecutionRequestCreate, request: Request):
     await enforce_rate_limit(request, "execution_request", limit=60, window_seconds=60)
+    if str(body.chain_id) != str(AVAIRA_CHAIN_ID):
+        raise HTTPException(400, f"chain_id must be {AVAIRA_CHAIN_ID} for this deployment")
     agent = await db.agents.find_one({"id": body.agent_id}, {"_id": 0})
     if not agent:
         raise HTTPException(404, "Agent not found")
@@ -964,7 +1032,7 @@ async def create_execution_request(body: ExecutionRequestCreate, request: Reques
 
     # Step 2: Validate risk envelope
     validation = validate_risk_envelope(
-        {"value": body.value, "action": body.action},
+        {"value": body.value, "action": body.action, "target": body.target_address},
         agent["risk_envelope"]
     )
 
@@ -1084,10 +1152,11 @@ async def slash_agent(agent_id: str, body: SlashRequest, request: Request, admin
     if not agent:
         raise HTTPException(404, "Agent not found")
 
-    slash_amount = body.amount if body.amount else round(agent["collateral_remaining"] * SLASH_RATE, 6)
-    slash_amount = min(slash_amount, agent["collateral_remaining"])
+    collateral = float(agent.get("collateral_remaining", 0.0))
+    slash_amount = body.amount if body.amount is not None else round(collateral * SLASH_RATE, 6)
+    slash_amount = max(0.0, min(slash_amount, collateral))
 
-    new_collateral = round(agent["collateral_remaining"] - slash_amount, 6)
+    new_collateral = round(collateral - slash_amount, 6)
     await db.agents.update_one({"id": agent_id}, {
         "$set": {"collateral_remaining": new_collateral, "status": "frozen"}
     })
@@ -1106,7 +1175,7 @@ async def slash_agent(agent_id: str, body: SlashRequest, request: Request, admin
     await update_reputation(agent_id, -REP_SLASH_PENALTY, f"Slashed: {body.reason}")
 
     # Trigger Marketplace Slashing Bridge (Economic Finality)
-    await trust_marketplace.trigger_slashing_bridge(agent_id, body.reason, "high")
+    await trust_marketplace.trigger_slashing_bridge(agent_id, body.reason, "high", slash_amount=slash_amount)
 
     await record_admin_audit("agent_slash", admin_user, request, {"agent_id": agent_id, "reason": body.reason, "amount": slash_amount})
     event.pop("_id", None)
@@ -1219,21 +1288,23 @@ async def get_recent_activity(limit: int = Query(20, ge=1, le=100)):
     activities = []
     recent_execs = await db.executions.find({}, {"_id": 0}).sort("created_at", -1).to_list(10)
     for ex in recent_execs:
+        # Defensive reads: a malformed record must not take the whole public feed down.
         activities.append({
             "type": "execution",
-            "description": f"Agent '{ex.get('agent_name', 'Unknown')}' - {ex['action']} ({ex['status']})",
-            "status": ex["status"],
-            "timestamp": ex["created_at"],
-            "id": ex["id"]
+            "description": f"Agent '{ex.get('agent_name', 'Unknown')}' - {ex.get('action', 'unknown')} ({ex.get('status', 'unknown')})",
+            "status": ex.get("status", "unknown"),
+            "timestamp": ex.get("created_at") or ex.get("timestamp") or "",
+            "id": ex.get("id", ""),
         })
     recent_freezes = await db.freeze_events.find({}, {"_id": 0}).sort("timestamp", -1).to_list(10)
     for fe in recent_freezes:
+        kind = str(fe.get("type", "event"))
         activities.append({
-            "type": fe["type"],
-            "description": f"Agent '{fe.get('agent_name', 'Unknown')}' - {fe['type'].upper()}: {fe['reason']}",
-            "status": fe["type"],
-            "timestamp": fe["timestamp"],
-            "id": fe["id"]
+            "type": kind,
+            "description": f"Agent '{fe.get('agent_name', 'Unknown')}' - {kind.upper()}: {fe.get('reason', '')}",
+            "status": kind,
+            "timestamp": fe.get("timestamp") or "",
+            "id": fe.get("id", ""),
         })
     activities.sort(key=lambda x: x["timestamp"], reverse=True)
     return activities[:limit]
@@ -1626,11 +1697,15 @@ async def stake_on_mission(mission_id: str, body: MissionStake, request: Request
     if not uw:
         raise HTTPException(404, "Underwriter not found")
     owner = uw.get("user_id")
-    if owner in (None, "", "system"):
-        await db.underwriters.update_one({"id": uw["id"]}, {"$set": {"user_id": user["user_id"]}})
-        uw["user_id"] = user["user_id"]
-    elif owner != user["user_id"]:
+    if not owner or owner == "system" or owner != user["user_id"]:
+        # No implicit claim of ownerless underwriters (audit F-01 family).
         raise HTTPException(403, "You do not own this underwriter")
+
+    agent = await db.agents.find_one({"id": mission["agent_id"]}, {"_id": 0, "user_id": 1})
+    if agent and agent.get("user_id") == user["user_id"]:
+        # An operator cannot underwrite their own agent's missions: that lets them
+        # manufacture payouts from their own capital (audit F-04).
+        raise HTTPException(403, "You cannot underwrite a mission for an agent you operate")
 
     # Conditional update: the previous read-then-write could commit the same capacity
     # twice when two requests interleaved.
@@ -1752,24 +1827,25 @@ async def agent_run(agent_id: str, body: AgentRunRequest, agent: Dict = Depends(
     return result
 
 @api_router.post("/agents/{agent_id}/log")
-async def agent_log_outcome(agent_id: str, body: Dict[str, Any], agent: Dict = Depends(_get_agent_from_key)):
+async def agent_log_outcome(agent_id: str, body: AgentOutcomeLog, agent: Dict = Depends(_get_agent_from_key)):
     if agent["id"] != agent_id:
         raise HTTPException(403, "API Key does not match agent ID")
 
-    intent = body.get("intent")
-    status = body.get("status")
-    result = body.get("result")
-
-    await intent_logger.log(intent, agent_id, agent["risk_envelope"])
-    await db.executions.insert_one({
+    # Agent self-reports are kept out of the public execution ledger: they used to be
+    # written to `executions` with caller-chosen status, which inflated public counts and
+    # broke the dashboard on malformed records (audit F-11). Only the server's own
+    # execution path writes to `executions`.
+    await intent_logger.log(body.intent, agent_id, agent["risk_envelope"])
+    await db.agent_outcome_logs.insert_one({
         "trace_id": str(uuid.uuid4()),
         "agent_id": agent_id,
-        "intent": intent,
-        "status": status,
-        "result": result,
+        "intent": body.intent,
+        "status": body.status,
+        "result": body.result,
+        "verified": False,
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
-    return {"status": "logged"}
+    return {"status": "logged", "verified": False}
 
 @api_router.get("/agents/{agent_id}/trust-proof")
 async def get_agent_trust_proof(agent_id: str, agent: Dict = Depends(_get_agent_from_key)):
@@ -1875,10 +1951,26 @@ async def get_agent_drift(agent_id: str, agent: Dict = Depends(_get_agent_from_k
 class InsuranceRequest(BaseModel):
     agent_id: str
     underwriter_id: str
-    coverage_amount: float
+    coverage_amount: float = Field(gt=0, le=MAX_COVERAGE_USD, allow_inf_nan=False)
 
 @api_router.post("/marketplace/insurance")
-async def issue_insurance(body: InsuranceRequest, _user: Dict[str, Any] = Depends(require_authenticated_user)):
+async def issue_insurance(body: InsuranceRequest, user: Dict[str, Any] = Depends(require_authenticated_user)):
+    # Buyer must operate the agent and must own the underwriter backing the policy. Before,
+    # any signed-in user could insure anyone's agent with anyone's underwriter (audit F-03).
+    agent = await db.agents.find_one({"id": body.agent_id}, {"_id": 0})
+    if not agent:
+        raise HTTPException(404, "Agent not found")
+    if not agent.get("user_id") or agent.get("user_id") == "system" or agent.get("user_id") != user["user_id"]:
+        raise HTTPException(403, "You do not own this agent")
+
+    uw = await db.underwriters.find_one({"id": body.underwriter_id}, {"_id": 0})
+    if not uw:
+        raise HTTPException(404, "Underwriter not found")
+    if not uw.get("user_id") or uw.get("user_id") == "system" or uw.get("user_id") != user["user_id"]:
+        raise HTTPException(403, "You do not own this underwriter")
+    if body.coverage_amount > float(uw.get("capital_available", 0.0)):
+        raise HTTPException(400, "Coverage exceeds the underwriter's available capital")
+
     policy = await trust_marketplace.issue_policy(
         body.agent_id, body.underwriter_id, body.coverage_amount
     )
@@ -1896,10 +1988,16 @@ async def slash_agent_internal(agent_id: str, request: Request):
     reason = body.get("reason", "manual")
     severity = body.get("severity", "medium")
 
+    agent = await db.agents.find_one({"id": agent_id}, {"_id": 0})
+    if not agent:
+        raise HTTPException(404, "Agent not found")
+    # The engine acts first (freeze, event log). The single collateral debit comes only
+    # after it succeeds, so a failed engine call leaves collateral untouched (audit F-08).
+    collateral = float(agent.get("collateral_remaining", 0.0))
+    slash_amount = round(collateral * SLASH_RATE, 6)
     result = await slash_engine.slash(agent_id, reason, severity)
-
-    # Trigger Marketplace Slashing Bridge
-    await trust_marketplace.trigger_slashing_bridge(agent_id, reason, severity)
+    await db.agents.update_one({"id": agent_id}, {"$set": {"collateral_remaining": round(collateral - slash_amount, 6)}})
+    await trust_marketplace.trigger_slashing_bridge(agent_id, reason, severity, slash_amount=slash_amount)
 
     return result.model_dump()
 
@@ -1931,6 +2029,11 @@ async def agent_think(body: AgentThinkRequest, request: Request, user: Dict[str,
     if not agent:
         agent = await db.agents.find_one({"wallet_address": body.agent_address})
     if not agent: raise HTTPException(404, "Agent not found")
+    # The envelope of another user's agent is injected into the model prompt below, so
+    # only the owning operator may plan for it (audit F-06).
+    owner = agent.get("user_id")
+    if not owner or owner == "system" or owner != user.get("user_id"):
+        raise HTTPException(403, "You do not own this agent")
 
     real_agent = RealAvairaAgent(agent["id"], agent["risk_envelope"], db_client=db)
     intent = await real_agent.think(body.mission_goal)
@@ -1944,6 +2047,10 @@ async def simulate_full_lifecycle(body: AgentThinkRequest, request: Request, use
         raise HTTPException(400, "Invalid agent wallet address")
 
     agent = await _ensure_ai_agent_record(body, user_id=user.get("user_id"))
+    if agent.get("status") != "active":
+        # Freeze is an operator control: a frozen agent must not obtain a new permit, and
+        # a successful run must not reactivate it (audit F-02).
+        raise HTTPException(403, f"Agent is {agent.get('status')}. Only an admin can change this.")
     runtime = AvairaAgent(body.agent_address, body.risk_envelope, body.mission_goal)
     lifecycle = []
 
@@ -2045,7 +2152,7 @@ async def simulate_full_lifecycle(body: AgentThinkRequest, request: Request, use
         new_score = min(100, score_before + 8)
         await db.agents.update_one(
             {"id": agent["id"]},
-            {"$set": {"runtime_nonce": nonce, "status": "active"}, "$inc": {"total_executions": 1, "successful_executions": 1}},
+            {"$set": {"runtime_nonce": nonce}, "$inc": {"total_executions": 1, "successful_executions": 1}},
         )
         await _write_reputation_snapshot(agent, new_score, "full_lifecycle_success")
         lifecycle.append({"stage": 7, "name": "score_update", "status": "completed", "details": {"before": score_before, "after": new_score, "grade": _grade_from_score(new_score)}})
@@ -2120,7 +2227,11 @@ class IntentValidateRequest(BaseModel):
 @api_router.post("/validate")
 async def validate_intent_endpoint(body: IntentValidateRequest, request: Request):
     """
-    Two-layer intent validation using AvairaValidator (Claude-powered).
+    Fast shield pass on a single intent (AvairaValidator.fast_shield_pass).
+
+    This route does not call the Claude-based deep audit (audit F-16 fixed the 500 by
+    routing here, since AvairaValidator.validate() never existed). It is not a complete
+    two-layer validation.
     """
     # Anonymous callers keep working (the SDK's `validate()` is public), but at a
     # tighter budget: this endpoint fans out to a paid model.
@@ -2132,17 +2243,23 @@ async def validate_intent_endpoint(body: IntentValidateRequest, request: Request
         await enforce_rate_limit(request, "validate_intent_agent", limit=60, window_seconds=60, identity=key_agent["id"])
     else:
         await enforce_rate_limit(request, "validate_intent", limit=10, window_seconds=60)
-    result = await avaira_validator.validate(body.intent, body.risk_envelope)
-    return result
+    # The route used to call AvairaValidator.validate(), which does not exist (HTTP 500 on
+    # every call, audit F-16). The implemented entry point is the fast shield pass.
+    result = await avaira_validator.fast_shield_pass(body.intent, body.risk_envelope)
+    return result.model_dump()
 
 # ─── HEALTH ──────────────────────────────────────────────────────
 @api_router.get("/anchor-state")
 async def anchor_state_endpoint():
     """
-    Internal cron endpoint for state anchoring.
+    State anchoring is not implemented. This endpoint used to return a random hash labelled
+    "anchored" while nothing was written anywhere (audit F-13). It now says so, with 501.
     """
-    result = await reputation_engine.anchor_state()
-    return result
+    return JSONResponse(
+        status_code=501,
+        content={"status": "not_implemented", "anchored": False,
+                 "detail": "State anchoring is not implemented in this deployment."},
+    )
 
 @api_router.get("/health")
 async def health_check():
@@ -2165,6 +2282,27 @@ async def root():
     return {"message": "AVAIRA Protocol API v1.0", "status": "operational"}
 
 app.include_router(api_router)
+
+
+@app.middleware("http")
+async def csrf_origin_guard(request: Request, call_next):
+    """Block cross-site, cookie-authenticated state changes (audit F-07).
+
+    Only requests that carry the session cookie *and* no bearer/API-key header are checked:
+    those are the ones a browser attaches automatically. If an Origin header is present it
+    must be an allowed origin or this server's own origin. `Sec-Fetch-Site` is deliberately
+    not used: the frontend and API are on different sites in production, so legitimate
+    credentialed calls are cross-site too.
+    """
+    if request.method in ("POST", "PUT", "PATCH", "DELETE") and "session_token" in request.cookies:
+        if not request.headers.get("authorization") and not request.headers.get("x-avaira-api-key"):
+            origin = request.headers.get("origin")
+            if origin:
+                own_origin = f"{request.url.scheme}://{request.headers.get('host', '')}"
+                allowed = origin in cors_origins or origin == own_origin
+                if not allowed:
+                    return JSONResponse({"detail": "Cross-site request blocked"}, status_code=403)
+    return await call_next(request)
 
 
 @app.middleware("http")

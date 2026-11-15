@@ -22,6 +22,8 @@ class RuntimeRiskEnvelope(BaseModel):
     max_spend_usd: float = 1.0
     max_slippage: float = Field(default=0.05, ge=0, le=1)
     allowed_actions: List[str] = []
+    blocked_actions: List[str] = []
+    allowed_targets: List[str] = []
 
 class AvairaAgent:
     def __init__(self, agent_address: str, risk_envelope: RuntimeRiskEnvelope | Dict[str, Any], mission_goal: str):
@@ -37,14 +39,19 @@ class AvairaAgent:
         `max_tx_value` is the per-transaction ceiling and `max_spend_usd` the run ceiling,
         and only the first was checked — an envelope declaring max_tx_value=1 with
         max_spend_usd=0.5 happily approved a 1.0 spend."""
+        if intent.value_usd < 0:
+            return {"valid": False, "reason": f"value_usd {intent.value_usd} is negative"}
         if intent.value_usd > self.risk_envelope.max_tx_value:
             return {"valid": False, "reason": f"value_usd {intent.value_usd} exceeds max_tx_value {self.risk_envelope.max_tx_value}"}
         if intent.value_usd > self.risk_envelope.max_spend_usd:
             return {"valid": False, "reason": f"value_usd {intent.value_usd} exceeds max_spend_usd {self.risk_envelope.max_spend_usd}"}
-        if intent.value_usd < 0:
-            return {"valid": False, "reason": f"value_usd {intent.value_usd} is negative"}
         if intent.action not in self.risk_envelope.allowed_actions:
             return {"valid": False, "reason": f"action '{intent.action}' is not allowed by the registered risk envelope"}
+        if intent.action in self.risk_envelope.blocked_actions:
+            return {"valid": False, "reason": f"action '{intent.action}' is blocked by the registered risk envelope"}
+        targets = [t.lower() for t in self.risk_envelope.allowed_targets if t]
+        if targets and str(getattr(intent, "target", "")).lower() not in targets:
+            return {"valid": False, "reason": f"target '{getattr(intent, 'target', '')}' is not in allowed_targets"}
         return {"valid": True, "reason": "within risk envelope"}
 
     async def execute_cycle(self, market_context: dict, history: list) -> dict:
